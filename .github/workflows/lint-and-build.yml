@@ -1,0 +1,17 @@
+name: Lint and Build Check
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm install
+      - name: Run Lint
+        run: npm run lint
+      - name: Build App
+        run: npm run build
