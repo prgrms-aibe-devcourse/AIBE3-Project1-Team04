@@ -33,14 +33,6 @@ export default function Header() {
               </Link>
             </div>
           </nav>
-
-          <button
-            className="md:hidden p-2 cursor-pointer"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <i className="ri-menu-line w-6 h-6 flex items-center justify-center text-xl"></i>
-            아이콘
-          </button>
         </div>
 
         {isMenuOpen && (

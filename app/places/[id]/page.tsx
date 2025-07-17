@@ -1,7 +1,6 @@
-
 import PlaceDetail from './PlaceDetail';
 
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<{ id: string }[]> {
   return [
     { id: '1' },
     { id: '2' },
@@ -14,6 +13,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default function PlacePage({ params }: { params: { id: string } }) {
-  return <PlaceDetail placeId={params.id} />;
+export default async function PlacePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <PlaceDetail placeId={id} />;
 }
