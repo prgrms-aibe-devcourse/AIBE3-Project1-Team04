@@ -92,7 +92,6 @@ export default function Header() {
               )}
             </div>
           </nav>
-
           <button
             className="md:hidden p-2 cursor-pointer"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -121,12 +120,6 @@ export default function Header() {
                 className="text-gray-700 hover:text-blue-600 font-medium cursor-pointer"
               >
                 여행지
-              </Link>
-              <Link
-                href="/mypage"
-                className="text-gray-700 hover:text-blue-600 font-medium cursor-pointer"
-              >
-                마이페이지
               </Link>
               {user && (
                 <Link
