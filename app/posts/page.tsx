@@ -1,10 +1,10 @@
-
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import PostCard from '@/components/PostCard';
+import { supabase } from '@/lib/supabaseClient';
 
 const mockPosts = [
   {
@@ -17,14 +17,15 @@ const mockPosts = [
     ratingCount: 156,
     views: 2340,
     cost: 450000,
-    imageUrl: 'https://readdy.ai/api/search-image?query=Beautiful%20Busan%20Haeundae%20Beach%20cityscape%20with%20modern%20buildings%20and%20ocean%20view%2C%20vibrant%20blue%20sky%2C%20tourist%20destination%2C%20clean%20minimalist%20background%2C%20professional%20photography&width=400&height=300&seq=busan-post1&orientation=landscape',
+    imageUrl:
+      'https://readdy.ai/api/search-image?query=Beautiful%20Busan%20Haeundae%20Beach%20cityscape%20with%20modern%20buildings%20and%20ocean%20view%2C%20vibrant%20blue%20sky%2C%20tourist%20destination%2C%20clean%20minimalist%20background%2C%20professional%20photography&width=400&height=300&seq=busan-post1&orientation=landscape',
     startDate: '2024-01-15',
     endDate: '2024-01-18',
     createdAt: '2024-01-20',
     duration: '3박 4일',
     likes: 87,
     isLiked: true,
-    isFavorited: false
+    isFavorited: false,
   },
   {
     id: '2',
@@ -36,14 +37,15 @@ const mockPosts = [
     ratingCount: 203,
     views: 3450,
     cost: 380000,
-    imageUrl: 'https://readdy.ai/api/search-image?query=Jeju%20Island%20natural%20landscape%2C%20Hallasan%20mountain%20view%2C%20lush%20green%20fields%2C%20volcanic%20island%20scenery%2C%20pristine%20nature%2C%20peaceful%20atmosphere&width=400&height=300&seq=jeju-post1&orientation=landscape',
+    imageUrl:
+      'https://readdy.ai/api/search-image?query=Jeju%20Island%20natural%20landscape%2C%20Hallasan%20mountain%20view%2C%20lush%20green%20fields%2C%20volcanic%20island%20scenery%2C%20pristine%20nature%2C%20peaceful%20atmosphere&width=400&height=300&seq=jeju-post1&orientation=landscape',
     startDate: '2024-02-10',
     endDate: '2024-02-12',
     createdAt: '2024-02-15',
     duration: '2박 3일',
     likes: 124,
     isLiked: false,
-    isFavorited: true
+    isFavorited: true,
   },
   {
     id: '3',
@@ -55,14 +57,15 @@ const mockPosts = [
     ratingCount: 89,
     views: 1890,
     cost: 120000,
-    imageUrl: 'https://readdy.ai/api/search-image?query=Gyeongju%20historical%20sites%20with%20ancient%20Korean%20temples%2C%20traditional%20pagodas%2C%20cherry%20blossoms%2C%20and%20cultural%20heritage%20buildings.%20Serene%20atmosphere%20with%20traditional%20Korean%20architecture&width=400&height=300&seq=gyeongju-post1&orientation=landscape',
+    imageUrl:
+      'https://readdy.ai/api/search-image?query=Gyeongju%20historical%20sites%20with%20ancient%20Korean%20temples%2C%20traditional%20pagodas%2C%20cherry%20blossoms%2C%20and%20cultural%20heritage%20buildings.%20Serene%20atmosphere%20with%20traditional%20Korean%20architecture&width=400&height=300&seq=gyeongju-post1&orientation=landscape',
     startDate: '2024-03-05',
     endDate: '2024-03-05',
     createdAt: '2024-03-08',
     duration: '당일치기',
     likes: 45,
     isLiked: false,
-    isFavorited: false
+    isFavorited: false,
   },
   {
     id: '4',
@@ -74,14 +77,15 @@ const mockPosts = [
     ratingCount: 134,
     views: 2670,
     cost: 280000,
-    imageUrl: 'https://readdy.ai/api/search-image?query=Gangneung%20seaside%20coffee%20street%20with%20cozy%20cafes%2C%20ocean%20view%2C%20sandy%20beaches%2C%20and%20modern%20coffee%20shops.%20Relaxing%20atmosphere%20with%20ocean%20breeze%20and%20Korean%20coastal%20town%20charm&width=400&height=300&seq=gangneung-post1&orientation=landscape',
+    imageUrl:
+      'https://readdy.ai/api/search-image?query=Gangneung%20seaside%20coffee%20street%20with%20cozy%20cafes%2C%20ocean%20view%2C%20sandy%20beaches%2C%20and%20modern%20coffee%20shops.%20Relaxing%20atmosphere%20with%20ocean%20breeze%20and%20Korean%20coastal%20town%20charm&width=400&height=300&seq=gangneung-post1&orientation=landscape',
     startDate: '2024-03-15',
     endDate: '2024-03-16',
     createdAt: '2024-03-18',
     duration: '1박 2일',
     likes: 78,
     isLiked: true,
-    isFavorited: false
+    isFavorited: false,
   },
   {
     id: '5',
@@ -93,14 +97,15 @@ const mockPosts = [
     ratingCount: 167,
     views: 3120,
     cost: 200000,
-    imageUrl: 'https://readdy.ai/api/search-image?query=Jeonju%20Hanok%20Village%20with%20traditional%20Korean%20houses%2C%20street%20food%20markets%2C%20Korean%20traditional%20cuisine%2C%20and%20cultural%20experiences.%20Authentic%20Korean%20architecture%20with%20wooden%20buildings&width=400&height=300&seq=jeonju-post1&orientation=landscape',
+    imageUrl:
+      'https://readdy.ai/api/search-image?query=Jeonju%20Hanok%20Village%20with%20traditional%20Korean%20houses%2C%20street%20food%20markets%2C%20Korean%20traditional%20cuisine%2C%20and%20cultural%20experiences.%20Authentic%20Korean%20architecture%20with%20wooden%20buildings&width=400&height=300&seq=jeonju-post1&orientation=landscape',
     startDate: '2024-03-20',
     endDate: '2024-03-21',
     createdAt: '2024-03-23',
     duration: '1박 2일',
     likes: 96,
     isLiked: false,
-    isFavorited: true
+    isFavorited: true,
   },
   {
     id: '6',
@@ -112,14 +117,15 @@ const mockPosts = [
     ratingCount: 98,
     views: 2340,
     cost: 350000,
-    imageUrl: 'https://readdy.ai/api/search-image?query=Seoraksan%20National%20Park%20autumn%20foliage%20with%20colorful%20maple%20trees%2C%20mountain%20hiking%20trails%2C%20traditional%20Korean%20temples%2C%20and%20hot%20springs.%20Beautiful%20fall%20colors%20with%20red%20and%20yellow%20leaves&width=400&height=300&seq=seorak-post1&orientation=landscape',
+    imageUrl:
+      'https://readdy.ai/api/search-image?query=Seoraksan%20National%20Park%20autumn%20foliage%20with%20colorful%20maple%20trees%2C%20mountain%20hiking%20trails%2C%20traditional%20Korean%20temples%2C%20and%20hot%20springs.%20Beautiful%20fall%20colors%20with%20red%20and%20yellow%20leaves&width=400&height=300&seq=seorak-post1&orientation=landscape',
     startDate: '2024-10-15',
     endDate: '2024-10-17',
     createdAt: '2024-10-20',
     duration: '2박 3일',
     likes: 67,
     isLiked: false,
-    isFavorited: false
+    isFavorited: false,
   },
   {
     id: '7',
@@ -131,14 +137,15 @@ const mockPosts = [
     ratingCount: 123,
     views: 2890,
     cost: 320000,
-    imageUrl: 'https://readdy.ai/api/search-image?query=Yeosu%20night%20sea%20view%20with%20beautiful%20harbor%20lights%2C%20cable%20car%2C%20marine%20city%20skyline%2C%20romantic%20evening%20atmosphere%2C%20Korean%20coastal%20city%20at%20night&width=400&height=300&seq=yeosu-post1&orientation=landscape',
+    imageUrl:
+      'https://readdy.ai/api/search-image?query=Yeosu%20night%20sea%20view%20with%20beautiful%20harbor%20lights%2C%20cable%20car%2C%20marine%20city%20skyline%2C%20romantic%20evening%20atmosphere%2C%20Korean%20coastal%20city%20at%20night&width=400&height=300&seq=yeosu-post1&orientation=landscape',
     startDate: '2024-04-01',
     endDate: '2024-04-02',
     createdAt: '2024-04-05',
     duration: '1박 2일',
     likes: 89,
     isLiked: true,
-    isFavorited: true
+    isFavorited: true,
   },
   {
     id: '8',
@@ -150,25 +157,26 @@ const mockPosts = [
     ratingCount: 67,
     views: 1560,
     cost: 80000,
-    imageUrl: 'https://readdy.ai/api/search-image?query=Incheon%20Chinatown%20with%20traditional%20Chinese%20architecture%2C%20colorful%20buildings%2C%20street%20food%20vendors%2C%20cultural%20district%2C%20vibrant%20urban%20atmosphere&width=400&height=300&seq=incheon-post1&orientation=landscape',
+    imageUrl:
+      'https://readdy.ai/api/search-image?query=Incheon%20Chinatown%20with%20traditional%20Chinese%20architecture%2C%20colorful%20buildings%2C%20street%20food%20vendors%2C%20cultural%20district%2C%20vibrant%20urban%20atmosphere&width=400&height=300&seq=incheon-post1&orientation=landscape',
     startDate: '2024-04-10',
     endDate: '2024-04-10',
     createdAt: '2024-04-12',
     duration: '당일치기',
     likes: 23,
     isLiked: false,
-    isFavorited: false
-  }
+    isFavorited: false,
+  },
 ];
 
 const categories = ['전체', '가족여행', '커플여행', '자연여행', '문화여행', '맛집여행', '액티비티'];
-const regions = ['전체', '서울특별시', '부산광역시', '인천광역시', '대구광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원도', '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주특별자치도'];
+
 const sortOptions = [
   { value: 'popular', label: '인기순' },
   { value: 'latest', label: '최신순' },
   { value: 'rating', label: '평점순' },
   { value: 'cost-low', label: '비용 낮은순' },
-  { value: 'cost-high', label: '비용 높은순' }
+  { value: 'cost-high', label: '비용 높은순' },
 ];
 
 export default function PostsPage() {
@@ -176,12 +184,28 @@ export default function PostsPage() {
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedRegion, setSelectedRegion] = useState('전체');
   const [selectedSort, setSelectedSort] = useState('popular');
+  const [regions, setRegions] = useState(['전체']);
+
+  useEffect(() => {
+    async function fetchRegions() {
+      const { data, error } = await supabase.from('regions_state').select('name');
+      if (error) {
+        console.error(error);
+        return;
+      }
+      // state 테이블의 name만 추출해서 배열로 만듦
+      const regionNames = data.map((row) => row.name).filter(Boolean);
+      setRegions(['전체', ...regionNames]);
+    }
+    fetchRegions();
+  }, []);
 
   const filteredPosts = mockPosts
-    .filter(post => {
-      const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           post.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           post.author.toLowerCase().includes(searchQuery.toLowerCase());
+    .filter((post) => {
+      const matchesSearch =
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.author.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory = selectedCategory === '전체' || post.category === selectedCategory;
       const matchesRegion = selectedRegion === '전체' || post.region.includes(selectedRegion);
 
@@ -260,7 +284,9 @@ export default function PostsPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
               >
                 {regions.map((region) => (
-                  <option key={region} value={region}>{region}</option>
+                  <option key={region} value={region}>
+                    {region}
+                  </option>
                 ))}
               </select>
             </div>
@@ -274,7 +300,9 @@ export default function PostsPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
               >
                 {sortOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -286,7 +314,7 @@ export default function PostsPage() {
           <div className="text-gray-600">
             총 <span className="font-medium text-blue-600">{filteredPosts.length}</span>개의 게시글
           </div>
-          <Link 
+          <Link
             href="/posts/create"
             className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 whitespace-nowrap cursor-pointer"
           >
@@ -317,10 +345,16 @@ export default function PostsPage() {
                 <i className="ri-arrow-left-line w-4 h-4 flex items-center justify-center"></i>
               </button>
               <button className="px-3 py-2 bg-blue-600 text-white rounded cursor-pointer">1</button>
-              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">2</button>
-              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">3</button>
+              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
+                2
+              </button>
+              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
+                3
+              </button>
               <span className="px-2 text-gray-500">...</span>
-              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">10</button>
+              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
+                10
+              </button>
               <button className="px-3 py-2 text-gray-500 hover:text-gray-700 cursor-pointer">
                 <i className="ri-arrow-right-line w-4 h-4 flex items-center justify-center"></i>
               </button>
