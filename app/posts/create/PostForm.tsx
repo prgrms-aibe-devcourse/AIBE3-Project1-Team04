@@ -47,7 +47,7 @@ export default function PostForm() {
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
 
   const categories = ['가족여행', '커플여행', '자연여행', '문화여행', '맛집여행', '액티비티'];
-  const regions = ['서울특별시', '부산광역시', '인천광역시', '대구광역시', '광주광역시', '대전광역시', '울산광역시', '세종特別자치시', '경기도', '강원도', '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주特別자치도'];
+  const regions = ['서울특별시', '부산광역시', '인천광역시', '대구광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원도', '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주특별자치도'];
   const placeCategories = ['관광지', '맛집', '카페', '숙박', '쇼핑', '액티비티', '문화시설', '자연'];
 
   // 시/도별 시/군/구 데이터
@@ -74,6 +74,7 @@ export default function PostForm() {
   const totalPlaces = places.length;
   const totalCost = places.reduce((sum, place) => sum + place.cost, 0);
 
+  //여행지 이미지 업로드
   const handleImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -116,57 +117,64 @@ export default function PostForm() {
 
   const handleAddPlace = (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentPlace.name && currentPlace.province && currentPlace.city && currentPlace.memo) {
-      const newPlace = {
-        ...currentPlace,
-        id: Date.now().toString(),
-        imageUrl: currentPlace.customImages[0] || generatePlaceImage(currentPlace.name, currentPlace.category)
-      };
-      setPlaces([...places, newPlace]);
-      resetPlaceForm();
+    // 필수 필드 검증
+    // TODO : 카테고리, 방문날짜에 대한 검증 없음
+    const requiredFields = [];
+    if (!currentPlace.name) requiredFields.push('여행지 이름');
+    if (!currentPlace.province) requiredFields.push('시/도');
+    if (!currentPlace.city) requiredFields.push('시/군/구');
+    if (!currentPlace.memo) requiredFields.push('메모');
 
-      // 성공 메시지 표시
-      const successMessage = document.createElement('div');
-      successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      successMessage.textContent = '여행지가 성공적으로 추가되었습니다!';
-      document.body.appendChild(successMessage);
-
-      // 3초 후 메시지 제거
-      setTimeout(() => {
-        if (document.body.contains(successMessage)) {
-          document.body.removeChild(successMessage);
-        }
-      }, 3000);
-    } else {
-      // 필수 필드 검증 메시지
-      const requiredFields = [];
-      if (!currentPlace.name) requiredFields.push('여행지 이름');
-      if (!currentPlace.province) requiredFields.push('시/도');
-      if (!currentPlace.city) requiredFields.push('시/군/구');
-      if (!currentPlace.memo) requiredFields.push('메모');
-
+    // 필수 필드 검증 실패 시 메시지 표시
+    if (requiredFields.length > 0) {
       const errorMessage = document.createElement('div');
       errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
       errorMessage.textContent = `다음 항목을 입력해주세요: ${requiredFields.join(', ')}`;
       document.body.appendChild(errorMessage);
 
-      // 3초 후 메시지 제거
+      // 3초 후 메시지 제거(if문은 방어적 프로그래밍)
       setTimeout(() => {
         if (document.body.contains(errorMessage)) {
           document.body.removeChild(errorMessage);
         }
       }, 3000);
+      return;
     }
+
+    const newPlace = {
+      ...currentPlace,
+      //TODO : id 지정방식 변경
+      id: Date.now().toString(),
+      imageUrl: currentPlace.customImages[0] || generatePlaceImage(currentPlace.name, currentPlace.category)
+    };
+    setPlaces([...places, newPlace]);
+    resetPlaceForm();
+
+    // 성공 메시지 표시
+    const successMessage = document.createElement('div');
+    successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+    successMessage.textContent = '여행지가 성공적으로 추가되었습니다!';
+    document.body.appendChild(successMessage);
+
+    // 3초 후 메시지 제거
+    setTimeout(() => {
+      if (document.body.contains(successMessage)) {
+        document.body.removeChild(successMessage);
+      }
+    }, 3000);
   };
 
   const handleEditPlace = (place: Place) => {
     setCurrentPlace(place);
     setIsEditingPlace(true);
+    //NOTE : eidtingPlaceId state가 필요한가?
     setEditingPlaceId(place.id);
   };
 
+  //TODO : 함수명과 다르게 여행지 이미지를 수정하는 함수 같음 변경필요? 또한, resetPlaceForm()의 경우 작성중이던 여행지가 있을 경우 강제로 리셋하는데 작성중이던 여행지를 초기화하는 것이 맞는지?
   const handleUpdatePlace = (e: React.FormEvent) => {
     e.preventDefault();
+    //NOTE : 왜 Id만 currentPlace.id가 아니고 editingPlaceId인지?
     if (currentPlace.name && currentPlace.province && currentPlace.city && currentPlace.memo && editingPlaceId) {
       const updatedPlaces = places.map(place =>
         place.id === editingPlaceId
@@ -178,6 +186,7 @@ export default function PostForm() {
     }
   };
 
+  //TODO : 마찬가지로 editingPlaceId가 필요한지 여부
   const handleDeletePlace = (placeId: string) => {
     if (confirm('이 여행지를 삭제하시겠습니까?')) {
       setPlaces(places.filter(place => place.id !== placeId));
@@ -217,6 +226,7 @@ export default function PostForm() {
       '자연': 'Stunning natural landscape, mountains, forests, or beaches, pristine nature, peaceful environment, scenic beauty'
     };
 
+    //NOTE : prompt 사용되지 않고 있음
     const prompt = imagePrompts[category as keyof typeof imagePrompts] || imagePrompts['관광지'];
     const seq = `place-${Date.now()}`;
 
@@ -235,6 +245,7 @@ export default function PostForm() {
 
   const handleSubmitPost = (e: React.FormEvent) => {
     e.preventDefault();
+    // NOTE : 카테고리, 지역, 여행 날짜에 대한 검증 없음
     if (postData.title && postData.content && places.length > 0) {
       alert('게시글이 성공적으로 작성되었습니다!');
       console.log('게시글 데이터:', { ...postData, places });
@@ -258,6 +269,7 @@ export default function PostForm() {
               onChange={(e) => setPostData({ ...postData, title: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="여행 제목을 입력하세요"
+              // NOTE : maxLength 확인 필요
               maxLength={100}
             />
             <div className="text-xs text-gray-500 mt-1">{postData.title.length}/100자</div>
