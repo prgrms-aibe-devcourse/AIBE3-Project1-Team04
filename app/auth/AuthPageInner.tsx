@@ -156,7 +156,7 @@ export default function AuthPageInner() {
                           value={formData.name}
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
-                          placeholder="이메일을 입력하세요"
+                          placeholder="이름을 입력하세요"
                           required
                         />
                       </div>
