@@ -1,6 +1,8 @@
 import { supabase } from './supabaseClient';
 import { User, AuthError } from '@supabase/supabase-js';
 
+const redirectTo = `${window.location.origin}/auth/callback`;
+
 export interface AuthResponse {
   success: boolean;
   user?: User | null;
@@ -141,7 +143,7 @@ export async function signInWithGoogle(): Promise<AuthResponse> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo,
       },
     });
 
@@ -168,7 +170,7 @@ export async function signInWithGithub(): Promise<AuthResponse> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo,
       },
     });
 
@@ -195,7 +197,7 @@ export async function signInWithKakao(): Promise<AuthResponse> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo,
       },
     });
 
