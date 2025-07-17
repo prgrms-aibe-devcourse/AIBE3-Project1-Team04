@@ -258,7 +258,10 @@ export default function AuthPageInner() {
                     </div>
 
                     <div className="mt-6 space-y-3">
-                      <button className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                      <button
+                        className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                        onClick={signInWithGoogle}
+                      >
                         <div className="w-5 h-5 flex items-center justify-center mr-3">
                           <i className="ri-google-fill text-red-500 text-lg"></i>
                         </div>
