@@ -1,13 +1,14 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabaseClient';
 
 interface Place {
   id: string;
   name: string;
-  province: string;
+  state: string;
   city: string;
   category: string;
   memo: string;
@@ -33,7 +34,7 @@ export default function PostForm() {
   const [currentPlace, setCurrentPlace] = useState<Place>({
     id: '',
     name: '',
-    province: '',
+    state: '',
     city: '',
     category: '',
     memo: '',
@@ -45,10 +46,33 @@ export default function PostForm() {
   });
   const [isEditingPlace, setIsEditingPlace] = useState(false);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
-
   const categories = ['가족여행', '커플여행', '자연여행', '문화여행', '맛집여행', '액티비티'];
+  //TODO : 하드코딩 대신 데이터베이스에서 가져오는 방식으로 변경
   const regions = ['서울특별시', '부산광역시', '인천광역시', '대구광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원도', '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주특별자치도'];
-  const placeCategories = ['관광지', '맛집', '카페', '숙박', '쇼핑', '액티비티', '문화시설', '자연'];
+  const placeCategories = ['맛집', '관광', '문화', '휴식', '모험', '자연', '기타'];
+
+  // cities 상태: id, name, state_id, state_name
+  const [cities, setCities] = useState<{ id: number, name: string, state_id: number, state_name: string }[]>([]);
+
+  // cities DB에서 불러오기 (regions_state join)
+  useEffect(() => {
+    async function fetchCities() {
+      const { data, error } = await supabase
+        .from('regions_city')
+        .select('id, name, state_id, regions_state (id, name)');
+      if (!error && data) {
+        // state_name 평탄화
+        const citiesWithState = data.map(city => ({
+          id: city.id,
+          name: city.name,
+          state_id: city.state_id,
+          state_name: city.regions_state.name
+        }));
+        setCities(citiesWithState);
+      }
+    }
+    fetchCities();
+  }, []);
 
   // 시/도별 시/군/구 데이터
   const citiesByProvince: { [key: string]: string[] } = {
@@ -115,21 +139,34 @@ export default function PostForm() {
     }));
   };
 
-  const handleAddPlace = (e: React.FormEvent) => {
+  const handleAddPlace = async (e: React.FormEvent) => { // async 키워드 추가
     e.preventDefault();
     // 필수 필드 검증
-    // TODO : 카테고리, 방문날짜에 대한 검증 없음
     const requiredFields = [];
     if (!currentPlace.name) requiredFields.push('여행지 이름');
-    if (!currentPlace.province) requiredFields.push('시/도');
+    if (!currentPlace.category) requiredFields.push('카테고리');
+    if (!currentPlace.state) requiredFields.push('시/도');
     if (!currentPlace.city) requiredFields.push('시/군/구');
     if (!currentPlace.memo) requiredFields.push('메모');
+    if (!currentPlace.visitStartDateTime) requiredFields.push('방문 시작 일시');
+    if (!currentPlace.visitEndDateTime) requiredFields.push('방문 종료 일시');
+
+    // 방문 시작 일시가 방문 종료 일시보다 이후인 경우 검증 실패
+    if (currentPlace.visitStartDateTime && currentPlace.visitEndDateTime && currentPlace.visitStartDateTime > currentPlace.visitEndDateTime) {
+      requiredFields.push('방문 시작 일시는 방문 종료 일시보다 이전이어야 합니다.');
+    }
+
+    // city_id 찾기 (state_name, city.name으로 매칭)
+    const selectedCity = cities.find(city => city.name === currentPlace.city && city.state_name === currentPlace.state);
+    if (!selectedCity) {
+      requiredFields.push('시/군/구(city) 정보가 올바르지 않습니다.');
+    }
 
     // 필수 필드 검증 실패 시 메시지 표시
     if (requiredFields.length > 0) {
       const errorMessage = document.createElement('div');
       errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      errorMessage.textContent = `다음 항목을 입력해주세요: ${requiredFields.join(', ')}`;
+      errorMessage.textContent = `다음 항목을 확인해주세요: ${requiredFields.join(', ')}`;
       document.body.appendChild(errorMessage);
 
       // 3초 후 메시지 제거(if문은 방어적 프로그래밍)
@@ -141,27 +178,58 @@ export default function PostForm() {
       return;
     }
 
+    // city_id로 저장, city name은 DB에 저장하지 않음
     const newPlace = {
       ...currentPlace,
-      //TODO : id 지정방식 변경
-      id: Date.now().toString(),
+      city_id: selectedCity!.id,
       imageUrl: currentPlace.customImages[0] || generatePlaceImage(currentPlace.name, currentPlace.category)
     };
-    setPlaces([...places, newPlace]);
-    resetPlaceForm();
 
-    // 성공 메시지 표시
-    const successMessage = document.createElement('div');
-    successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-    successMessage.textContent = '여행지가 성공적으로 추가되었습니다!';
-    document.body.appendChild(successMessage);
+    //Supabase에 데이터 추가하는 코드 시작 
+    try {
+      const { data, error } = await supabase
+        .from('places')
+        .insert([newPlace])
+        .select();
 
-    // 3초 후 메시지 제거
-    setTimeout(() => {
-      if (document.body.contains(successMessage)) {
-        document.body.removeChild(successMessage);
+      if (error) {
+        throw error; // 에러 발생 시 throw
       }
-    }, 3000);
+
+      //방어적인 코드(DB에 저장이 성공됐지만 data를 제대로 전달받지 못한 경우)
+      const addedPlace = data ? data[0] : newPlace;
+
+      setPlaces([...places, addedPlace]); // Supabase에서 반환된 데이터를 상태에 추가
+      resetPlaceForm();
+
+      // 성공 메시지 표시
+      const successMessage = document.createElement('div');
+      successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      successMessage.textContent = '여행지가 성공적으로 추가되었습니다!';
+      document.body.appendChild(successMessage);
+
+      // 3초 후 메시지 제거
+      setTimeout(() => {
+        if (document.body.contains(successMessage)) {
+          document.body.removeChild(successMessage);
+        }
+      }, 3000);
+
+    } catch (error) {
+      console.error('Supabase에 여행지 추가 중 오류 발생:', error);
+      // 에러 메시지 표시
+      const errorMessage = document.createElement('div');
+      errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      errorMessage.textContent = `여행지 추가 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`;
+      document.body.appendChild(errorMessage);
+
+      setTimeout(() => {
+        if (document.body.contains(errorMessage)) {
+          document.body.removeChild(errorMessage);
+        }
+      }, 3000);
+    }
+    // 🌟 Supabase에 데이터 추가하는 코드 끝 🌟
   };
 
   const handleEditPlace = (place: Place) => {
@@ -175,7 +243,7 @@ export default function PostForm() {
   const handleUpdatePlace = (e: React.FormEvent) => {
     e.preventDefault();
     //NOTE : 왜 Id만 currentPlace.id가 아니고 editingPlaceId인지?
-    if (currentPlace.name && currentPlace.province && currentPlace.city && currentPlace.memo && editingPlaceId) {
+    if (currentPlace.name && currentPlace.state && currentPlace.city && currentPlace.memo && editingPlaceId) {
       const updatedPlaces = places.map(place =>
         place.id === editingPlaceId
           ? { ...currentPlace, imageUrl: currentPlace.customImages[0] || place.imageUrl }
@@ -200,7 +268,7 @@ export default function PostForm() {
     setCurrentPlace({
       id: '',
       name: '',
-      province: '',
+      state: '',
       city: '',
       category: '',
       memo: '',
@@ -253,6 +321,9 @@ export default function PostForm() {
       alert('제목, 내용, 그리고 최소 1개의 여행지를 입력해주세요.');
     }
   };
+
+  // 시/도 select 옵션 렌더링: cities에서 state_name만 unique하게 추출
+  const uniqueStates = Array.from(new Set((Array.isArray(cities) ? cities : []).map(city => city.state_name)));
 
   return (
     <div className="space-y-8">
@@ -406,13 +477,13 @@ export default function PostForm() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">시/도</label>
                 <select
-                  value={currentPlace.province}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, province: e.target.value, city: '' })}
+                  value={currentPlace.state}
+                  onChange={(e) => setCurrentPlace({ ...currentPlace, state: e.target.value, city: '' })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                 >
                   <option value="">시/도 선택</option>
-                  {regions.map(region => (
-                    <option key={region} value={region}>{region}</option>
+                  {uniqueStates.map(state => (
+                    <option key={state} value={state}>{state}</option>
                   ))}
                 </select>
               </div>
@@ -423,11 +494,11 @@ export default function PostForm() {
                   value={currentPlace.city}
                   onChange={(e) => setCurrentPlace({ ...currentPlace, city: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
-                  disabled={!currentPlace.province}
+                  disabled={!currentPlace.state}
                 >
                   <option value="">시/군/구 선택</option>
-                  {currentPlace.province && citiesByProvince[currentPlace.province]?.map(city => (
-                    <option key={city} value={city}>{city}</option>
+                  {currentPlace.state && cities.filter(city => city.state_name === currentPlace.state).map(city => (
+                    <option key={city.id} value={city.name}>{city.name}</option>
                   ))}
                 </select>
               </div>
@@ -570,7 +641,7 @@ export default function PostForm() {
                           <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                             <span className="flex items-center gap-1">
                               <i className="ri-map-pin-line w-4 h-4 flex items-center justify-center"></i>
-                              {place.province} {place.city}
+                              {place.state} {place.city}
                             </span>
                             {(place.visitStartDateTime || place.visitEndDateTime) && (
                               <span className="flex items-center gap-1">
@@ -663,9 +734,9 @@ export default function PostForm() {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">시/도</label>
                           <select
-                            value={currentPlace.province}
+                            value={currentPlace.state}
                             onChange={(e) => {
-                              setCurrentPlace({ ...currentPlace, province: e.target.value, city: '' });
+                              setCurrentPlace({ ...currentPlace, state: e.target.value, city: '' });
                             }}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                           >
@@ -681,11 +752,11 @@ export default function PostForm() {
                             value={currentPlace.city}
                             onChange={(e) => setCurrentPlace({ ...currentPlace, city: e.target.value })}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
-                            disabled={!currentPlace.province}
+                            disabled={!currentPlace.state}
                           >
                             <option value="">시/군/구 선택</option>
-                            {currentPlace.province && citiesByProvince[currentPlace.province]?.map(city => (
-                              <option key={city} value={city}>{city}</option>
+                            {currentPlace.state && cities.filter(city => city.state_name === currentPlace.state).map(city => (
+                              <option key={city.id} value={city.name}>{city.name}</option>
                             ))}
                           </select>
                         </div>
