@@ -22,8 +22,8 @@ export default function PostForm() {
   const [postData, setPostData] = useState({
     title: '',
     content: '',
-    category: '가족여행',
-    region: '서울특별시',
+    category: '',
+    region: '',
     startDate: '',
     endDate: '',
     duration: ''
@@ -33,9 +33,9 @@ export default function PostForm() {
   const [currentPlace, setCurrentPlace] = useState<Place>({
     id: '',
     name: '',
-    province: '서울특별시',
+    province: '',
     city: '',
-    category: '관광지',
+    category: '',
     memo: '',
     cost: 0,
     visitStartDateTime: '',
@@ -59,7 +59,7 @@ export default function PostForm() {
     '광주광역시': ['광산구', '남구', '동구', '북구', '서구'],
     '대전광역시': ['대덕구', '동구', '서구', '유성구', '중구'],
     '울산광역시': ['남구', '동구', '북구', '중구', '울주군'],
-    '세종特別자치시': ['세종시'],
+    '세종특별자치시': ['세종시'],
     '경기도': ['수원시', '성남시', '고양시', '용인시', '부천시', '안산시', '안양시', '남양주시', '화성시', '평택시', '의정부시', '시흥시', '파주시', '광명시', '김포시', '군포시', '광주시', '이천시', '양주시', '오산시', '구리시', '안성시', '포천시', '의왕시', '하남시', '여주시', '양평군', '동두천시', '과천시', '가평군', '연천군'],
     '강원도': ['춘천시', '원주시', '강릉시', '동해시', '태백시', '속초시', '삼척시', '홍천군', '횡성군', '영월군', '평창군', '정선군', '철원군', '화천군', '양구군', '인제군', '고성군', '양양군'],
     '충청북도': ['청주시', '충주시', '제천시', '보은군', '옥천군', '영동군', '증평군', '진천군', '괴산군', '음성군', '단양군'],
@@ -68,7 +68,7 @@ export default function PostForm() {
     '전라남도': ['목포시', '여수시', '순천시', '나주시', '광양시', '담양군', '곡성군', '구례군', '고흥군', '보성군', '화순군', '장흥군', '강진군', '해남군', '영암군', '무안군', '함평군', '영광군', '장성군', '완도군', '진도군', '신안군'],
     '경상북도': ['포항시', '경주시', '김천시', '안동시', '구미시', '영주시', '영천시', '상주시', '문경시', '경산시', '군위군', '의성군', '청송군', '영양군', '영덕군', '청도군', '고령군', '성주군', '칠곡군', '예천군', '봉화군', '울진군', '울릉군'],
     '경상남도': ['창원시', '진주시', '통영시', '사천시', '김해시', '밀양시', '거제시', '양산시', '의령군', '함안군', '창녕군', '고성군', '남해군', '하동군', '산청군', '함양군', '거창군', '합천군'],
-    '제주特別자치도': ['제주시', '서귀포시']
+    '제주특별자치도': ['제주시', '서귀포시']
   };
 
   const totalPlaces = places.length;
@@ -200,9 +200,9 @@ export default function PostForm() {
     setCurrentPlace({
       id: '',
       name: '',
-      province: '서울특별시',
+      province: '',
       city: '',
-      category: '관광지',
+      category: '',
       memo: '',
       cost: 0,
       visitStartDateTime: '',
@@ -282,6 +282,7 @@ export default function PostForm() {
               onChange={(e) => setPostData({ ...postData, category: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
             >
+              <option value="">카테고리 선택</option>
               {categories.map(category => (
                 <option key={category} value={category}>{category}</option>
               ))}
@@ -295,12 +296,14 @@ export default function PostForm() {
               onChange={(e) => setPostData({ ...postData, region: e.target.value })}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
             >
+              <option value="">지역 선택</option>
               {regions.map(region => (
                 <option key={region} value={region}>{region}</option>
               ))}
             </select>
           </div>
 
+          {/* NOTE :여행 날짜 선택은 여행지 추가에 의해 의존하도록? */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">여행 시작일</label>
             <input
@@ -329,6 +332,7 @@ export default function PostForm() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={6}
               placeholder="여행 경험과 팁을 자세히 공유해주세요..."
+              // NOTE : maxLength 확인 필요
               maxLength={2000}
             />
             <div className="text-xs text-gray-500 mt-1">{postData.content.length}/2000자</div>
@@ -355,21 +359,21 @@ export default function PostForm() {
                 : 0
               }
             </div>
-            <div className="text-sm opacity-90">여행 期間 (일)</div>
+            <div className="text-sm opacity-90">총 여행 기간 (일)</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold">
               {totalPlaces > 0 ? Math.round(totalCost / totalPlaces).toLocaleString() : 0}
             </div>
-            <div className="text-sm opacity-90">平均 비용 (원)</div>
+            <div className="text-sm opacity-90">여행 비용 (원)</div>
           </div>
         </div>
       </div>
 
-      {/* 여행지登録 (수정モード가 아닐 때만 表示) */}
+      {/* 여행지 등록 (수정 모드가 아닐 때만 표시) */}
       {!isEditingPlace && (
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-xl font-bold mb-6">여행지登録</h2>
+          <h2 className="text-xl font-bold mb-6">여행지 등록</h2>
 
           <form onSubmit={handleAddPlace} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -392,6 +396,7 @@ export default function PostForm() {
                   onChange={(e) => setCurrentPlace({ ...currentPlace, category: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                 >
+                  <option value="">카테고리 선택</option>
                   {placeCategories.map(category => (
                     <option key={category} value={category}>{category}</option>
                   ))}
@@ -402,11 +407,10 @@ export default function PostForm() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">시/도</label>
                 <select
                   value={currentPlace.province}
-                  onChange={(e) => {
-                    setCurrentPlace({ ...currentPlace, province: e.target.value, city: '' });
-                  }}
+                  onChange={(e) => setCurrentPlace({ ...currentPlace, province: e.target.value, city: '' })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                 >
+                  <option value="">시/도 선택</option>
                   {regions.map(region => (
                     <option key={region} value={region}>{region}</option>
                   ))}
@@ -439,7 +443,7 @@ export default function PostForm() {
                   min="0"
                 />
               </div>
-
+              {/* TODO : 사진 등록 대표이미지 선정 필요 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">사진 등록</label>
                 <div className="space-y-3">
@@ -456,6 +460,7 @@ export default function PostForm() {
                       htmlFor="image-upload"
                       className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
                     >
+                      {/* TODO : 사진등록 UI 수정 필요 */}
                       <div className="text-center">
                         <i className="ri-image-add-line text-2xl text-gray-400 mb-2"></i>
                         <div className="text-sm text-gray-600">사진을 선택하거나 드래그하세요</div>
@@ -486,7 +491,7 @@ export default function PostForm() {
                   )}
                 </div>
               </div>
-
+              {/* TODO : 방문 시작 일시, 종료 일시 검증 필요 */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">방문 시작 일시</label>
                 <input
