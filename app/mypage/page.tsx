@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import ActivitySummary from './ActivitySummary';
-import { mockMyPosts, mockMyPlaces, tabs, mockDraftPosts } from './MockData';
+import { mockMyPosts, mockMyPlaces, mockDraftPosts } from './MockData';
 import WritingPostListTab from './WritingPostListTab';
 import CompletedPostListTab from './CompletedPostListTab';
 import PlaceListTab from './PlaceListTab';
-import MyTabs from './MyTabS';
+import MyTabs from './MyTabs';
+import { useMypage } from '@/hooks/useMypage';
 
 export default function MyPage() {
-  const [activeTab, setActiveTab] = useState('drafts');
+  const { activeTab, setActiveTab } = useMypage();
 
   return (
     <div className="min-h-screen bg-gray-50">
