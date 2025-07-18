@@ -137,7 +137,7 @@ export async function signInWithGoogle(): Promise<AuthResponse> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/`,
       },
     });
 
@@ -159,12 +159,12 @@ export async function signInWithGoogle(): Promise<AuthResponse> {
   }
 }
 
-export async function signInWithGitHub(): Promise<AuthResponse> {
+export async function signInWithGithub(): Promise<AuthResponse> {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/`,
       },
     });
 
@@ -182,6 +182,33 @@ export async function signInWithGitHub(): Promise<AuthResponse> {
     return {
       success: false,
       error: 'GitHub 로그인 중 오류가 발생했습니다.',
+    };
+  }
+}
+
+export async function signInWithKakao(): Promise<AuthResponse> {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    });
+
+    if (error) {
+      return {
+        success: false,
+        error: getErrorMessage(error),
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Kakao 로그인 중 오류가 발생했습니다.',
     };
   }
 }
