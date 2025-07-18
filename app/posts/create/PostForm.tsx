@@ -44,17 +44,13 @@ export default function PostForm() {
     imageUrl: '',
     customImages: []
   });
+  const [cities, setCities] = useState<{ city_id: number, name: string, state_id: number, state_name: string }[]>([]);
   const [isEditingPlace, setIsEditingPlace] = useState(false);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
   const categories = ['가족여행', '커플여행', '자연여행', '문화여행', '맛집여행', '액티비티'];
-  //TODO : 하드코딩 대신 데이터베이스에서 가져오는 방식으로 변경
-  const regions = ['서울특별시', '부산광역시', '인천광역시', '대구광역시', '광주광역시', '대전광역시', '울산광역시', '세종특별자치시', '경기도', '강원도', '충청북도', '충청남도', '전라북도', '전라남도', '경상북도', '경상남도', '제주특별자치도'];
-  const placeCategories = ['맛집', '관광', '문화', '휴식', '모험', '자연', '기타'];
+  const placeCategories = ['맛집', '관광', '문화', '휴식', '모험', '자연', '기타'];  
 
-  // cities 상태: id, name, state_id, state_name
-  const [cities, setCities] = useState<{ city_id: number, name: string, state_id: number, state_name: string }[]>([]);
-
-  // state와 city DB에서 불러오기
+  // state와 city DB에서 join하여 불러오기
   useEffect(() => {
     async function fetchCities() {
       const { data, error } = await supabase
@@ -72,9 +68,6 @@ export default function PostForm() {
     }
     fetchCities();
   }, []);
-
-  const totalPlaces = places.length;
-  const totalCost = places.reduce((sum, place) => sum + place.cost, 0);
 
   //여행지 이미지 업로드
   const handleImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,21 +174,17 @@ export default function PostForm() {
         image_urls: imageUrls
       });
 
-      if (error) {
-        throw error;
-      }
-
-      if (!data || !data.success) {
-        throw new Error(data?.error || '여행지 추가에 실패했습니다.');
+      if (error || !data || !data.success) {
+        throw new Error(error?.message || data?.error || '여행지 추가에 실패했습니다.');
       }
 
       // 성공적으로 추가된 place 정보로 상태 업데이트
       const addedPlace: Place = {
         ...currentPlace,
         id: data.place_id,
+        //NOTE : 대표이미지 선정 방법 변경 필요
         imageUrl: currentPlace.customImages[0] || generatePlaceImage(currentPlace.name, currentPlace.category)
       };
-
       setPlaces([...places, addedPlace]);
       resetPlaceForm();
 
@@ -234,7 +223,6 @@ export default function PostForm() {
         }
       }, 3000);
     }
-    // 🌟 Supabase DB 함수 호출 코드 끝 🌟
   };
 
   const handleEditPlace = (place: Place) => {
@@ -328,7 +316,12 @@ export default function PostForm() {
   };
 
   // 시/도 select 옵션 렌더링: cities에서 state_name만 unique하게 추출
-  const uniqueStateIds = Array.from(new Set(cities.map(city => city.state_id)));
+  const stateIds = Array.from(new Set(cities.map(city => city.state_id)));
+  const statesNames = Array.from(new Set(cities.map(city => city.state_name)));
+
+  // 여행지 개수와 총 비용 계산
+  const totalPlaces = places.length;
+  const totalCost = places.reduce((sum, place) => sum + place.cost, 0);
 
   // 화면 표시용 helper 함수 추가
   const getCityAndStateName = (place: Place) => {
@@ -382,8 +375,8 @@ export default function PostForm() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
             >
               <option value="">지역 선택</option>
-              {regions.map(region => (
-                <option key={region} value={region}>{region}</option>
+              {statesNames.map(stateName => (
+                <option key={stateName} value={stateName}>{stateName}</option>
               ))}
             </select>
           </div>
@@ -496,7 +489,7 @@ export default function PostForm() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                 >
                   <option value="">시/도 선택</option>
-                  {uniqueStateIds.map(stateId => {
+                  {stateIds.map(stateId => {
                     const state = cities.find(c => c.state_id === stateId);
                     return (
                       <option key={stateId} value={stateId}>{state?.state_name}</option>
@@ -759,7 +752,7 @@ export default function PostForm() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                           >
                             <option value="">시/도 선택</option>
-                            {uniqueStateIds.map(stateId => {
+                            {stateIds.map(stateId => {
                               const state = cities.find(c => c.state_id === stateId);
                               return (
                                 <option key={stateId} value={stateId}>{state?.state_name}</option>

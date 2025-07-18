@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import PostForm from './PostForm';
-import TestPage from './TestPage';
 
 export default function CreatePostPage() {
   return (
