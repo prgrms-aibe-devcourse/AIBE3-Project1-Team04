@@ -121,7 +121,7 @@ export default function PostsPage() {
         title: post.title,
         category: formatCategories(post.categories),
         region: formatRegions(post.city_name),
-        author: post.email ? post.email.split('@')[0] : '익명',
+        author: post.name ? post.name : '익명',
         rating: post.avg_rating || 0,
         ratingCount: post.review_count || 0,
         views: post.view_count || 0,
