@@ -130,6 +130,15 @@ export default function PostForm() {
       requiredFields.push('방문 시작 일시는 방문 종료 일시보다 이전이어야 합니다.');
     }
 
+    // 등록된 다른 여행지의 여행 시간과 겹치는지 검증
+    places.forEach(place => {
+      if (currentPlace.visitStartDateTime && currentPlace.visitEndDateTime &&
+        (currentPlace.visitStartDateTime < place.visitStartDateTime && place.visitStartDateTime < currentPlace.visitEndDateTime)
+        || (currentPlace.visitStartDateTime < place.visitEndDateTime && place.visitEndDateTime < currentPlace.visitEndDateTime)) {
+        requiredFields.push('등록된 다른 여행지의 여행 시간과 겹칩니다.');
+      }
+    });
+
     // city_id 찾기 (state_name, city.name으로 매칭)
     const selectedCity = cities.find(city => city.city_id === currentPlace.city_id && city.state_id === currentPlace.state_id);
     if (!selectedCity) {
@@ -382,7 +391,6 @@ export default function PostForm() {
             </select>
           </div>
 
-          {/* TODO :여행 날짜 선택은 여행지 추가에 의해 의존하도록 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">여행 시작일</label>
             <input
