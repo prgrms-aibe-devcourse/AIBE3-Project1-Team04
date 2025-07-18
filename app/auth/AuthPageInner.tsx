@@ -11,6 +11,7 @@ export default function AuthPageInner() {
   const searchParams = useSearchParams();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -45,10 +46,6 @@ export default function AuthPageInner() {
     setError(null);
 
     if (isLogin) {
-      console.log({
-        email: formData.email,
-        password: formData.password,
-      });
       const result = await signIn({
         email: formData.email,
         password: formData.password,
@@ -72,11 +69,16 @@ export default function AuthPageInner() {
       const result = await signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          data: { name: formData.name },
+        },
       });
 
       if (result.success) {
         // 회원가입 성공 시 로그인 페이지로 이동
-        router.push('/auth?message=회원가입이 완료되었습니다. 이메일 인증 후 로그인해주세요.');
+        router.push(
+          '/auth?message=회원가입이 완료되었습니다. 이메일 인증 후 로그인해주세요.&isLogin=false'
+        );
       } else {
         setError(result.error || '회원가입에 실패했습니다.');
         setIsLoading(false);
@@ -139,6 +141,26 @@ export default function AuthPageInner() {
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    {!isLogin && (
+                      <div>
+                        <label
+                          htmlFor="name"
+                          className="block text-sm font-medium text-gray-700 mb-2"
+                        >
+                          이름
+                        </label>
+                        <input
+                          type="name"
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm"
+                          placeholder="이름을 입력하세요"
+                          required
+                        />
+                      </div>
+                    )}
                     <div>
                       <label
                         htmlFor="email"

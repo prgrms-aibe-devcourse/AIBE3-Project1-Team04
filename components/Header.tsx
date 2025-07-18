@@ -46,7 +46,7 @@ export default function Header() {
                     <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                       <i className="ri-user-line text-white text-sm"></i>
                     </div>
-                    <span className="font-medium">사용자님</span>
+                    <span className="font-medium">{user.user_metadata.name ?? '-'}님</span>
                     <i className="ri-arrow-down-s-line text-sm"></i>
                   </button>
 
