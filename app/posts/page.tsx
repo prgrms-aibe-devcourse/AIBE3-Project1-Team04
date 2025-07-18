@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import PostCard from '@/components/PostCard';
 import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/useAuth';
 
 interface Post {
   id: string;
@@ -45,7 +44,6 @@ export default function PostsPage() {
   const [regions, setRegions] = useState(['전체']);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
 
   // 여행 기간 계산 함수
   function calculateDuration(startDate: string, endDate: string): string {
@@ -95,7 +93,7 @@ export default function PostsPage() {
         title: post.title,
         category: formatCategories(post.categories),
         region: post.city_name || '지역미정',
-        author: user?.user_metadata.name || '익명', // TODO: 작성자의 이름을 사용하도록 수정 필요
+        author: post.email ? post.email.split('@')[0] : '익명', // 이메일 @ 앞부분만 표시
         rating: post.avg_rating || 0,
         ratingCount: post.review_count || 0,
         views: post.view_count || 0,
@@ -117,7 +115,7 @@ export default function PostsPage() {
     }
 
     fetchPosts();
-  }, [user]); // user를 의존성 배열에 추가
+  }, []);
 
   const filteredPosts = posts
     .filter((post) => {
