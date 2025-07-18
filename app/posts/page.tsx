@@ -66,6 +66,37 @@ export default function PostsPage() {
     return `${categories[0]} 외 ${categories.length - 1}개`;
   }
 
+  // 지역명 포맷팅 함수
+  function formatRegions(regions: string[] | null): string {
+    if (!regions || regions.length === 0) return '지역미정';
+    if (regions.length === 1) return regions[0];
+    return `${regions[0]} 외 ${regions.length - 1}개`;
+  }
+
+  // Post 데이터 포맷 함수
+  function formatPostList(data: any[]): Post[] {
+    return (data || []).map((post: any) => ({
+      id: post.post_id,
+      title: post.title,
+      category: formatCategories(post.categories),
+      region: formatRegions(post.city_name),
+      author: post.email ? post.email.split('@')[0] : '익명',
+      rating: post.avg_rating || 0,
+      ratingCount: post.review_count || 0,
+      views: post.view_count || 0,
+      cost: post.total_cost || 0,
+      imageUrl:
+        'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape',
+      startDate: post.trip_start,
+      endDate: post.trip_end,
+      createdAt: post.created_at,
+      duration: calculateDuration(post.trip_start, post.trip_end),
+      likes: post.like_count || 0,
+      isLiked: false,
+      isFavorited: false,
+    }));
+  }
+
   useEffect(() => {
     async function fetchRegions() {
       const { data, error } = await supabase.from('regions_state').select('name');
@@ -73,75 +104,44 @@ export default function PostsPage() {
         console.error(error);
         return;
       }
-      // state 테이블의 name만 추출해서 배열로 만듦
       const regionNames = data.map((row) => row.name).filter(Boolean);
       setRegions(['전체', ...regionNames]);
     }
     fetchRegions();
   }, []);
 
+  // 최초 전체 게시글 불러오기
   useEffect(() => {
     async function fetchPosts() {
+      setIsLoading(true);
       const { data, error } = await supabase.from('post_list_view').select('*');
       if (error) {
-        console.error(error);
+        setIsLoading(false);
         return;
       }
-
-      const formattedPosts: Post[] = data.map((post) => ({
-        id: post.post_id,
-        title: post.title,
-        category: formatCategories(post.categories),
-        region: post.city_name || '지역미정',
-        author: post.email ? post.email.split('@')[0] : '익명', // 이메일 @ 앞부분만 표시
-        rating: post.avg_rating || 0,
-        ratingCount: post.review_count || 0,
-        views: post.view_count || 0,
-        cost: post.total_cost || 0,
-        // TODO: 정확히 연결된 이미지 사용 필요
-        imageUrl:
-          'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape', // 기본 이미지 또는 실제 이미지 URL
-        startDate: post.trip_start,
-        endDate: post.trip_end,
-        createdAt: post.created_at,
-        duration: calculateDuration(post.trip_start, post.trip_end),
-        likes: post.like_count || 0,
-        isLiked: false, // TODO: 사용자별 좋아요 상태는 별도 쿼리 필요
-        isFavorited: false, // TODO: 사용자별 즐겨찾기 상태는 별도 쿼리 필요
-      }));
-
-      setPosts(formattedPosts);
+      setPosts(formatPostList(data));
       setIsLoading(false);
     }
-
     fetchPosts();
   }, []);
 
-  const filteredPosts = posts
-    .filter((post) => {
-      const matchesSearch =
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.author.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategory === '전체' || post.category === selectedCategory;
-      const matchesRegion = selectedRegion === '전체' || post.region.includes(selectedRegion);
-
-      return matchesSearch && matchesCategory && matchesRegion;
-    })
-    .sort((a, b) => {
-      switch (selectedSort) {
-        case 'latest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        case 'rating':
-          return b.rating - a.rating;
-        case 'cost-low':
-          return a.cost - b.cost;
-        case 'cost-high':
-          return b.cost - a.cost;
-        default: // popular
-          return b.views - a.views;
-      }
+  // 검색 버튼 클릭 시 호출되는 함수
+  async function handleSearch() {
+    setIsLoading(true);
+    const { data, error } = await supabase.rpc('search_posts', {
+      search: searchQuery,
+      region: selectedRegion,
+      // sort: selectedSort,
     });
+    if (error) {
+      console.error(error);
+      setIsLoading(false);
+      alert('검색 중 오류가 발생했습니다.');
+      return;
+    }
+    setPosts(formatPostList(data));
+    setIsLoading(false);
+  }
 
   // 로딩 중일 때 표시
   if (isLoading) {
@@ -177,8 +177,11 @@ export default function PostsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleSearch();
+              }}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-              placeholder="게시글 제목, 지역, 작성자로 검색..."
+              placeholder="제목"
             />
           </div>
 
@@ -236,12 +239,21 @@ export default function PostsPage() {
               </select>
             </div>
           </div>
+          {/* 검색 버튼 */}
+          <div className="flex justify-end mt-4">
+            <button
+              onClick={handleSearch}
+              className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 whitespace-nowrap cursor-pointer"
+            >
+              검색
+            </button>
+          </div>
         </div>
 
         {/* 검색 결과 요약 */}
         <div className="flex items-center justify-between mb-6">
           <div className="text-gray-600">
-            총 <span className="font-medium text-blue-600">{filteredPosts.length}</span>개의 게시글
+            총 <span className="font-medium text-blue-600">{posts.length}</span>개의 게시글
           </div>
           <Link
             href="/posts/create"
@@ -252,9 +264,9 @@ export default function PostsPage() {
         </div>
 
         {/* 게시글 목록 */}
-        {filteredPosts.length > 0 ? (
+        {posts.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {filteredPosts.map((post) => (
+            {posts.map((post) => (
               <PostCard key={post.id} {...post} />
             ))}
           </div>
@@ -267,7 +279,7 @@ export default function PostsPage() {
         )}
 
         {/* 페이지네이션 */}
-        {filteredPosts.length > 0 && (
+        {/* {filteredPosts.length > 0 && (
           <div className="flex justify-center">
             <div className="flex items-center gap-2">
               <button className="px-3 py-2 text-gray-500 hover:text-gray-700 cursor-pointer">
@@ -289,7 +301,7 @@ export default function PostsPage() {
               </button>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
