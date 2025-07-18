@@ -10,6 +10,9 @@ export interface AuthResponse {
 export interface SignUpData {
   email: string;
   password: string;
+  options: {
+    data: object;
+  };
 }
 
 export interface LoginData {
@@ -18,11 +21,12 @@ export interface LoginData {
 }
 
 // 회원가입 함수
-export async function signUp({ email, password }: SignUpData): Promise<AuthResponse> {
+export async function signUp({ email, password, options }: SignUpData): Promise<AuthResponse> {
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options,
     });
 
     if (error) {
@@ -137,7 +141,7 @@ export async function signInWithGoogle(): Promise<AuthResponse> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
@@ -164,7 +168,7 @@ export async function signInWithGithub(): Promise<AuthResponse> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
@@ -191,7 +195,7 @@ export async function signInWithKakao(): Promise<AuthResponse> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
