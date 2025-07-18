@@ -61,7 +61,6 @@ export default function PostForm() {
         .from('regions_city')
         .select('id, name, state_id, regions_state(name)');
       if (!error && data) {
-        // state_name 평탄화
         const citiesWithState = data.map(city => ({
           city_id: city.id,
           name: city.name,
@@ -118,6 +117,9 @@ export default function PostForm() {
     }));
   };
 
+  // datetime-local 값이 'YYYY-MM-DDTHH:MM' 형식이면 ':00'을 붙여서 'YYYY-MM-DDTHH:MM:SS'로 변환
+  const fixDateTime = (dt: string) => dt && dt.length === 16 ? dt + ':00' : dt || null;
+
   const handleAddPlace = async (e: React.FormEvent) => { // async 키워드 추가
     e.preventDefault();
     // 필수 필드 검증
@@ -157,33 +159,44 @@ export default function PostForm() {
       return;
     }
 
-    // city_id로 저장, city name은 DB에 저장하지 않음
-    const newPlace = {
+    // DB 함수에 전달할 place_data 준비
+    const placeData = {
       name: currentPlace.name,
       category: currentPlace.category,
       memo: currentPlace.memo,
       cost: currentPlace.cost,
-      visit_start_time: currentPlace.visitStartDateTime,
-      visit_end_time: currentPlace.visitEndDateTime,
+      visit_start_time: fixDateTime(currentPlace.visitStartDateTime),
+      visit_end_time: fixDateTime(currentPlace.visitEndDateTime),
       city_id: currentPlace.city_id,
       state_id: currentPlace.state_id
     };
 
-    //Supabase에 데이터 추가하는 코드 시작 
+    // 이미지 URL 배열 준비 (모든 이미지를 place_images에 저장)
+    const imageUrls = currentPlace.customImages;
+
+    //Supabase DB 함수 호출
     try {
-      const { data, error } = await supabase
-        .from('places')
-        .insert([newPlace])
-        .select();
+      const { data, error } = await supabase.rpc('add_place_with_images', {
+        place_data: placeData,
+        image_urls: imageUrls
+      });
 
       if (error) {
-        throw error; // 에러 발생 시 throw
+        throw error;
       }
 
-      //방어적인 코드(DB에 저장이 성공됐지만 data를 제대로 전달받지 못한 경우)
-      const addedPlace = data ? data[0] : newPlace;
+      if (!data || !data.success) {
+        throw new Error(data?.error || '여행지 추가에 실패했습니다.');
+      }
 
-      setPlaces([...places, addedPlace]); // Supabase에서 반환된 데이터를 상태에 추가
+      // 성공적으로 추가된 place 정보로 상태 업데이트
+      const addedPlace: Place = {
+        ...currentPlace,
+        id: data.place_id,
+        imageUrl: currentPlace.customImages[0] || generatePlaceImage(currentPlace.name, currentPlace.category)
+      };
+
+      setPlaces([...places, addedPlace]);
       resetPlaceForm();
 
       // 성공 메시지 표시
@@ -200,11 +213,19 @@ export default function PostForm() {
       }, 3000);
 
     } catch (error) {
-      console.error('Supabase에 여행지 추가 중 오류 발생:', error);
+      console.error('Supabase DB 함수 호출 중 오류 발생:', error);
       // 에러 메시지 표시
       const errorMessage = document.createElement('div');
       errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      errorMessage.textContent = `여행지 추가 중 오류가 발생했습니다: ${error.message || '알 수 없는 오류'}`;
+      let errorMsg = '알 수 없는 오류';
+      if (error instanceof Error) {
+        errorMsg = error.message;
+      } else if (typeof error === 'string') {
+        errorMsg = error;
+      } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        errorMsg = (error as any).message;
+      }
+      errorMessage.textContent = `여행지 추가 중 오류가 발생했습니다: ${errorMsg}`;
       document.body.appendChild(errorMessage);
 
       setTimeout(() => {
@@ -213,7 +234,7 @@ export default function PostForm() {
         }
       }, 3000);
     }
-    // 🌟 Supabase에 데이터 추가하는 코드 끝 🌟
+    // 🌟 Supabase DB 함수 호출 코드 끝 🌟
   };
 
   const handleEditPlace = (place: Place) => {
