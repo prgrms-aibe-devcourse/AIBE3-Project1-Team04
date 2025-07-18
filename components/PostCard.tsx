@@ -99,7 +99,10 @@ export default function PostCard({
 
           <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
             <span>{duration}</span>
-            <span>{author}</span>
+            <div className="flex items-center gap-1">
+              <i className="ri-user-line w-4 h-4 flex items-center justify-center text-gray-500"></i>
+              <span>{author}</span>
+            </div>
           </div>
 
           <div className="flex items-center justify-between border-t border-gray-100 pt-3">
