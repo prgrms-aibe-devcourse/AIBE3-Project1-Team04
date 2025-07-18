@@ -113,7 +113,7 @@ export default function PostForm() {
   // datetime-local 값이 'YYYY-MM-DDTHH:MM' 형식이면 ':00'을 붙여서 'YYYY-MM-DDTHH:MM:SS'로 변환
   const fixDateTime = (dt: string) => dt && dt.length === 16 ? dt + ':00' : dt || null;
 
-  const handleAddPlace = async (e: React.FormEvent) => { // async 키워드 추가
+  const handleAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
     // 필수 필드 검증
     const requiredFields = [];
@@ -307,12 +307,13 @@ export default function PostForm() {
   const handleSubmitPost = (e: React.FormEvent) => {
     e.preventDefault();
     // NOTE : 카테고리, 지역, 여행 날짜에 대한 검증 없음
-    if (postData.title && postData.content && places.length > 0) {
-      alert('게시글이 성공적으로 작성되었습니다!');
-      console.log('게시글 데이터:', { ...postData, places });
-    } else {
+    if (!postData.title || !postData.content || places.length === 0) {
       alert('제목, 내용, 그리고 최소 1개의 여행지를 입력해주세요.');
+      return;
     }
+
+    alert('게시글이 성공적으로 작성되었습니다!');
+    console.log('게시글 데이터:', { ...postData, places });
   };
 
   // 시/도 select 옵션 렌더링: cities에서 state_name만 unique하게 추출
@@ -381,13 +382,13 @@ export default function PostForm() {
             </select>
           </div>
 
-          {/* NOTE :여행 날짜 선택은 여행지 추가에 의해 의존하도록? */}
+          {/* TODO :여행 날짜 선택은 여행지 추가에 의해 의존하도록 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">여행 시작일</label>
             <input
+              disabled
               type="date"
-              value={postData.startDate}
-              onChange={(e) => setPostData({ ...postData, startDate: e.target.value })}
+              value={places[0]?.visitStartDateTime || new Date().toISOString().split('T')[0]}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -395,9 +396,9 @@ export default function PostForm() {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">여행 종료일</label>
             <input
+              disabled
               type="date"
-              value={postData.endDate}
-              onChange={(e) => setPostData({ ...postData, endDate: e.target.value })}
+              value={places[places.length - 1]?.visitEndDateTime || new Date().toISOString().split('T')[0]}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
