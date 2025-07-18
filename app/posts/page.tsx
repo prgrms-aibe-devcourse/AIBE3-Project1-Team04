@@ -27,7 +27,7 @@ interface Post {
   isFavorited: boolean;
 }
 
-const categories = ['전체', '가족여행', '커플여행', '자연여행', '문화여행', '맛집여행', '액티비티'];
+const categories = ['맛집', '관광', '문화', '휴식', '모험', '자연', '기타'];
 
 const sortOptions = [
   { value: 'latest', label: '최근등록순' },
@@ -40,7 +40,7 @@ const sortOptions = [
 
 export default function PostsPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [selectedCategory, setSelectedCategory] = useState('기타');
   const [selectedRegion, setSelectedRegion] = useState('전체');
   const [selectedSort, setSelectedSort] = useState('latest');
   const [regions, setRegions] = useState(['전체']);
@@ -90,12 +90,18 @@ export default function PostsPage() {
   }, []);
 
   // 게시글 목록과 좋아요 여부를 함께 불러오는 함수
-  async function fetchPostsWithLikes(params?: { search?: string; region?: string; sort?: string }) {
+  async function fetchPostsWithLikes(params?: {
+    search?: string;
+    region?: string;
+    category?: string;
+    sort?: string;
+  }) {
     setIsLoading(true);
     // 1. 게시글 목록 불러오기
     const { data: postsData, error: postsError } = await supabase.rpc('search_posts', {
       search: params?.search ?? searchQuery,
       region: params?.region ?? selectedRegion,
+      category: params?.category ?? selectedCategory,
       sort: params?.sort ?? selectedSort,
     });
     if (postsError) {
