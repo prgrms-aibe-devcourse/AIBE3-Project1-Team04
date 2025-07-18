@@ -6,168 +6,25 @@ import Header from '@/components/Header';
 import PostCard from '@/components/PostCard';
 import { supabase } from '@/lib/supabaseClient';
 
-const mockPosts = [
-  {
-    id: '1',
-    title: '부산 3박 4일 완벽 코스 - 해운대부터 감천문화마을까지',
-    category: '가족여행',
-    region: '부산광역시',
-    author: '김여행',
-    rating: 4.8,
-    ratingCount: 156,
-    views: 2340,
-    cost: 450000,
-    imageUrl:
-      'https://readdy.ai/api/search-image?query=Beautiful%20Busan%20Haeundae%20Beach%20cityscape%20with%20modern%20buildings%20and%20ocean%20view%2C%20vibrant%20blue%20sky%2C%20tourist%20destination%2C%20clean%20minimalist%20background%2C%20professional%20photography&width=400&height=300&seq=busan-post1&orientation=landscape',
-    startDate: '2024-01-15',
-    endDate: '2024-01-18',
-    createdAt: '2024-01-20',
-    duration: '3박 4일',
-    likes: 87,
-    isLiked: true,
-    isFavorited: false,
-  },
-  {
-    id: '2',
-    title: '제주도 자연 힐링 여행 - 한라산과 성산일출봉',
-    category: '자연여행',
-    region: '제주특별자치도',
-    author: '박자연',
-    rating: 4.9,
-    ratingCount: 203,
-    views: 3450,
-    cost: 380000,
-    imageUrl:
-      'https://readdy.ai/api/search-image?query=Jeju%20Island%20natural%20landscape%2C%20Hallasan%20mountain%20view%2C%20lush%20green%20fields%2C%20volcanic%20island%20scenery%2C%20pristine%20nature%2C%20peaceful%20atmosphere&width=400&height=300&seq=jeju-post1&orientation=landscape',
-    startDate: '2024-02-10',
-    endDate: '2024-02-12',
-    createdAt: '2024-02-15',
-    duration: '2박 3일',
-    likes: 124,
-    isLiked: false,
-    isFavorited: true,
-  },
-  {
-    id: '3',
-    title: '경주 역사문화탐방 당일치기 완벽가이드',
-    category: '문화여행',
-    region: '경상북도',
-    author: '이역사',
-    rating: 4.7,
-    ratingCount: 89,
-    views: 1890,
-    cost: 120000,
-    imageUrl:
-      'https://readdy.ai/api/search-image?query=Gyeongju%20historical%20sites%20with%20ancient%20Korean%20temples%2C%20traditional%20pagodas%2C%20cherry%20blossoms%2C%20and%20cultural%20heritage%20buildings.%20Serene%20atmosphere%20with%20traditional%20Korean%20architecture&width=400&height=300&seq=gyeongju-post1&orientation=landscape',
-    startDate: '2024-03-05',
-    endDate: '2024-03-05',
-    createdAt: '2024-03-08',
-    duration: '당일치기',
-    likes: 45,
-    isLiked: false,
-    isFavorited: false,
-  },
-  {
-    id: '4',
-    title: '강릉 바다카페 힐링투어 1박2일',
-    category: '커플여행',
-    region: '강원도',
-    author: '최바다',
-    rating: 4.6,
-    ratingCount: 134,
-    views: 2670,
-    cost: 280000,
-    imageUrl:
-      'https://readdy.ai/api/search-image?query=Gangneung%20seaside%20coffee%20street%20with%20cozy%20cafes%2C%20ocean%20view%2C%20sandy%20beaches%2C%20and%20modern%20coffee%20shops.%20Relaxing%20atmosphere%20with%20ocean%20breeze%20and%20Korean%20coastal%20town%20charm&width=400&height=300&seq=gangneung-post1&orientation=landscape',
-    startDate: '2024-03-15',
-    endDate: '2024-03-16',
-    createdAt: '2024-03-18',
-    duration: '1박 2일',
-    likes: 78,
-    isLiked: true,
-    isFavorited: false,
-  },
-  {
-    id: '5',
-    title: '전주 한옥마을 맛집투어 1박2일',
-    category: '맛집여행',
-    region: '전라북도',
-    author: '정맛집',
-    rating: 4.8,
-    ratingCount: 167,
-    views: 3120,
-    cost: 200000,
-    imageUrl:
-      'https://readdy.ai/api/search-image?query=Jeonju%20Hanok%20Village%20with%20traditional%20Korean%20houses%2C%20street%20food%20markets%2C%20Korean%20traditional%20cuisine%2C%20and%20cultural%20experiences.%20Authentic%20Korean%20architecture%20with%20wooden%20buildings&width=400&height=300&seq=jeonju-post1&orientation=landscape',
-    startDate: '2024-03-20',
-    endDate: '2024-03-21',
-    createdAt: '2024-03-23',
-    duration: '1박 2일',
-    likes: 96,
-    isLiked: false,
-    isFavorited: true,
-  },
-  {
-    id: '6',
-    title: '설악산 단풍 트레킹 2박3일',
-    category: '액티비티',
-    region: '강원도',
-    author: '산악왕',
-    rating: 4.9,
-    ratingCount: 98,
-    views: 2340,
-    cost: 350000,
-    imageUrl:
-      'https://readdy.ai/api/search-image?query=Seoraksan%20National%20Park%20autumn%20foliage%20with%20colorful%20maple%20trees%2C%20mountain%20hiking%20trails%2C%20traditional%20Korean%20temples%2C%20and%20hot%20springs.%20Beautiful%20fall%20colors%20with%20red%20and%20yellow%20leaves&width=400&height=300&seq=seorak-post1&orientation=landscape',
-    startDate: '2024-10-15',
-    endDate: '2024-10-17',
-    createdAt: '2024-10-20',
-    duration: '2박 3일',
-    likes: 67,
-    isLiked: false,
-    isFavorited: false,
-  },
-  {
-    id: '7',
-    title: '여수 밤바다 야경투어 1박2일',
-    category: '커플여행',
-    region: '전라남도',
-    author: '야경매니아',
-    rating: 4.7,
-    ratingCount: 123,
-    views: 2890,
-    cost: 320000,
-    imageUrl:
-      'https://readdy.ai/api/search-image?query=Yeosu%20night%20sea%20view%20with%20beautiful%20harbor%20lights%2C%20cable%20car%2C%20marine%20city%20skyline%2C%20romantic%20evening%20atmosphere%2C%20Korean%20coastal%20city%20at%20night&width=400&height=300&seq=yeosu-post1&orientation=landscape',
-    startDate: '2024-04-01',
-    endDate: '2024-04-02',
-    createdAt: '2024-04-05',
-    duration: '1박 2일',
-    likes: 89,
-    isLiked: true,
-    isFavorited: true,
-  },
-  {
-    id: '8',
-    title: '인천 차이나타운 당일여행',
-    category: '문화여행',
-    region: '인천광역시',
-    author: '도시탐험가',
-    rating: 4.3,
-    ratingCount: 67,
-    views: 1560,
-    cost: 80000,
-    imageUrl:
-      'https://readdy.ai/api/search-image?query=Incheon%20Chinatown%20with%20traditional%20Chinese%20architecture%2C%20colorful%20buildings%2C%20street%20food%20vendors%2C%20cultural%20district%2C%20vibrant%20urban%20atmosphere&width=400&height=300&seq=incheon-post1&orientation=landscape',
-    startDate: '2024-04-10',
-    endDate: '2024-04-10',
-    createdAt: '2024-04-12',
-    duration: '당일치기',
-    likes: 23,
-    isLiked: false,
-    isFavorited: false,
-  },
-];
+interface Post {
+  id: string;
+  title: string;
+  category: string;
+  region: string;
+  author: string;
+  rating: number;
+  ratingCount: number;
+  views: number;
+  cost: number;
+  imageUrl: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  duration: string;
+  likes: number;
+  isLiked: boolean;
+  isFavorited: boolean;
+}
 
 const categories = ['전체', '가족여행', '커플여행', '자연여행', '문화여행', '맛집여행', '액티비티'];
 
@@ -185,6 +42,29 @@ export default function PostsPage() {
   const [selectedRegion, setSelectedRegion] = useState('전체');
   const [selectedSort, setSelectedSort] = useState('popular');
   const [regions, setRegions] = useState(['전체']);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 여행 기간 계산 함수
+  function calculateDuration(startDate: string, endDate: string): string {
+    if (!startDate || !endDate) return '기간미정';
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return '당일치기';
+    if (diffDays === 1) return '1박 2일';
+    return `${diffDays - 1}박 ${diffDays}일`;
+  }
+
+  // 카테고리 포맷팅 함수
+  function formatCategories(categories: string[] | null): string {
+    if (!categories || categories.length === 0) return '기타';
+    if (categories.length === 1) return categories[0];
+    return `${categories[0]} 외 ${categories.length - 1}개`;
+  }
 
   useEffect(() => {
     async function fetchRegions() {
@@ -198,9 +78,44 @@ export default function PostsPage() {
       setRegions(['전체', ...regionNames]);
     }
     fetchRegions();
+
+    async function fetchPosts() {
+      const { data, error } = await supabase.from('post_list_view').select('*');
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const formattedPosts: Post[] = data.map((post) => ({
+        id: post.post_id,
+        title: post.title,
+        category: formatCategories(post.categories),
+        region: post.city_name || '지역미정',
+        author: post.email, // TODO: 작성자의 이름을 사용하도록 수정 필요
+        rating: post.avg_rating || 0,
+        ratingCount: post.review_count || 0,
+        views: post.view_count || 0,
+        cost: post.total_cost || 0,
+        // TODO: 정확히 연결된 이미지 사용 필요
+        imageUrl:
+          'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape', // 기본 이미지 또는 실제 이미지 URL
+        startDate: post.trip_start,
+        endDate: post.trip_end,
+        createdAt: post.created_at,
+        duration: calculateDuration(post.trip_start, post.trip_end),
+        likes: post.like_count || 0,
+        isLiked: false, // TODO: 사용자별 좋아요 상태는 별도 쿼리 필요
+        isFavorited: false, // TODO: 사용자별 즐겨찾기 상태는 별도 쿼리 필요
+      }));
+
+      setPosts(formattedPosts);
+      setIsLoading(false);
+    }
+
+    fetchPosts();
   }, []);
 
-  const filteredPosts = mockPosts
+  const filteredPosts = posts
     .filter((post) => {
       const matchesSearch =
         post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -225,6 +140,18 @@ export default function PostsPage() {
           return b.views - a.views;
       }
     });
+
+  // 로딩 중일 때 표시
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">게시글을 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
