@@ -8,8 +8,8 @@ import { supabase } from '@/lib/supabaseClient';
 interface Place {
   id: string;
   name: string;
-  state: string;
-  city: string;
+  state_id: number;      // string → number
+  city_id: number;       // string → number
   category: string;
   memo: string;
   cost: number;
@@ -34,8 +34,8 @@ export default function PostForm() {
   const [currentPlace, setCurrentPlace] = useState<Place>({
     id: '',
     name: '',
-    state: '',
-    city: '',
+    state_id: 0,         // number로 변경
+    city_id: 0,          // number로 변경
     category: '',
     memo: '',
     cost: 0,
@@ -124,8 +124,8 @@ export default function PostForm() {
     const requiredFields = [];
     if (!currentPlace.name) requiredFields.push('여행지 이름');
     if (!currentPlace.category) requiredFields.push('카테고리');
-    if (!currentPlace.state) requiredFields.push('시/도');
-    if (!currentPlace.city) requiredFields.push('시/군/구');
+    if (!currentPlace.state_id) requiredFields.push('시/도');
+    if (!currentPlace.city_id) requiredFields.push('시/군/구');
     if (!currentPlace.memo) requiredFields.push('메모');
     if (!currentPlace.visitStartDateTime) requiredFields.push('방문 시작 일시');
     if (!currentPlace.visitEndDateTime) requiredFields.push('방문 종료 일시');
@@ -136,7 +136,7 @@ export default function PostForm() {
     }
 
     // city_id 찾기 (state_name, city.name으로 매칭)
-    const selectedCity = cities.find(city => city.name === currentPlace.city && city.state_name === currentPlace.state);
+    const selectedCity = cities.find(city => city.city_id === currentPlace.city_id && city.state_id === currentPlace.state_id);
     if (!selectedCity) {
       requiredFields.push('시/군/구(city) 정보가 올바르지 않습니다.');
     }
@@ -159,9 +159,14 @@ export default function PostForm() {
 
     // city_id로 저장, city name은 DB에 저장하지 않음
     const newPlace = {
-      ...currentPlace,
-      city_id: selectedCity!.city_id,
-      imageUrl: currentPlace.customImages[0] || generatePlaceImage(currentPlace.name, currentPlace.category)
+      name: currentPlace.name,
+      category: currentPlace.category,
+      memo: currentPlace.memo,
+      cost: currentPlace.cost,
+      visit_start_time: currentPlace.visitStartDateTime,
+      visit_end_time: currentPlace.visitEndDateTime,
+      city_id: currentPlace.city_id,
+      state_id: currentPlace.state_id
     };
 
     //Supabase에 데이터 추가하는 코드 시작 
@@ -222,7 +227,7 @@ export default function PostForm() {
   const handleUpdatePlace = (e: React.FormEvent) => {
     e.preventDefault();
     //NOTE : 왜 Id만 currentPlace.id가 아니고 editingPlaceId인지?
-    if (currentPlace.name && currentPlace.state && currentPlace.city && currentPlace.memo && editingPlaceId) {
+    if (currentPlace.name && currentPlace.state_id && currentPlace.city_id && currentPlace.memo && editingPlaceId) {
       const updatedPlaces = places.map(place =>
         place.id === editingPlaceId
           ? { ...currentPlace, imageUrl: currentPlace.customImages[0] || place.imageUrl }
@@ -247,8 +252,8 @@ export default function PostForm() {
     setCurrentPlace({
       id: '',
       name: '',
-      state: '',
-      city: '',
+      state_id: 0,       // number로 변경
+      city_id: 0,        // number로 변경
       category: '',
       memo: '',
       cost: 0,
@@ -303,6 +308,15 @@ export default function PostForm() {
 
   // 시/도 select 옵션 렌더링: cities에서 state_name만 unique하게 추출
   const uniqueStates = Array.from(new Set((Array.isArray(cities) ? cities : []).map(city => city.state_name)));
+
+  // 화면 표시용 helper 함수 추가
+  const getCityAndStateName = (place: Place) => {
+    const city = cities.find(c => c.city_id === place.city_id && c.state_id === place.state_id);
+    return {
+      cityName: city?.name || '',
+      stateName: city?.state_name || ''
+    };
+  };
 
   return (
     <div className="space-y-8">
@@ -456,8 +470,8 @@ export default function PostForm() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">시/도</label>
                 <select
-                  value={currentPlace.state}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, state: e.target.value, city: '' })}
+                  value={currentPlace.state_id}
+                  onChange={(e) => setCurrentPlace({ ...currentPlace, state_id: parseInt(e.target.value) || 0 })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                 >
                   <option value="">시/도 선택</option>
@@ -470,14 +484,14 @@ export default function PostForm() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">시/군/구</label>
                 <select
-                  value={currentPlace.city}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, city: e.target.value })}
+                  value={currentPlace.city_id}
+                  onChange={(e) => setCurrentPlace({ ...currentPlace, city_id: parseInt(e.target.value) || 0 })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
-                  disabled={!currentPlace.state}
+                  disabled={!currentPlace.state_id}
                 >
                   <option value="">시/군/구 선택</option>
-                  {currentPlace.state && cities.filter(city => city.state_name === currentPlace.state).map(city => (
-                    <option key={city.city_id} value={city.name}>{city.name}</option>
+                  {currentPlace.state_id && cities.filter(city => city.state_id === currentPlace.state_id).map(city => (
+                    <option key={city.city_id} value={city.city_id}>{city.name}</option>
                   ))}
                 </select>
               </div>
@@ -620,7 +634,10 @@ export default function PostForm() {
                           <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
                             <span className="flex items-center gap-1">
                               <i className="ri-map-pin-line w-4 h-4 flex items-center justify-center"></i>
-                              {place.state} {place.city}
+                              {(() => {
+                                const { stateName, cityName } = getCityAndStateName(place);
+                                return `${stateName} ${cityName}`;
+                              })()}
                             </span>
                             {(place.visitStartDateTime || place.visitEndDateTime) && (
                               <span className="flex items-center gap-1">
@@ -632,9 +649,9 @@ export default function PostForm() {
                               </span>
                             )}
                           </div>
-                          {place.customImages.length > 1 && (
+                          {place.customImages?.length > 1 && (
                             <div className="flex gap-2 mb-2">
-                              {place.customImages.slice(0, 3).map((image, idx) => (
+                              {place.customImages?.slice(0, 3).map((image, idx) => (
                                 <img
                                   key={idx}
                                   src={image}
@@ -642,7 +659,7 @@ export default function PostForm() {
                                   className="w-12 h-12 object-cover object-top rounded border"
                                 />
                               ))}
-                              {place.customImages.length > 3 && (
+                              {place.customImages?.length > 3 && (
                                 <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-600">
                                   +{place.customImages.length - 3}
                                 </div>
@@ -713,9 +730,9 @@ export default function PostForm() {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">시/도</label>
                           <select
-                            value={currentPlace.state}
+                            value={currentPlace.state_id}
                             onChange={(e) => {
-                              setCurrentPlace({ ...currentPlace, state: e.target.value, city: '' });
+                              setCurrentPlace({ ...currentPlace, state_id: parseInt(e.target.value) || 0 });
                             }}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                           >
@@ -728,14 +745,14 @@ export default function PostForm() {
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">시/군/구</label>
                           <select
-                            value={currentPlace.city}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, city: e.target.value })}
+                            value={currentPlace.city_id}
+                            onChange={(e) => setCurrentPlace({ ...currentPlace, city_id: parseInt(e.target.value) || 0 })}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
-                            disabled={!currentPlace.state}
+                            disabled={!currentPlace.state_id}
                           >
                             <option value="">시/군/구 선택</option>
-                            {currentPlace.state && cities.filter(city => city.state_name === currentPlace.state).map(city => (
-                              <option key={city.city_id} value={city.name}>{city.name}</option>
+                            {currentPlace.state_id && cities.filter(city => city.state_id === currentPlace.state_id).map(city => (
+                              <option key={city.city_id} value={city.city_id}>{city.name}</option>
                             ))}
                           </select>
                         </div>
