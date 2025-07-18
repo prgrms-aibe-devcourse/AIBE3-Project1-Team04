@@ -1,69 +1,30 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
-import PlaceCard from '../../components/PlaceCard';
-import { supabase } from '@/lib/supabaseClient';
-import { AuthContext } from '@/contexts/AuthContext';
+import { useEffect, useState } from 'react';
+import PlaceCard from '@/components/places/PlaceCard';
+import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
+import { usePlace } from '@/hooks/usePlace';
+import { PlaceWithUserAction } from '@/types/place.type';
 
 export default function PlacesList() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedRegion, setSelectedRegion] = useState('전체');
-  const { user } = useContext(AuthContext);
-  const userId = user?.id ?? null;
 
-  const categories = ['전체', '관광지', '맛집', '카페', '숙박', '쇼핑', '문화시설', '체험'];
-  const regions = [
-    '전체',
-    '서울',
-    '부산',
-    '대구',
-    '인천',
-    '광주',
-    '대전',
-    '울산',
-    '경기',
-    '강원',
-    '충북',
-    '충남',
-    '전북',
-    '전남',
-    '경북',
-    '경남',
-    '제주',
-  ];
-
-  const [places, setPlaces] = useState([]);
-
-  const fetchData = async () => {
-    const { data, error } = await supabase.rpc('get_places_full', {
-      _user_id: user?.id ?? null,
-    });
-
-    if (error) {
-      console.error('🔥 Supabase error:', error.message);
-      return;
-    } else {
+  const [places, setPlaces] = useState<PlaceWithUserAction[]>([]);
+  const { getAllPlacesWithUserAction } = usePlace();
+  const fetchAllPlaces = async () => {
+    try {
+      const data = await getAllPlacesWithUserAction();
+      console.log(data);
       setPlaces(data);
+    } catch (error) {
+      console.error('사용자 정보를 가져오는 중 오류 발생:', error);
     }
-    data.map((el) => {
-      console.log(el);
-    });
   };
-
   useEffect(() => {
-    fetchData();
+    fetchAllPlaces();
   }, []);
-
-  const filteredPlaces = places.filter((place) => {
-    const matchesSearch =
-      place.city_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      place.state_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === '전체' || place.category === selectedCategory;
-    const matchesRegion = selectedRegion === '전체' || place.category === selectedRegion;
-
-    return matchesSearch && matchesCategory && matchesRegion;
-  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -94,7 +55,8 @@ export default function PlacesList() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
               >
-                {categories.map((category) => (
+                <option value={''}>카테고리</option>
+                {PLACE_CATEGORIES.map((category) => (
                   <option key={category} value={category}>
                     {category}
                   </option>
@@ -106,9 +68,10 @@ export default function PlacesList() {
                 onChange={(e) => setSelectedRegion(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
               >
-                {regions.map((region) => (
-                  <option key={region} value={region}>
-                    {region}
+                <option value={''}>지역</option>
+                {PLACE_STATES.map((state) => (
+                  <option key={state} value={state}>
+                    {state}
                   </option>
                 ))}
               </select>
@@ -118,8 +81,8 @@ export default function PlacesList() {
 
         <div className="flex justify-between items-center mb-6">
           <p className="text-gray-600">
-            총 <span className="font-semibold text-blue-600">{filteredPlaces.length}</span>개의
-            여행지가 있습니다
+            총 <span className="font-semibold text-blue-600">{places.length}</span>개의 여행지가
+            있습니다
           </p>
 
           <div className="flex gap-2">
@@ -139,12 +102,12 @@ export default function PlacesList() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredPlaces.map((place) => (
-            <PlaceCard key={place.id} place={place} />
+          {places.map((place, index) => (
+            <PlaceCard key={index} place={place} />
           ))}
         </div>
 
-        {filteredPlaces.length === 0 && (
+        {places.length === 0 && (
           <div className="text-center py-12">
             <i className="ri-map-pin-line text-6xl text-gray-300 mb-4 w-16 h-16 flex items-center justify-center mx-auto"></i>
             <h3 className="text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
