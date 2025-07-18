@@ -307,7 +307,7 @@ export default function PostForm() {
   };
 
   // 시/도 select 옵션 렌더링: cities에서 state_name만 unique하게 추출
-  const uniqueStates = Array.from(new Set((Array.isArray(cities) ? cities : []).map(city => city.state_name)));
+  const uniqueStateIds = Array.from(new Set(cities.map(city => city.state_id)));
 
   // 화면 표시용 helper 함수 추가
   const getCityAndStateName = (place: Place) => {
@@ -475,9 +475,12 @@ export default function PostForm() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                 >
                   <option value="">시/도 선택</option>
-                  {uniqueStates.map(state => (
-                    <option key={state} value={state}>{state}</option>
-                  ))}
+                  {uniqueStateIds.map(stateId => {
+                    const state = cities.find(c => c.state_id === stateId);
+                    return (
+                      <option key={stateId} value={stateId}>{state?.state_name}</option>
+                    );
+                  })}
                 </select>
               </div>
 
@@ -731,14 +734,16 @@ export default function PostForm() {
                           <label className="block text-sm font-medium text-gray-700 mb-2">시/도</label>
                           <select
                             value={currentPlace.state_id}
-                            onChange={(e) => {
-                              setCurrentPlace({ ...currentPlace, state_id: parseInt(e.target.value) || 0 });
-                            }}
+                            onChange={(e) => setCurrentPlace({ ...currentPlace, state_id: parseInt(e.target.value) || 0 })}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                           >
-                            {regions.map(region => (
-                              <option key={region} value={region}>{region}</option>
-                            ))}
+                            <option value="">시/도 선택</option>
+                            {uniqueStateIds.map(stateId => {
+                              const state = cities.find(c => c.state_id === stateId);
+                              return (
+                                <option key={stateId} value={stateId}>{state?.state_name}</option>
+                              );
+                            })}
                           </select>
                         </div>
 
