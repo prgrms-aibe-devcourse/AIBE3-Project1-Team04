@@ -1,30 +1,6 @@
+import { LoginData, SignUpData, UserProfile, AuthResponse } from '@/types/auth.type';
 import { supabase } from './supabaseClient';
 import { User, AuthError } from '@supabase/supabase-js';
-
-export interface AuthResponse {
-  success: boolean;
-  user?: User | null;
-  error?: string;
-}
-
-export interface SignUpData {
-  email: string;
-  password: string;
-  options: {
-    data: object;
-  };
-}
-
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-export interface UserProfile {
-  id: string;
-  name: string;
-  avatar_url?: string;
-}
 
 export async function signUp({ email, password, options }: SignUpData): Promise<AuthResponse> {
   try {
