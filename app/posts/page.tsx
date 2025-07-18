@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import PostCard from '@/components/PostCard';
 import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Post {
   id: string;
@@ -45,6 +46,7 @@ export default function PostsPage() {
   const [regions, setRegions] = useState(['전체']);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
   // 여행 기간 계산 함수
   function calculateDuration(startDate: string, endDate: string): string {
@@ -74,30 +76,6 @@ export default function PostsPage() {
     return `${regions[0]} 외 ${regions.length - 1}개`;
   }
 
-  // Post 데이터 포맷 함수
-  function formatPostList(data: any[]): Post[] {
-    return (data || []).map((post: any) => ({
-      id: post.post_id,
-      title: post.title,
-      category: formatCategories(post.categories),
-      region: formatRegions(post.city_name),
-      author: post.email ? post.email.split('@')[0] : '익명',
-      rating: post.avg_rating || 0,
-      ratingCount: post.review_count || 0,
-      views: post.view_count || 0,
-      cost: post.total_cost || 0,
-      imageUrl:
-        'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape',
-      startDate: post.trip_start,
-      endDate: post.trip_end,
-      createdAt: post.created_at,
-      duration: calculateDuration(post.trip_start, post.trip_end),
-      likes: post.like_count || 0,
-      isLiked: false,
-      isFavorited: false,
-    }));
-  }
-
   useEffect(() => {
     async function fetchRegions() {
       const { data, error } = await supabase.from('regions_state').select('name');
@@ -111,42 +89,67 @@ export default function PostsPage() {
     fetchRegions();
   }, []);
 
-  // 최초 전체 게시글 불러오기
-  useEffect(() => {
-    async function fetchPosts() {
-      setIsLoading(true);
-      const { data, error } = await supabase.rpc('search_posts', {
-        search: '',
-        region: '전체',
-        sort: selectedSort,
-      });
-      if (error) {
-        setIsLoading(false);
-        return;
-      }
-      setPosts(formatPostList(data));
-      setIsLoading(false);
-    }
-    fetchPosts();
-  }, []);
-
-  // 검색 버튼 클릭 시 호출되는 함수
-  async function handleSearch() {
+  // 게시글 목록과 좋아요 여부를 함께 불러오는 함수
+  async function fetchPostsWithLikes(params?: { search?: string; region?: string; sort?: string }) {
     setIsLoading(true);
-    const { data, error } = await supabase.rpc('search_posts', {
-      search: searchQuery,
-      region: selectedRegion,
-      sort: selectedSort,
+    // 1. 게시글 목록 불러오기
+    const { data: postsData, error: postsError } = await supabase.rpc('search_posts', {
+      search: params?.search ?? searchQuery,
+      region: params?.region ?? selectedRegion,
+      sort: params?.sort ?? selectedSort,
     });
-    if (error) {
-      console.error(error);
+    if (postsError) {
       setIsLoading(false);
-      alert('검색 중 오류가 발생했습니다.');
+      alert('게시글을 불러오는 중 오류가 발생했습니다.');
       return;
     }
-    setPosts(formatPostList(data));
+    // 2. 좋아요 여부 불러오기 (로그인한 유저가 있을 때만)
+    let likedData: { post_id: number; liked_by_me: boolean }[] = [];
+    if (user?.id) {
+      const { data: liked, error: likedError } = await supabase.rpc('get_liked_by_me', {
+        _user_id: user.id,
+      });
+      if (!likedError && liked) {
+        likedData = liked;
+      }
+    }
+    // 3. 게시글에 isLiked 정보 매핑
+    const posts = (postsData || []).map((post: any) => {
+      const likeInfo = likedData.find((d) => d.post_id === post.post_id);
+      return {
+        id: post.post_id,
+        title: post.title,
+        category: formatCategories(post.categories),
+        region: formatRegions(post.city_name),
+        author: post.email ? post.email.split('@')[0] : '익명',
+        rating: post.avg_rating || 0,
+        ratingCount: post.review_count || 0,
+        views: post.view_count || 0,
+        cost: post.total_cost || 0,
+        imageUrl:
+          'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape',
+        startDate: post.trip_start,
+        endDate: post.trip_end,
+        createdAt: post.created_at,
+        duration: calculateDuration(post.trip_start, post.trip_end),
+        likes: post.like_count || 0,
+        isLiked: likeInfo ? likeInfo.liked_by_me : false,
+        isFavorited: false,
+      };
+    });
+    setPosts(posts);
     setIsLoading(false);
   }
+
+  // 최초 로딩 및 정렬/필터 변경 시
+  useEffect(() => {
+    fetchPostsWithLikes();
+  }, [selectedCategory, selectedRegion, selectedSort, user]);
+
+  // 검색 버튼/엔터 입력 시
+  const handleSearch = () => {
+    fetchPostsWithLikes({ search: searchQuery, region: selectedRegion, sort: selectedSort });
+  };
 
   // 로딩 중일 때 표시
   if (isLoading) {
