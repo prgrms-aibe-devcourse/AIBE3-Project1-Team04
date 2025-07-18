@@ -10,6 +10,9 @@ export interface AuthResponse {
 export interface SignUpData {
   email: string;
   password: string;
+  options: {
+    data: object;
+  };
 }
 
 export interface LoginData {
@@ -18,11 +21,12 @@ export interface LoginData {
 }
 
 // 회원가입 함수
-export async function signUp({ email, password }: SignUpData): Promise<AuthResponse> {
+export async function signUp({ email, password, options }: SignUpData): Promise<AuthResponse> {
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options,
     });
 
     if (error) {
@@ -159,7 +163,7 @@ export async function signInWithGoogle(): Promise<AuthResponse> {
   }
 }
 
-export async function signInWithGitHub(): Promise<AuthResponse> {
+export async function signInWithGithub(): Promise<AuthResponse> {
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
@@ -182,6 +186,33 @@ export async function signInWithGitHub(): Promise<AuthResponse> {
     return {
       success: false,
       error: 'GitHub 로그인 중 오류가 발생했습니다.',
+    };
+  }
+}
+
+export async function signInWithKakao(): Promise<AuthResponse> {
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      return {
+        success: false,
+        error: getErrorMessage(error),
+      };
+    }
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Kakao 로그인 중 오류가 발생했습니다.',
     };
   }
 }
