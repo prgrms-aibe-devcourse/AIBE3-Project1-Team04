@@ -57,6 +57,15 @@ export default function PostCard({
     console.log('Post like toggled:', id, !currentIsLiked);
   };
 
+  function formatDate(dateString: string) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
   return (
     <Link href={`/posts/${id}`} className="cursor-pointer">
       <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
@@ -106,7 +115,7 @@ export default function PostCard({
           </div>
 
           <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-            <div className="text-xs text-gray-400">{createdAt}</div>
+            <div className="text-xs text-gray-400">{formatDate(createdAt)}</div>
             <button
               onClick={handleLike}
               className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-colors ${

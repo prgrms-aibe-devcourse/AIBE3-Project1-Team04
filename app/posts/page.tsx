@@ -29,18 +29,19 @@ interface Post {
 const categories = ['전체', '가족여행', '커플여행', '자연여행', '문화여행', '맛집여행', '액티비티'];
 
 const sortOptions = [
-  { value: 'popular', label: '인기순' },
-  { value: 'latest', label: '최신순' },
+  { value: 'latest', label: '최근등록순' },
+  { value: 'visit-date', label: '여행지 방문날짜순' },
+  { value: 'cost', label: '비용순' },
+  { value: 'views', label: '조회순' },
   { value: 'rating', label: '평점순' },
-  { value: 'cost-low', label: '비용 낮은순' },
-  { value: 'cost-high', label: '비용 높은순' },
+  { value: 'review-count', label: '리뷰 개수순' },
 ];
 
 export default function PostsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedRegion, setSelectedRegion] = useState('전체');
-  const [selectedSort, setSelectedSort] = useState('popular');
+  const [selectedSort, setSelectedSort] = useState('latest');
   const [regions, setRegions] = useState(['전체']);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -114,7 +115,11 @@ export default function PostsPage() {
   useEffect(() => {
     async function fetchPosts() {
       setIsLoading(true);
-      const { data, error } = await supabase.from('post_list_view').select('*');
+      const { data, error } = await supabase.rpc('search_posts', {
+        search: '',
+        region: '전체',
+        sort: selectedSort,
+      });
       if (error) {
         setIsLoading(false);
         return;
@@ -131,7 +136,7 @@ export default function PostsPage() {
     const { data, error } = await supabase.rpc('search_posts', {
       search: searchQuery,
       region: selectedRegion,
-      // sort: selectedSort,
+      sort: selectedSort,
     });
     if (error) {
       console.error(error);
@@ -277,31 +282,6 @@ export default function PostsPage() {
             <p className="text-gray-500">다른 검색 조건을 시도해보세요</p>
           </div>
         )}
-
-        {/* 페이지네이션 */}
-        {/* {filteredPosts.length > 0 && (
-          <div className="flex justify-center">
-            <div className="flex items-center gap-2">
-              <button className="px-3 py-2 text-gray-500 hover:text-gray-700 cursor-pointer">
-                <i className="ri-arrow-left-line w-4 h-4 flex items-center justify-center"></i>
-              </button>
-              <button className="px-3 py-2 bg-blue-600 text-white rounded cursor-pointer">1</button>
-              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
-                2
-              </button>
-              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
-                3
-              </button>
-              <span className="px-2 text-gray-500">...</span>
-              <button className="px-3 py-2 text-gray-700 hover:bg-gray-100 rounded cursor-pointer">
-                10
-              </button>
-              <button className="px-3 py-2 text-gray-500 hover:text-gray-700 cursor-pointer">
-                <i className="ri-arrow-right-line w-4 h-4 flex items-center justify-center"></i>
-              </button>
-            </div>
-          </div>
-        )} */}
       </div>
     </div>
   );
