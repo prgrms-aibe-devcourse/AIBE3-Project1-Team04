@@ -1,4 +1,4 @@
-function ProfileHeader() {
+function ProfileHeader({ userName }: { userName: string }) {
   return (
     <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -7,7 +7,7 @@ function ProfileHeader() {
             <i className="ri-user-line text-3xl"></i>
           </div>
           <div>
-            <h1 className="text-3xl font-bold mb-2">김여행님의 마이페이지</h1>
+            <h1 className="text-3xl font-bold mb-2">{userName}님의 마이페이지</h1>
             <p className="text-blue-100">여행의 모든 순간을 기록하고 공유해보세요</p>
           </div>
         </div>
