@@ -44,3 +44,15 @@ export interface PlaceWithUserAction {
   liked_by_me: boolean;
   favorite_by_me: boolean;
 }
+
+export interface PlaceReview {
+  id: number;
+  user_id: string;
+  place_id: number;
+  rating: number;
+  content: string;
+  created_at: Date;
+  modified_at: Date;
+  user_name: string;
+  avatar_url: string;
+}

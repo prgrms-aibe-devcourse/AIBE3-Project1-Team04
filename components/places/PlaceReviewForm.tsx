@@ -1,15 +1,17 @@
 'use client';
 import { useAuth } from '@/hooks/useAuth';
 import { usePlace } from '@/hooks/usePlace';
+import { PlaceReview } from '@/types/place.type';
 import { format } from 'date-fns';
 import { useCallback, useEffect, useState } from 'react';
+import { reviewStars } from '../reviewStar';
 
 interface PlaceDetailProps {
   placeId: string;
 }
 
-export const PlaceReview = ({ placeId }: PlaceDetailProps) => {
-  const [reviews, setReviews] = useState<any[]>([]);
+export const PlaceReviewForm = ({ placeId }: PlaceDetailProps) => {
+  const [reviews, setReviews] = useState<PlaceReview[]>([]);
   const [newReview, setNewReview] = useState({
     rating: 5,
     content: '',
@@ -21,52 +23,19 @@ export const PlaceReview = ({ placeId }: PlaceDetailProps) => {
     try {
       if (!placeId) return;
       const data = await getPlaceReviews(placeId);
-      console.log(data);
       setReviews(data);
     } catch (error) {
       console.error('해당 여행지를 가져오는 중 오류 발생:', error);
     }
   }, [placeId, getPlaceReviews]);
 
-  useEffect(() => {
-    fetchAllPlaceReviews();
-  }, [fetchAllPlaceReviews]);
-
-  const renderStars = (
-    rating: number,
-    interactive: boolean = false,
-    onChange?: (rating: number) => void
-  ) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <button
-            key={star}
-            type="button"
-            onClick={() => interactive && onChange && onChange(star)}
-            className={`w-5 h-5 flex items-center justify-center ${
-              interactive ? 'cursor-pointer hover:scale-110' : ''
-            }`}
-            disabled={!interactive}
-          >
-            <i
-              className={`ri-star-${star <= rating ? 'fill' : 'line'} ${
-                star <= rating ? 'text-yellow-500' : 'text-gray-300'
-              }`}
-            ></i>
-          </button>
-        ))}
-      </div>
-    );
-  };
-
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !placeId) return;
     if (newReview.content.trim()) {
-      const review: any = {
+      const review = {
         user_id: user.id,
-        place_id: placeId,
+        place_id: Number(placeId),
         rating: newReview.rating,
         content: newReview.content,
       };
@@ -76,6 +45,10 @@ export const PlaceReview = ({ placeId }: PlaceDetailProps) => {
       fetchAllPlaceReviews();
     }
   };
+
+  useEffect(() => {
+    fetchAllPlaceReviews();
+  }, [fetchAllPlaceReviews]);
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
       <h3 className="text-lg font-bold mb-6">리뷰 ({reviews.length})</h3>
@@ -86,7 +59,7 @@ export const PlaceReview = ({ placeId }: PlaceDetailProps) => {
 
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">평점</label>
-          {renderStars(newReview.rating, true, (rating) => setNewReview({ ...newReview, rating }))}
+          {reviewStars(newReview.rating, true, (rating) => setNewReview({ ...newReview, rating }))}
         </div>
 
         <div className="mb-4">
@@ -117,13 +90,13 @@ export const PlaceReview = ({ placeId }: PlaceDetailProps) => {
             <div className="flex items-start gap-4">
               <img
                 src={review.avatar_url}
-                alt={review.name}
+                alt={review.user_name}
                 className="w-12 h-12 rounded-full object-cover object-top"
               />
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h5 className="font-medium">{review.author}</h5>
-                  {renderStars(review.rating)}
+                  <h5 className="font-medium">{review.user_name}</h5>
+                  {reviewStars(review.rating)}
                   <span className="text-sm text-gray-500">
                     {format(review.created_at, 'yyyy-MM-dd HH:mm:ss')}
                   </span>
@@ -138,4 +111,4 @@ export const PlaceReview = ({ placeId }: PlaceDetailProps) => {
   );
 };
 
-export default PlaceReview;
+export default PlaceReviewForm;
