@@ -1,23 +1,24 @@
-import PostCard from '@/components/PostCard';
 import Link from 'next/link';
+import { MyPostViewType } from '@/lib/database';
+import MyPostCard from '@/components/mypage/MyPostCard';
 
-function CompletedPostListTab({ mockMyPosts }: { mockMyPosts: any }) {
+function CompletedPostListTab({ postList }: { postList: MyPostViewType[] }) {
   return (
     <>
       <div>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">내가 작성한 게시글</h2>
-          <div className="text-sm text-gray-600">총 {mockMyPosts.length}개의 게시글</div>
+          <div className="text-sm text-gray-600">총 {postList.length}개의 게시글</div>
         </div>
 
-        {mockMyPosts.length > 0 ? (
+        {postList.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {mockMyPosts.map((post) => (
+            {postList.map((post: MyPostViewType) => (
               <div key={post.id} className="relative">
-                <PostCard {...post} />
+                <MyPostCard {...post} />
                 <div className="absolute top-4 right-4 flex gap-2">
                   <Link
-                    href={`/posts/${post.id}/edit`}
+                    href={`/posts/edit?post=${post.id}`}
                     className="bg-white/90 hover:bg-white p-2 rounded-full shadow-sm cursor-pointer"
                   >
                     <i className="ri-edit-line w-4 h-4 flex items-center justify-center text-gray-600"></i>

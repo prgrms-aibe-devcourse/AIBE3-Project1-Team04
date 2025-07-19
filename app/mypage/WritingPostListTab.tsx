@@ -1,32 +1,30 @@
 import Link from 'next/link';
+import { MyPostViewType } from '@/lib/database';
 
-function WritingPostListTab({ mockDraftPosts }: { mockDraftPosts: any }) {
+function WritingPostListTab({ notPostList }: { notPostList: MyPostViewType[] }) {
   return (
     <>
       <div>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">임시저장한 게시물</h2>
-          <Link
-            href="/posts/create"
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 whitespace-nowrap cursor-pointer"
-          >
-            새 글 작성
-          </Link>
         </div>
 
-        {mockDraftPosts.length > 0 ? (
+        {notPostList.length > 0 ? (
           <div className="space-y-4">
-            {mockDraftPosts.map((draft) => (
+            {notPostList.map((post: MyPostViewType) => (
               <div
-                key={draft.id}
+                key={post.id}
                 className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="font-medium text-lg mb-2">{draft.title}</h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{draft.content}</p>
+                    <h3 className="font-medium text-lg mb-2">{post.title}</h3>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{post.title}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span>최종 수정: {new Date(draft.updatedAt).toLocaleDateString()}</span>
+                      <span>
+                        최종 수정:{' '}
+                        {new Date(post.modified_at ?? post.created_at).toLocaleDateString()}
+                      </span>
                       <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">
                         임시저장
                       </span>
@@ -34,7 +32,7 @@ function WritingPostListTab({ mockDraftPosts }: { mockDraftPosts: any }) {
                   </div>
                   <div className="flex items-center gap-2 ml-4">
                     <Link
-                      href={`/posts/create?draft=${draft.id}`}
+                      href={`/posts/edit?draft=${post.id}`}
                       className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
                     >
                       편집

@@ -1,5 +1,4 @@
 import Header from '@/components/Header';
-import ProfileHeader from './ProfileHeader';
 
 export default function MyPageLayout({
   children,
@@ -9,7 +8,6 @@ export default function MyPageLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <ProfileHeader />
       {children}
     </div>
   );
