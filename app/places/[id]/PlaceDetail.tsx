@@ -6,6 +6,7 @@ import { usePlace } from '@/hooks/usePlace';
 import { PlaceWithUserAction } from '@/types/place.type';
 import { format } from 'date-fns';
 import { formatCost } from '@/lib/cost';
+import PlaceReview from '@/components/places/PlaceReview';
 
 interface PlaceDetailProps {
   placeId: string;
@@ -13,8 +14,8 @@ interface PlaceDetailProps {
 
 export default function PlaceDetail({ placeId }: PlaceDetailProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const { getPlaceWithUserAction } = usePlace();
   const [place, setPlace] = useState<PlaceWithUserAction | null>();
+  const { getPlaceWithUserAction } = usePlace();
 
   const fetchAllPlaces = useCallback(async () => {
     try {
@@ -156,6 +157,7 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
             </div>
           </div>
         </div>
+        <PlaceReview placeId={placeId} />
       </div>
     </div>
   );

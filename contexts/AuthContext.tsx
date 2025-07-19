@@ -3,14 +3,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { fetchUserProfile } from '@/lib/auth';
-import { UserProfile } from '@/types/auth.type';
-
-interface AuthContextType {
-  user: UserProfile | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
-  getInitialUser: () => Promise<void>;
-}
+import { AuthContextType, UserProfile } from '@/types/auth.type';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
