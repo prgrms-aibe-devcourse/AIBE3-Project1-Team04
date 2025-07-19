@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import PlaceCard from '@/components/places/PlaceCard';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
 import { usePlace } from '@/hooks/usePlace';
@@ -13,18 +13,18 @@ export default function PlacesList() {
 
   const [places, setPlaces] = useState<PlaceWithUserAction[]>([]);
   const { getAllPlacesWithUserAction } = usePlace();
-  const fetchAllPlaces = async () => {
+  const fetchAllPlaces = useCallback(async () => {
     try {
       const data = await getAllPlacesWithUserAction();
-      console.log(data);
       setPlaces(data);
     } catch (error) {
-      console.error('사용자 정보를 가져오는 중 오류 발생:', error);
+      console.error('여행지 목록을 가져오는 중 오류 발생:', error);
     }
-  };
+  }, [getAllPlacesWithUserAction]);
+
   useEffect(() => {
     fetchAllPlaces();
-  }, []);
+  }, [fetchAllPlaces]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -55,7 +55,7 @@ export default function PlacesList() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
               >
-                <option value={''}>카테고리</option>
+                <option value={'전체'}>전체</option>
                 {PLACE_CATEGORIES.map((category) => (
                   <option key={category} value={category}>
                     {category}
@@ -68,7 +68,7 @@ export default function PlacesList() {
                 onChange={(e) => setSelectedRegion(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
               >
-                <option value={''}>지역</option>
+                <option value={'전체'}>전체</option>
                 {PLACE_STATES.map((state) => (
                   <option key={state} value={state}>
                     {state}
