@@ -1,8 +1,14 @@
 import { supabase } from '@/lib/supabaseClient';
-import { PlaceReview, PlaceWithUserAction } from '@/types/place.type';
+import {
+  PlaceImageInputType,
+  PlaceInputType,
+  PlaceReview,
+  PlaceWithUserAction,
+} from '@/types/place.type';
 import { useCallback } from 'react';
 
 export const usePlace = () => {
+  /** 여행지 전체 조회 */
   const getAllPlacesWithUserAction = useCallback(async (): Promise<PlaceWithUserAction[]> => {
     try {
       const { data, error } = await supabase.rpc('get_places_with_user_action');
@@ -24,6 +30,7 @@ export const usePlace = () => {
     }
   }, []);
 
+  /** 여행지 단일 조회 */
   const getPlaceWithUserAction = useCallback(
     async (placeId: string): Promise<PlaceWithUserAction | null> => {
       try {
@@ -46,6 +53,7 @@ export const usePlace = () => {
     []
   );
 
+  /** 여행지 리뷰 조회 */
   const getPlaceReviews = useCallback(async (placeId: string): Promise<PlaceReview[]> => {
     try {
       const { data, error } = await supabase
@@ -68,6 +76,7 @@ export const usePlace = () => {
     }
   }, []);
 
+  /** 여행지 리뷰 생성 */
   const createPlaceReivew = useCallback(
     async (
       review: Omit<PlaceReview, 'id' | 'created_at' | 'modified_at' | 'user_name' | 'avatar_url'>
@@ -93,5 +102,41 @@ export const usePlace = () => {
     []
   );
 
-  return { getAllPlacesWithUserAction, getPlaceWithUserAction, getPlaceReviews, createPlaceReivew };
+  /** 여행지 생성 */
+  const createPlace = async (placeData: PlaceInputType) => {
+    const { data, error } = await supabase.from('places').insert(placeData).select().single();
+    if (error) throw error;
+    return data;
+  };
+
+  /** 여행지 이미지 등록 */
+  const uploadPlaceImage = async (imageData: PlaceImageInputType) => {
+    const { place_id, image_url } = imageData;
+    const { data, error } = await supabase
+      .from('place_images')
+      .insert({ place_id, image_url })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  };
+
+  /** 여행지 대표 이미지 업데이트트 */
+  const setRepresentativeImage = async (placeId: number, imageId: number) => {
+    const { error } = await supabase
+      .from('places')
+      .update({ representative_image_id: imageId })
+      .eq('id', placeId);
+    if (error) throw error;
+  };
+
+  return {
+    getAllPlacesWithUserAction,
+    getPlaceWithUserAction,
+    getPlaceReviews,
+    createPlaceReivew,
+    createPlace,
+    uploadPlaceImage,
+    setRepresentativeImage,
+  };
 };

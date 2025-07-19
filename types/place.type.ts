@@ -17,11 +17,10 @@ export type Place_State =
   | '경상북도'
   | '경상남도'
   | '제주특별자치도';
-
-export interface Place {
-  id: string;
-  title: string;
-  category: Place_Category;
+export interface Place_City {
+  id: number;
+  name: string;
+  state_id: number;
 }
 export interface PlaceWithUserAction {
   id: number;
@@ -43,6 +42,24 @@ export interface PlaceWithUserAction {
   like_count: number;
   liked_by_me: boolean;
   favorite_by_me: boolean;
+}
+
+export interface PlaceInputType {
+  name: string;
+  state_id: number;
+  city_id: number;
+  visit_start_time: string; // ISO string or Date
+  visit_end_time: string;
+  category: string;
+  memo: string;
+  isviewed?: boolean;
+  cost: number;
+}
+
+export interface PlaceImageInputType {
+  place_id: number;
+  image_url: string;
+  is_representative?: boolean;
 }
 
 export interface PlaceReview {

@@ -1,15 +1,15 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
+import PlaceForm from '@/components/places/PlaceForm';
 
 interface Place {
   id: string;
   name: string;
-  state_id: number;      // string → number
-  city_id: number;       // string → number
+  state_id: number; // string → number
+  city_id: number; // string → number
   category: string;
   memo: string;
   cost: number;
@@ -27,47 +27,30 @@ export default function PostForm() {
     region: '',
     startDate: '',
     endDate: '',
-    duration: ''
+    duration: '',
   });
 
   const [places, setPlaces] = useState<Place[]>([]);
   const [currentPlace, setCurrentPlace] = useState<Place>({
     id: '',
     name: '',
-    state_id: 0,         // number로 변경
-    city_id: 0,          // number로 변경
+    state_id: 0, // number로 변경
+    city_id: 0, // number로 변경
     category: '',
     memo: '',
     cost: 0,
     visitStartDateTime: '',
     visitEndDateTime: '',
     imageUrl: '',
-    customImages: []
+    customImages: [],
   });
-  const [cities, setCities] = useState<{ city_id: number, name: string, state_id: number, state_name: string }[]>([]);
+  const [cities, setCities] = useState<
+    { city_id: number; name: string; state_id: number; state_name: string }[]
+  >([]);
   const [isEditingPlace, setIsEditingPlace] = useState(false);
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null);
   const categories = ['가족여행', '커플여행', '자연여행', '문화여행', '맛집여행', '액티비티'];
-  const placeCategories = ['맛집', '관광', '문화', '휴식', '모험', '자연', '기타'];  
-
-  // state와 city DB에서 join하여 불러오기
-  useEffect(() => {
-    async function fetchCities() {
-      const { data, error } = await supabase
-        .from('regions_city')
-        .select('id, name, state_id, regions_state(name)');
-      if (!error && data) {
-        const citiesWithState = data.map(city => ({
-          city_id: city.id,
-          name: city.name,
-          state_id: city.state_id,
-          state_name: city.regions_state.name
-        }));
-        setCities(citiesWithState);
-      }
-    }
-    fetchCities();
-  }, []);
+  const placeCategories = ['맛집', '관광', '문화', '휴식', '모험', '자연', '기타'];
 
   //여행지 이미지 업로드
   const handleImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +65,7 @@ export default function PostForm() {
       return;
     }
 
-    const validFiles = files.filter(file => {
+    const validFiles = files.filter((file) => {
       if (file.size > maxSize) {
         alert(`${file.name}은(는) 5MB를 초과하여 업로드할 수 없습니다.`);
         return false;
@@ -90,13 +73,13 @@ export default function PostForm() {
       return true;
     });
 
-    validFiles.forEach(file => {
+    validFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         const result = event.target?.result as string;
-        setCurrentPlace(prev => ({
+        setCurrentPlace((prev) => ({
           ...prev,
-          customImages: [...prev.customImages, result]
+          customImages: [...prev.customImages, result],
         }));
       };
       reader.readAsDataURL(file);
@@ -104,14 +87,14 @@ export default function PostForm() {
   };
 
   const removeImage = (index: number) => {
-    setCurrentPlace(prev => ({
+    setCurrentPlace((prev) => ({
       ...prev,
-      customImages: prev.customImages.filter((_, i) => i !== index)
+      customImages: prev.customImages.filter((_, i) => i !== index),
     }));
   };
 
   // datetime-local 값이 'YYYY-MM-DDTHH:MM' 형식이면 ':00'을 붙여서 'YYYY-MM-DDTHH:MM:SS'로 변환
-  const fixDateTime = (dt: string) => dt && dt.length === 16 ? dt + ':00' : dt || null;
+  const fixDateTime = (dt: string) => (dt && dt.length === 16 ? dt + ':00' : dt || null);
 
   const handleAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,21 +109,32 @@ export default function PostForm() {
     if (!currentPlace.visitEndDateTime) requiredFields.push('방문 종료 일시');
 
     // 방문 시작 일시가 방문 종료 일시보다 이후인 경우 검증 실패
-    if (currentPlace.visitStartDateTime && currentPlace.visitEndDateTime && currentPlace.visitStartDateTime > currentPlace.visitEndDateTime) {
+    if (
+      currentPlace.visitStartDateTime &&
+      currentPlace.visitEndDateTime &&
+      currentPlace.visitStartDateTime > currentPlace.visitEndDateTime
+    ) {
       requiredFields.push('방문 시작 일시는 방문 종료 일시보다 이전이어야 합니다.');
     }
 
     // 등록된 다른 여행지의 여행 시간과 겹치는지 검증
-    places.forEach(place => {
-      if (currentPlace.visitStartDateTime && currentPlace.visitEndDateTime &&
-        (currentPlace.visitStartDateTime < place.visitStartDateTime && place.visitStartDateTime < currentPlace.visitEndDateTime)
-        || (currentPlace.visitStartDateTime < place.visitEndDateTime && place.visitEndDateTime < currentPlace.visitEndDateTime)) {
+    places.forEach((place) => {
+      if (
+        (currentPlace.visitStartDateTime &&
+          currentPlace.visitEndDateTime &&
+          currentPlace.visitStartDateTime < place.visitStartDateTime &&
+          place.visitStartDateTime < currentPlace.visitEndDateTime) ||
+        (currentPlace.visitStartDateTime < place.visitEndDateTime &&
+          place.visitEndDateTime < currentPlace.visitEndDateTime)
+      ) {
         requiredFields.push('등록된 다른 여행지의 여행 시간과 겹칩니다.');
       }
     });
 
     // city_id 찾기 (state_name, city.name으로 매칭)
-    const selectedCity = cities.find(city => city.city_id === currentPlace.city_id && city.state_id === currentPlace.state_id);
+    const selectedCity = cities.find(
+      (city) => city.city_id === currentPlace.city_id && city.state_id === currentPlace.state_id
+    );
     if (!selectedCity) {
       requiredFields.push('시/군/구(city) 정보가 올바르지 않습니다.');
     }
@@ -148,7 +142,8 @@ export default function PostForm() {
     // 필수 필드 검증 실패 시 메시지 표시
     if (requiredFields.length > 0) {
       const errorMessage = document.createElement('div');
-      errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      errorMessage.className =
+        'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
       errorMessage.textContent = `다음 항목을 확인해주세요: ${requiredFields.join(', ')}`;
       document.body.appendChild(errorMessage);
 
@@ -170,7 +165,7 @@ export default function PostForm() {
       visit_start_time: fixDateTime(currentPlace.visitStartDateTime),
       visit_end_time: fixDateTime(currentPlace.visitEndDateTime),
       city_id: currentPlace.city_id,
-      state_id: currentPlace.state_id
+      state_id: currentPlace.state_id,
     };
 
     // 이미지 URL 배열 준비 (모든 이미지를 place_images에 저장)
@@ -180,7 +175,7 @@ export default function PostForm() {
     try {
       const { data, error } = await supabase.rpc('add_place_with_images', {
         place_data: placeData,
-        image_urls: imageUrls
+        image_urls: imageUrls,
       });
 
       if (error || !data || !data.success) {
@@ -192,14 +187,17 @@ export default function PostForm() {
         ...currentPlace,
         id: data.place_id,
         //NOTE : 대표이미지 선정 방법 변경 필요
-        imageUrl: currentPlace.customImages[0] || generatePlaceImage(currentPlace.name, currentPlace.category)
+        imageUrl:
+          currentPlace.customImages[0] ||
+          generatePlaceImage(currentPlace.name, currentPlace.category),
       };
       setPlaces([...places, addedPlace]);
       resetPlaceForm();
 
       // 성공 메시지 표시
       const successMessage = document.createElement('div');
-      successMessage.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      successMessage.className =
+        'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
       successMessage.textContent = '여행지가 성공적으로 추가되었습니다!';
       document.body.appendChild(successMessage);
 
@@ -209,12 +207,12 @@ export default function PostForm() {
           document.body.removeChild(successMessage);
         }
       }, 3000);
-
     } catch (error) {
       console.error('Supabase DB 함수 호출 중 오류 발생:', error);
       // 에러 메시지 표시
       const errorMessage = document.createElement('div');
-      errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+      errorMessage.className =
+        'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
       let errorMsg = '알 수 없는 오류';
       if (error instanceof Error) {
         errorMsg = error.message;
@@ -245,8 +243,14 @@ export default function PostForm() {
   const handleUpdatePlace = (e: React.FormEvent) => {
     e.preventDefault();
     //NOTE : 왜 Id만 currentPlace.id가 아니고 editingPlaceId인지?
-    if (currentPlace.name && currentPlace.state_id && currentPlace.city_id && currentPlace.memo && editingPlaceId) {
-      const updatedPlaces = places.map(place =>
+    if (
+      currentPlace.name &&
+      currentPlace.state_id &&
+      currentPlace.city_id &&
+      currentPlace.memo &&
+      editingPlaceId
+    ) {
+      const updatedPlaces = places.map((place) =>
         place.id === editingPlaceId
           ? { ...currentPlace, imageUrl: currentPlace.customImages[0] || place.imageUrl }
           : place
@@ -259,7 +263,7 @@ export default function PostForm() {
   //TODO : 마찬가지로 editingPlaceId가 필요한지 여부
   const handleDeletePlace = (placeId: string) => {
     if (confirm('이 여행지를 삭제하시겠습니까?')) {
-      setPlaces(places.filter(place => place.id !== placeId));
+      setPlaces(places.filter((place) => place.id !== placeId));
       if (editingPlaceId === placeId) {
         resetPlaceForm();
       }
@@ -270,15 +274,15 @@ export default function PostForm() {
     setCurrentPlace({
       id: '',
       name: '',
-      state_id: 0,       // number로 변경
-      city_id: 0,        // number로 변경
+      state_id: 0, // number로 변경
+      city_id: 0, // number로 변경
       category: '',
       memo: '',
       cost: 0,
       visitStartDateTime: '',
       visitEndDateTime: '',
       imageUrl: '',
-      customImages: []
+      customImages: [],
     });
     setIsEditingPlace(false);
     setEditingPlaceId(null);
@@ -286,14 +290,17 @@ export default function PostForm() {
 
   const generatePlaceImage = (name: string, category: string) => {
     const imagePrompts = {
-      '관광지': 'Famous tourist attraction landmark with beautiful architecture, scenic views, clear blue sky, professional travel photography, vibrant colors, welcoming atmosphere',
-      '맛집': 'Delicious Korean traditional food restaurant interior, appetizing dishes, cozy dining atmosphere, warm lighting, authentic Korean cuisine presentation',
-      '카페': 'Modern cozy coffee shop interior, beautiful latte art, comfortable seating, natural lighting, minimalist design, peaceful atmosphere',
-      '숙박': 'Comfortable hotel room or traditional Korean hanok accommodation, clean bedding, welcoming interior design, relaxing atmosphere',
-      '쇼핑': 'Modern shopping district or traditional market, colorful storefronts, busy shopping street, vibrant commercial atmosphere',
-      '액티비티': 'Exciting outdoor activity location, adventure sports, natural landscape, active lifestyle, fun recreational atmosphere',
-      '문화시설': 'Beautiful museum or cultural center, traditional Korean architecture, educational exhibits, cultural heritage site',
-      '자연': 'Stunning natural landscape, mountains, forests, or beaches, pristine nature, peaceful environment, scenic beauty'
+      관광지:
+        'Famous tourist attraction landmark with beautiful architecture, scenic views, clear blue sky, professional travel photography, vibrant colors, welcoming atmosphere',
+      맛집: 'Delicious Korean traditional food restaurant interior, appetizing dishes, cozy dining atmosphere, warm lighting, authentic Korean cuisine presentation',
+      카페: 'Modern cozy coffee shop interior, beautiful latte art, comfortable seating, natural lighting, minimalist design, peaceful atmosphere',
+      숙박: 'Comfortable hotel room or traditional Korean hanok accommodation, clean bedding, welcoming interior design, relaxing atmosphere',
+      쇼핑: 'Modern shopping district or traditional market, colorful storefronts, busy shopping street, vibrant commercial atmosphere',
+      액티비티:
+        'Exciting outdoor activity location, adventure sports, natural landscape, active lifestyle, fun recreational atmosphere',
+      문화시설:
+        'Beautiful museum or cultural center, traditional Korean architecture, educational exhibits, cultural heritage site',
+      자연: 'Stunning natural landscape, mountains, forests, or beaches, pristine nature, peaceful environment, scenic beauty',
     };
 
     //NOTE : prompt 사용되지 않고 있음
@@ -326,8 +333,8 @@ export default function PostForm() {
   };
 
   // 시/도 select 옵션 렌더링: cities에서 state_name만 unique하게 추출
-  const stateIds = Array.from(new Set(cities.map(city => city.state_id)));
-  const statesNames = Array.from(new Set(cities.map(city => city.state_name)));
+  const stateIds = Array.from(new Set(cities.map((city) => city.state_id)));
+  const statesNames = Array.from(new Set(cities.map((city) => city.state_name)));
 
   // 여행지 개수와 총 비용 계산
   const totalPlaces = places.length;
@@ -335,10 +342,10 @@ export default function PostForm() {
 
   // 화면 표시용 helper 함수 추가
   const getCityAndStateName = (place: Place) => {
-    const city = cities.find(c => c.city_id === place.city_id && c.state_id === place.state_id);
+    const city = cities.find((c) => c.city_id === place.city_id && c.state_id === place.state_id);
     return {
       cityName: city?.name || '',
-      stateName: city?.state_name || ''
+      stateName: city?.state_name || '',
     };
   };
 
@@ -371,8 +378,10 @@ export default function PostForm() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
             >
               <option value="">카테고리 선택</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
               ))}
             </select>
           </div>
@@ -385,8 +394,10 @@ export default function PostForm() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
             >
               <option value="">지역 선택</option>
-              {statesNames.map(stateName => (
-                <option key={stateName} value={stateName}>{stateName}</option>
+              {statesNames.map((stateName) => (
+                <option key={stateName} value={stateName}>
+                  {stateName}
+                </option>
               ))}
             </select>
           </div>
@@ -406,7 +417,10 @@ export default function PostForm() {
             <input
               disabled
               type="date"
-              value={places[places.length - 1]?.visitEndDateTime || new Date().toISOString().split('T')[0]}
+              value={
+                places[places.length - 1]?.visitEndDateTime ||
+                new Date().toISOString().split('T')[0]
+              }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -442,9 +456,12 @@ export default function PostForm() {
           <div className="text-center">
             <div className="text-3xl font-bold">
               {postData.startDate && postData.endDate
-                ? Math.ceil((new Date(postData.endDate).getTime() - new Date(postData.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
-                : 0
-              }
+                ? Math.ceil(
+                    (new Date(postData.endDate).getTime() -
+                      new Date(postData.startDate).getTime()) /
+                      (1000 * 60 * 60 * 24)
+                  ) + 1
+                : 0}
             </div>
             <div className="text-sm opacity-90">총 여행 기간 (일)</div>
           </div>
@@ -458,176 +475,7 @@ export default function PostForm() {
       </div>
 
       {/* 여행지 등록 (수정 모드가 아닐 때만 표시) */}
-      {!isEditingPlace && (
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-xl font-bold mb-6">여행지 등록</h2>
-
-          <form onSubmit={handleAddPlace} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">여행지 이름</label>
-                <input
-                  type="text"
-                  value={currentPlace.name}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="여행지 이름을 입력하세요"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">카테고리</label>
-                <select
-                  value={currentPlace.category}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, category: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
-                >
-                  <option value="">카테고리 선택</option>
-                  {placeCategories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">시/도</label>
-                <select
-                  value={currentPlace.state_id}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, state_id: parseInt(e.target.value) || 0 })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
-                >
-                  <option value="">시/도 선택</option>
-                  {stateIds.map(stateId => {
-                    const state = cities.find(c => c.state_id === stateId);
-                    return (
-                      <option key={stateId} value={stateId}>{state?.state_name}</option>
-                    );
-                  })}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">시/군/구</label>
-                <select
-                  value={currentPlace.city_id}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, city_id: parseInt(e.target.value) || 0 })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
-                  disabled={!currentPlace.state_id}
-                >
-                  <option value="">시/군/구 선택</option>
-                  {currentPlace.state_id && cities.filter(city => city.state_id === currentPlace.state_id).map(city => (
-                    <option key={city.city_id} value={city.city_id}>{city.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">예상 비용 (원)</label>
-                <input
-                  type="number"
-                  value={currentPlace.cost || ''}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, cost: parseInt(e.target.value) || 0 })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="예상 비용을 입력하세요 (무료인 경우 0)"
-                  min="0"
-                />
-              </div>
-              {/* TODO : 사진 등록 대표이미지 선정 필요 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">사진 등록</label>
-                <div className="space-y-3">
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImagesUpload}
-                      className="hidden"
-                      id="image-upload"
-                    />
-                    <label
-                      htmlFor="image-upload"
-                      className="flex items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                    >
-                      {/* TODO : 사진등록 UI 수정 필요 */}
-                      <div className="text-center">
-                        <i className="ri-image-add-line text-2xl text-gray-400 mb-2"></i>
-                        <div className="text-sm text-gray-600">사진을 선택하거나 드래그하세요</div>
-                        <div className="text-xs text-gray-500 mt-1">최대 5장, 각 5MB 이하</div>
-                      </div>
-                    </label>
-                  </div>
-
-                  {currentPlace.customImages.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {currentPlace.customImages.map((image, index) => (
-                        <div key={index} className="relative">
-                          <img
-                            src={image}
-                            alt={`미리보기 ${index + 1}`}
-                            className="w-full h-24 object-cover object-top rounded-lg border"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 cursor-pointer"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              {/* TODO : 방문 시작 일시, 종료 일시 검증 필요 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">방문 시작 일시</label>
-                <input
-                  type="datetime-local"
-                  value={currentPlace.visitStartDateTime}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, visitStartDateTime: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">방문 종료 일시</label>
-                <input
-                  type="datetime-local"
-                  value={currentPlace.visitEndDateTime}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, visitEndDateTime: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">메모</label>
-                <textarea
-                  value={currentPlace.memo}
-                  onChange={(e) => setCurrentPlace({ ...currentPlace, memo: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                  placeholder="이 여행지에 대한 설명이나 팁을 적어주세요..."
-                  required
-                  maxLength={500}
-                />
-                <div className="text-xs text-gray-500 mt-1">{currentPlace.memo.length}/500자</div>
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium whitespace-nowrap cursor-pointer"
-              >
-                여행지 추가
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      <PlaceForm />
 
       {/* 등록된 여행지 목록 */}
       {places.length > 0 && (
@@ -669,9 +517,12 @@ export default function PostForm() {
                               <span className="flex items-center gap-1">
                                 <i className="ri-time-line w-4 h-4 flex items-center justify-center"></i>
                                 {place.visitStartDateTime && place.visitEndDateTime
-                                  ? `${formatDateTime(place.visitStartDateTime)} - ${formatDateTime(place.visitEndDateTime)}`
-                                  : formatDateTime(place.visitStartDateTime || place.visitEndDateTime)
-                                }
+                                  ? `${formatDateTime(place.visitStartDateTime)} - ${formatDateTime(
+                                      place.visitEndDateTime
+                                    )}`
+                                  : formatDateTime(
+                                      place.visitStartDateTime || place.visitEndDateTime
+                                    )}
                               </span>
                             )}
                           </div>
@@ -729,11 +580,15 @@ export default function PostForm() {
                     <form onSubmit={handleUpdatePlace} className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">여행지 이름</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            여행지 이름
+                          </label>
                           <input
                             type="text"
                             value={currentPlace.name}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, name: e.target.value })}
+                            onChange={(e) =>
+                              setCurrentPlace({ ...currentPlace, name: e.target.value })
+                            }
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="여행지 이름을 입력하세요"
                             required
@@ -741,56 +596,90 @@ export default function PostForm() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">카테고리</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            카테고리
+                          </label>
                           <select
                             value={currentPlace.category}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, category: e.target.value })}
+                            onChange={(e) =>
+                              setCurrentPlace({ ...currentPlace, category: e.target.value })
+                            }
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                           >
-                            {placeCategories.map(category => (
-                              <option key={category} value={category}>{category}</option>
+                            {placeCategories.map((category) => (
+                              <option key={category} value={category}>
+                                {category}
+                              </option>
                             ))}
                           </select>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">시/도</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            시/도
+                          </label>
                           <select
                             value={currentPlace.state_id}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, state_id: parseInt(e.target.value) || 0 })}
+                            onChange={(e) =>
+                              setCurrentPlace({
+                                ...currentPlace,
+                                state_id: parseInt(e.target.value) || 0,
+                              })
+                            }
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                           >
                             <option value="">시/도 선택</option>
-                            {stateIds.map(stateId => {
-                              const state = cities.find(c => c.state_id === stateId);
+                            {stateIds.map((stateId) => {
+                              const state = cities.find((c) => c.state_id === stateId);
                               return (
-                                <option key={stateId} value={stateId}>{state?.state_name}</option>
+                                <option key={stateId} value={stateId}>
+                                  {state?.state_name}
+                                </option>
                               );
                             })}
                           </select>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">시/군/구</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            시/군/구
+                          </label>
                           <select
                             value={currentPlace.city_id}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, city_id: parseInt(e.target.value) || 0 })}
+                            onChange={(e) =>
+                              setCurrentPlace({
+                                ...currentPlace,
+                                city_id: parseInt(e.target.value) || 0,
+                              })
+                            }
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
                             disabled={!currentPlace.state_id}
                           >
                             <option value="">시/군/구 선택</option>
-                            {currentPlace.state_id && cities.filter(city => city.state_id === currentPlace.state_id).map(city => (
-                              <option key={city.city_id} value={city.city_id}>{city.name}</option>
-                            ))}
+                            {currentPlace.state_id &&
+                              cities
+                                .filter((city) => city.state_id === currentPlace.state_id)
+                                .map((city) => (
+                                  <option key={city.city_id} value={city.city_id}>
+                                    {city.name}
+                                  </option>
+                                ))}
                           </select>
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">예상 비용 (원)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            예상 비용 (원)
+                          </label>
                           <input
                             type="number"
                             value={currentPlace.cost || ''}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, cost: parseInt(e.target.value) || 0 })}
+                            onChange={(e) =>
+                              setCurrentPlace({
+                                ...currentPlace,
+                                cost: parseInt(e.target.value) || 0,
+                              })
+                            }
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="예상 비용을 입력하세요 (무료인 경우 0)"
                             min="0"
@@ -798,7 +687,9 @@ export default function PostForm() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">사진 등록</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            사진 등록
+                          </label>
                           <div className="space-y-3">
                             <div className="relative">
                               <input
@@ -815,8 +706,12 @@ export default function PostForm() {
                               >
                                 <div className="text-center">
                                   <i className="ri-image-add-line text-2xl text-gray-400 mb-2"></i>
-                                  <div className="text-sm text-gray-600">사진을 선택하거나 드래그하세요</div>
-                                  <div className="text-xs text-gray-500 mt-1">최대 5장, 각 5MB 이하</div>
+                                  <div className="text-sm text-gray-600">
+                                    사진을 선택하거나 드래그하세요
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    최대 5장, 각 5MB 이하
+                                  </div>
                                 </div>
                               </label>
                             </div>
@@ -845,37 +740,54 @@ export default function PostForm() {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">방문 시작 일시</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            방문 시작 일시
+                          </label>
                           <input
                             type="datetime-local"
                             value={currentPlace.visitStartDateTime}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, visitStartDateTime: e.target.value })}
+                            onChange={(e) =>
+                              setCurrentPlace({
+                                ...currentPlace,
+                                visitStartDateTime: e.target.value,
+                              })
+                            }
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">방문 종료 일시</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            방문 종료 일시
+                          </label>
                           <input
                             type="datetime-local"
                             value={currentPlace.visitEndDateTime}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, visitEndDateTime: e.target.value })}
+                            onChange={(e) =>
+                              setCurrentPlace({ ...currentPlace, visitEndDateTime: e.target.value })
+                            }
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
 
                         <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">메모</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            메모
+                          </label>
                           <textarea
                             value={currentPlace.memo}
-                            onChange={(e) => setCurrentPlace({ ...currentPlace, memo: e.target.value })}
+                            onChange={(e) =>
+                              setCurrentPlace({ ...currentPlace, memo: e.target.value })
+                            }
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             rows={3}
                             placeholder="이 여행지에 대한 설명이나 팁을 적어주세요..."
                             required
                             maxLength={500}
                           />
-                          <div className="text-xs text-gray-500 mt-1">{currentPlace.memo.length}/500자</div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            {currentPlace.memo.length}/500자
+                          </div>
                         </div>
                       </div>
 
