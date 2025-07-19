@@ -3,7 +3,6 @@ import MyPlaceCard from '@/components/mypage/MyPlaceCard';
 import { MyPlaceViewType } from '@/lib/database';
 
 function PlaceListTab({ placeList }: { placeList: MyPlaceViewType[] }) {
-  console.log(placeList);
   return (
     <>
       <div>
