@@ -1,46 +1,46 @@
 'use client';
 import { useAuth } from '@/hooks/useAuth';
-import { usePlace } from '@/hooks/usePlace';
-import { PlaceReview } from '@/types/place.type';
 import { format } from 'date-fns';
 import { useCallback, useEffect, useState } from 'react';
 import { reviewStars } from '../reviewStar';
+import { usePost } from '@/hooks/usePost';
+import { PostReview } from '@/types/post.type';
 
-interface PlaceReviewProps {
-  placeId: string;
+interface PostReviewProps {
+  postId: string;
 }
 
-export const PlaceReviewForm = ({ placeId }: PlaceReviewProps) => {
-  const [reviews, setReviews] = useState<PlaceReview[]>([]);
+export const PostReviewForm = ({ postId }: PostReviewProps) => {
+  const [reviews, setReviews] = useState<PostReview[]>([]);
   const [newReview, setNewReview] = useState({
     rating: 5,
     content: '',
   });
-  const { getPlaceReviews, createPlaceReivew } = usePlace();
+  const { getPostReviews, createPostReivew } = usePost();
   const { user } = useAuth();
 
   const fetchAllPlaceReviews = useCallback(async () => {
     try {
-      if (!placeId) return;
-      const data = await getPlaceReviews(placeId);
+      if (!postId) return;
+      const data = await getPostReviews(postId);
       setReviews(data);
     } catch (error) {
       console.error('해당 여행지를 가져오는 중 오류 발생:', error);
     }
-  }, [placeId, getPlaceReviews]);
+  }, [postId, getPostReviews]);
 
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !placeId) return;
+    if (!user || !postId) return;
     if (newReview.content.trim()) {
       const review = {
         user_id: user.id,
-        place_id: Number(placeId),
+        post_id: Number(postId),
         rating: newReview.rating,
         content: newReview.content,
       };
 
-      await createPlaceReivew(review);
+      await createPostReivew(review);
       setNewReview({ rating: 5, content: '' });
       fetchAllPlaceReviews();
     }
@@ -111,4 +111,4 @@ export const PlaceReviewForm = ({ placeId }: PlaceReviewProps) => {
   );
 };
 
-export default PlaceReviewForm;
+export default PostReviewForm;
