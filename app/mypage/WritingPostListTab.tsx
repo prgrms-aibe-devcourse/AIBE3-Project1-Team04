@@ -32,7 +32,7 @@ function WritingPostListTab({ notPostList }: { notPostList: MyPostViewType[] }) 
                   </div>
                   <div className="flex items-center gap-2 ml-4">
                     <Link
-                      href={`/posts/create?draft=${post.id}`}
+                      href={`/posts/edit?draft=${post.id}`}
                       className="px-3 py-1 text-blue-600 hover:bg-blue-50 rounded cursor-pointer"
                     >
                       편집

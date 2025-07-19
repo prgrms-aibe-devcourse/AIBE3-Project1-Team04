@@ -20,7 +20,15 @@ export default function MyPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <ActivitySummary numOfPost={numOfPost} numOfPlace={numOfPlace} numOfLikes={numOfLikes} />
 
-          <MyTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          <MyTabs
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            counts={{
+              drafts: notPostList.length,
+              posts: postList.length,
+              places: placeList.length,
+            }}
+          />
 
           {/* 탭 콘텐츠 */}
           <div className="bg-white rounded-xl shadow-sm p-6">

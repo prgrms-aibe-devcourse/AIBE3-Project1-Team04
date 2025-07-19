@@ -18,7 +18,7 @@ function CompletedPostListTab({ postList }: { postList: MyPostViewType[] }) {
                 <MyPostCard {...post} />
                 <div className="absolute top-4 right-4 flex gap-2">
                   <Link
-                    href={`/posts/${post.id}/edit`}
+                    href={`/posts/edit?post=${post.id}`}
                     className="bg-white/90 hover:bg-white p-2 rounded-full shadow-sm cursor-pointer"
                   >
                     <i className="ri-edit-line w-4 h-4 flex items-center justify-center text-gray-600"></i>

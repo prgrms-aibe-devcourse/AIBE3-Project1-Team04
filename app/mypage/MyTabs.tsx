@@ -1,11 +1,21 @@
-import { tabs } from './MockData';
+const tabs = [
+  { id: 'drafts', label: '임시저장' },
+  { id: 'posts', label: '내 게시글' },
+  { id: 'places', label: '내 여행지' },
+];
 
 function MyTabs({
   setActiveTab,
   activeTab,
+  counts,
 }: {
   setActiveTab: (tab: string) => void;
   activeTab: string;
+  counts: {
+    drafts: number;
+    posts: number;
+    places: number;
+  };
 }) {
   return (
     <div className="bg-white rounded-xl shadow-sm mb-8">
@@ -22,7 +32,7 @@ function MyTabs({
           >
             {tab.label}
             <span className="ml-2 px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
-              {tab.count}
+              {counts[tab.id as keyof typeof counts]}
             </span>
           </button>
         ))}

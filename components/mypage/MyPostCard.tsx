@@ -1,8 +1,8 @@
 'use client';
 
 import { MyPostViewType } from '@/lib/database';
-import { getStayDuration_withTime } from '@/lib/place';
-import { formatDate } from '@/lib/post';
+import { formatCost, getStayDuration_withTime } from '@/lib/place';
+import { format } from 'date-fns';
 import Link from 'next/link';
 
 export default function MyPostCard({
@@ -61,7 +61,7 @@ export default function MyPostCard({
                 <span className="text-gray-500 text-sm">{view_count}회</span>
               </div>
             </div>
-            <span className="font-bold text-blue-600">{total_cost.toLocaleString()}원</span>
+            <span className="font-bold text-blue-600">{formatCost(total_cost)}</span>
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
@@ -69,7 +69,7 @@ export default function MyPostCard({
           </div>
 
           <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-            <div className="text-xs text-gray-400">{formatDate(modified_at ?? created_at)}</div>
+            <div className="text-xs text-gray-400">{format(created_at, 'yyyy-MM-dd')}</div>
             <button
               className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-colors text-gray-500 hover:bg-gray-50`}
             >

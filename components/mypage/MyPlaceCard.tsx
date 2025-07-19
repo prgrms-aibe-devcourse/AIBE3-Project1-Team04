@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { MyPlaceViewType } from '@/lib/database';
-import { getStayDuration_withTime } from '@/lib/place';
+import { formatCost, getStayDuration_withTime } from '@/lib/place';
+import { format } from 'date-fns';
 
 export default function MyPlaceCard({
   place_id,
@@ -19,23 +20,6 @@ export default function MyPlaceCard({
   visit_start_time,
   visit_end_time,
 }: MyPlaceViewType) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const formatCost = (cost: number) => {
-    if (cost === 0) return '무료';
-    if (cost >= 10000) {
-      return `${(cost / 10000).toFixed(0)}만원`;
-    }
-    return `${cost.toLocaleString()}원`;
-  };
-
   return (
     <Link href={`/places/${place_id}`}>
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
@@ -86,7 +70,7 @@ export default function MyPlaceCard({
                 <i className="ri-calendar-line mr-1 w-4 h-4 flex items-center justify-center"></i>
                 <span>{getStayDuration_withTime(visit_start_time, visit_end_time)}</span>
                 <span className="mx-2">•</span>
-                <span>{formatDate(created_at)}</span>
+                <span>{format(created_at, 'yyyy-MM-dd')}</span>
               </div>
               <button
                 className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-colors text-gray-500 hover:bg-gray-50`}
