@@ -1,5 +1,6 @@
 import { PostEditData, RegionsResponse } from '@/lib/database';
 import { supabase } from '@/lib/supabaseClient';
+import { useMessageModal } from '@/stores/MessageModalStore';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -30,6 +31,7 @@ function usePostEdit({
   regions: RegionsResponse;
 }) {
   const router = useRouter();
+  const { addModal } = useMessageModal();
   const [currentPlace, setCurrentPlace] = useState<PostEditData['places'][number]>(initialPlace);
   const [representativeImage, setRepresentativeImage] = useState<string | null>(null);
   const [isEditingPlace, setIsEditingPlace] = useState(false);
@@ -123,18 +125,7 @@ function usePostEdit({
 
     // 필수 필드 검증 실패 시 메시지 표시
     if (requiredFields.length > 0) {
-      const errorMessage = document.createElement('div');
-      errorMessage.className =
-        'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      errorMessage.textContent = `다음 항목을 확인해주세요: ${requiredFields.join(', ')}`;
-      document.body.appendChild(errorMessage);
-
-      // 3초 후 메시지 제거(if문은 방어적 프로그래밍)
-      setTimeout(() => {
-        if (document.body.contains(errorMessage)) {
-          document.body.removeChild(errorMessage);
-        }
-      }, 3000);
+      addModal(`다음 항목을 확인해주세요: ${requiredFields.join(', ')}`);
       return;
     }
 
@@ -174,24 +165,10 @@ function usePostEdit({
       resetPlaceForm();
 
       // 성공 메시지 표시
-      const successMessage = document.createElement('div');
-      successMessage.className =
-        'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      successMessage.textContent = '여행지가 성공적으로 추가되었습니다!';
-      document.body.appendChild(successMessage);
-
-      // 3초 후 메시지 제거
-      setTimeout(() => {
-        if (document.body.contains(successMessage)) {
-          document.body.removeChild(successMessage);
-        }
-      }, 3000);
+      addModal('여행지가 성공적으로 추가되었습니다!');
     } catch (error) {
       console.error('Supabase DB 함수 호출 중 오류 발생:', error);
       // 에러 메시지 표시
-      const errorMessage = document.createElement('div');
-      errorMessage.className =
-        'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
       let errorMsg = '알 수 없는 오류';
       if (error instanceof Error) {
         errorMsg = error.message;
@@ -200,14 +177,8 @@ function usePostEdit({
       } else if (typeof error === 'object' && error !== null && 'message' in error) {
         errorMsg = (error as any).message;
       }
-      errorMessage.textContent = `여행지 추가 중 오류가 발생했습니다: ${errorMsg}`;
-      document.body.appendChild(errorMessage);
 
-      setTimeout(() => {
-        if (document.body.contains(errorMessage)) {
-          document.body.removeChild(errorMessage);
-        }
-      }, 3000);
+      addModal(`여행지 추가 중 오류가 발생했습니다: ${errorMsg}`);
     }
   };
 
@@ -262,7 +233,7 @@ function usePostEdit({
     e.preventDefault();
     // NOTE : 카테고리, 지역, 여행 날짜에 대한 검증 없음
     if (!postData.title || !postData.content || postData.places.length === 0) {
-      alert('제목, 내용, 그리고 최소 1개의 여행지를 입력해주세요.');
+      addModal('제목, 내용, 그리고 최소 1개의 여행지를 입력해주세요.');
       return;
     }
 
@@ -285,7 +256,7 @@ function usePostEdit({
         throw error;
       }
 
-      alert('게시글이 성공적으로 작성되었습니다!');
+      addModal('게시글이 성공적으로 수정되었습니다!');
       router.push('/mypage');
     };
 
