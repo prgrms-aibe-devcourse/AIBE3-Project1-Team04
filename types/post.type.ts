@@ -1,3 +1,5 @@
+import { PlaceWithUserAction } from './place.type';
+
 export interface PostWithUserAction {
   id: number;
   user_id: string;
@@ -13,14 +15,24 @@ export interface PostWithUserAction {
   like_count: number;
   liked_by_me: boolean;
   favorite_by_me: boolean;
-  categories: string[];
-  total_cost: number;
   visit_start_time: string;
   visit_end_time: string;
-  region_locations: RegionLocation[];
+  places: PlaceWithUserAction[];
 }
 
 export interface RegionLocation {
   city: string;
   state: string;
+}
+
+export interface PostReview {
+  id: number;
+  user_id: string;
+  post_id: number;
+  rating: number;
+  content: string;
+  created_at: Date;
+  modified_at: Date;
+  user_name: string;
+  avatar_url: string;
 }

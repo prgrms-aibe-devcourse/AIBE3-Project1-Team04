@@ -14,6 +14,7 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.23.6",
     "gitmoji-cli": "^9.7.0",
+    "lodash": "^4.17.21",
     "next": "15.3.2",
     "openai": "^5.10.1",
     "react": "^19.0.0",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/lodash": "^4.17.20",
     "@types/node": "^20.19.8",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",

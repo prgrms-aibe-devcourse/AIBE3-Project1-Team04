@@ -2,6 +2,7 @@
 import PostCard from '@/components/posts/PostCard';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
 import { usePost } from '@/hooks/usePost';
+import { compareAsc } from 'date-fns';
 import React, { useCallback, useEffect, useState } from 'react';
 
 const PostList = () => {
@@ -13,7 +14,13 @@ const PostList = () => {
   const fetchAllPosts = useCallback(async () => {
     try {
       const data = await getAllPostsWithUserAction();
-      setPosts(data);
+      const sortedPostByPlace = data.map((post) => ({
+        ...post,
+        places: [...post.places].sort((a, b) =>
+          compareAsc(new Date(a.visit_start_time), new Date(b.visit_start_time))
+        ),
+      }));
+      setPosts(sortedPostByPlace);
     } catch (error) {
       console.error('게시글 목록을 가져오는 중 오류 발생:', error);
     }
