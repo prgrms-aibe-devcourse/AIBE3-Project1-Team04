@@ -1,73 +1,22 @@
-
 'use client';
 
+import { DUMMY_IMAGE_URL } from '@/consts';
+import { formatCost } from '@/lib/place';
+import { PostWithUserAction } from '@/types/post.type';
+import { format } from 'date-fns';
 import { useState } from 'react';
 
-interface Place {
-  id: string;
-  name: string;
-  location: string;
-  category: string;
-  memo: string;
-  cost: number;
-  visitTime: string;
-  imageUrl: string;
-  images?: string[];
-  likes: number;
-}
-
-interface Post {
-  id: string;
-  title: string;
-  content: string;
-  places: Place[];
-  author: string;
-  category: string;
-  region: string;
-  rating: number;
-  ratingCount: number;
-  views: number;
-  cost: number;
-  imageUrl: string;
-  startDate: string;
-  endDate: string;
-  duration: string;
-  createdAt: string;
-  totalDays: number;
-  totalBudget: number;
-  regions: string[];
-  categories: string[];
-  mainImage?: string;
-}
-
 interface ContentTabProps {
-  post: Post;
+  post: PostWithUserAction;
 }
 
 export default function ContentTab({ post }: ContentTabProps) {
-  const [selectedImageIndexes, setSelectedImageIndexes] = useState<{[key: string]: number}>({});
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
-  const formatCost = (cost: number) => {
-    if (cost === 0) return '무료';
-    if (cost >= 10000) {
-      return `${(cost / 10000).toFixed(0)}만원`;
-    }
-    return `${cost.toLocaleString()}원`;
-  };
+  const [selectedImageIndexes, setSelectedImageIndexes] = useState<{ [key: string]: number }>({});
 
   const setSelectedImageIndex = (placeId: string, index: number) => {
-    setSelectedImageIndexes(prev => ({
+    setSelectedImageIndexes((prev) => ({
       ...prev,
-      [placeId]: index
+      [placeId]: index,
     }));
   };
 
@@ -75,9 +24,7 @@ export default function ContentTab({ post }: ContentTabProps) {
     <div className="space-y-8">
       {/* 본문 내용 */}
       <div className="prose max-w-none">
-        <p className="text-gray-700 leading-relaxed text-lg">
-          {post.content}
-        </p>
+        <p className="text-gray-700 leading-relaxed text-lg">{post.content}</p>
       </div>
 
       {/* 여행지별 상세보기 */}
@@ -85,12 +32,13 @@ export default function ContentTab({ post }: ContentTabProps) {
         <h3 className="text-lg font-bold">여행지 상세보기</h3>
 
         {post.places.map((place) => {
-          const placeImages = Array.isArray(place.images) ? place.images : [];
-          const allImages = [place.imageUrl, ...placeImages];
           const selectedImageIndex = selectedImageIndexes[place.id] || 0;
 
           return (
-            <div key={place.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div
+              key={place.id}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+            >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -102,14 +50,14 @@ export default function ContentTab({ post }: ContentTabProps) {
                     <h4 className="text-3xl font-bold text-gray-900 mb-2">{place.name}</h4>
                     <div className="flex items-center text-gray-600 mb-2">
                       <i className="ri-map-pin-line mr-2 w-5 h-5 flex items-center justify-center"></i>
-                      <span>{place.location}</span>
+                      <span>{place.state}</span>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="flex items-center justify-end mb-2">
                       <i className="ri-star-fill text-yellow-400 mr-1 w-5 h-5 flex items-center justify-center"></i>
-                      <span className="font-bold text-lg">4.8</span>
-                      <span className="text-gray-500 ml-1">({place.likes})</span>
+                      <span className="font-bold text-lg">{place.average_rating}</span>
+                      <span className="text-gray-500 ml-1">({place.rating_count})</span>
                     </div>
                     <div className="text-2xl font-bold text-blue-600 mb-1">
                       {formatCost(place.cost)}
@@ -123,30 +71,33 @@ export default function ContentTab({ post }: ContentTabProps) {
                     <div className="space-y-3">
                       <div className="flex items-center">
                         <i className="ri-time-line mr-3 w-5 h-5 flex items-center justify-center text-gray-600"></i>
-                        <span className="text-gray-600">방문 시간:</span>
-                        <span className="ml-2 font-medium">{place.visitTime}</span>
+                        <span className="text-gray-600 whitespace-nowrap">방문 시간:</span>
+                        <span className="ml-2 font-medium whitespace-nowrap">
+                          {format(place.visit_start_time, 'yyyy-MM-dd HH:mm')} -
+                          {format(place.visit_end_time, 'yyyy-MM-dd HH:mm')}
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <i className="ri-heart-line mr-3 w-5 h-5 flex items-center justify-center text-gray-600"></i>
                         <span className="text-gray-600">좋아요:</span>
-                        <span className="ml-2 font-medium">{place.likes}명</span>
+                        <span className="ml-2 font-medium">{place.like_count}명</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="mb-8">
-                  <h5 className="font-bold text-lg mb-4">사진 ({allImages.length}장)</h5>
+                  <h5 className="font-bold text-lg mb-4">사진 ({0}장)</h5>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div className="lg:col-span-1">
                       <img
-                        src={allImages[selectedImageIndex]}
-                        alt={`${place.name} 사진 ${selectedImageIndex + 1}`}
+                        src={DUMMY_IMAGE_URL}
+                        alt={`${place.name} 사진`}
                         className="w-full h-80 object-cover object-top rounded-lg"
                       />
                     </div>
                     <div className="grid grid-cols-3 gap-2">
-                      {allImages.slice(0, 6).map((image, index) => (
+                      {/* {allImages.slice(0, 6).map((image, index) => (
                         <button
                           key={index}
                           onClick={() => setSelectedImageIndex(place.id, index)}
@@ -160,7 +111,8 @@ export default function ContentTab({ post }: ContentTabProps) {
                             className="w-full h-24 object-cover object-top"
                           />
                         </button>
-                      ))}
+                      ))} */}
+                      이미지
                     </div>
                   </div>
                 </div>

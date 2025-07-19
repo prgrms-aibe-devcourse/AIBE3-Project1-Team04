@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Pacifico } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
-import ChatOpenButton from '@/components/ChatOpenButton';
-import ChatModal from '@/components/ChatModal';
+import ChatOpenButton from '@/components/chat/ChatOpenButton';
+import ChatModal from '@/components/chat/ChatModal';
 
 const pacifico = Pacifico({
   weight: '400',

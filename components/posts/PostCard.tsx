@@ -6,13 +6,12 @@ import { formatCost } from '@/lib/place';
 import { formatCategories, formatRegions } from '@/lib/post';
 import { PostWithUserAction } from '@/types/post.type';
 import { format } from 'date-fns';
+import { DUMMY_IMAGE_URL } from '@/consts';
 
 export default function PostCard({ post }: { post: PostWithUserAction }) {
-  const DUMMY_IMAGE_URL =
-    'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape';
-
+  const total_cost = post.places.reduce((sum, place) => sum + place.cost, 0);
   return (
-    <Link href={`/post/${post.id}`}>
+    <Link href={`/posts/${post.id}`}>
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
         <div className="relative">
           <img
@@ -22,12 +21,12 @@ export default function PostCard({ post }: { post: PostWithUserAction }) {
           />
           <div className="absolute top-3 left-3">
             <span className="px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded-full">
-              {formatCategories(post.categories)}
+              {formatCategories(post.places)}
             </span>
           </div>
           <div className="absolute top-3 right-3">
             <span className="px-2 py-1 bg-black/50 text-white text-xs font-medium rounded-full">
-              {formatRegions(post.region_locations)}
+              {formatRegions(post.places)}
             </span>
           </div>
         </div>
@@ -37,7 +36,7 @@ export default function PostCard({ post }: { post: PostWithUserAction }) {
 
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <i className="ri-map-pin-line mr-1 w-4 h-4 flex items-center justify-center" />
-            <span className="line-clamp-1">{formatRegions(post.region_locations)}</span>
+            <span className="line-clamp-1">{formatRegions(post.places)}</span>
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
@@ -57,7 +56,7 @@ export default function PostCard({ post }: { post: PostWithUserAction }) {
               <span>{post.view_count}</span>
             </div>
 
-            <div className="text-blue-600 font-bold">{formatCost(post.total_cost)}</div>
+            <div className="text-blue-600 font-bold">{formatCost(total_cost)}</div>
           </div>
 
           <div className="border-t border-gray-100 pt-3">
