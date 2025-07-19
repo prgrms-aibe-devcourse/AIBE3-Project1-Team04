@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { PlaceWithUserAction } from '@/types/place.type';
 import { getStayDuration } from '@/lib/place';
+import { formatCost } from '@/lib/cost';
 
 export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
   const DUMMY_IMAGE_URL =
@@ -49,14 +50,14 @@ export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
           <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
             <div className="flex items-center">
               <i className="ri-star-fill text-yellow-400 mr-1 w-4 h-4 flex items-center justify-center" />
-              <span className="font-medium text-gray-900">{place.average_rating}</span>
+              <span className="font-medium text-gray-900">{place.average_rating ?? 0}</span>
               <span className="text-gray-500 text-sm ml-1">({place.rating_count})</span>
 
               <i className="ri-eye-line ml-4 mr-1 w-4 h-4 flex items-center justify-center" />
               <span>{place.view_count}</span>
             </div>
 
-            <div className="text-blue-600 font-bold">{place.cost.toLocaleString('ko-KR')}원</div>
+            <div className="text-blue-600 font-bold">{formatCost(place.cost)}원</div>
           </div>
 
           <div className="border-t border-gray-100 pt-3">
