@@ -157,17 +157,17 @@ export default function PostsPage() {
     fetchPostsWithLikes({ search: searchQuery, region: selectedRegion, sort: selectedSort });
   };
 
-  // 로딩 중일 때 표시
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">게시글을 불러오는 중...</p>
-        </div>
-      </div>
-    );
-  }
+  // // 로딩 중일 때 표시
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+  //         <p className="text-gray-600">게시글을 불러오는 중...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="min-h-screen bg-gray-50">

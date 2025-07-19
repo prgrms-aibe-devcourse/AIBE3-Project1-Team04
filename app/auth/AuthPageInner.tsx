@@ -75,7 +75,6 @@ export default function AuthPageInner() {
           data: { name: formData.name },
         },
       });
-      console.log(result);
 
       if (result.success) {
         // 회원가입 성공 시 로그인 페이지로 이동
