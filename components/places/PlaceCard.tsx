@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { PlaceWithUserAction } from '@/types/place.type';
 import { getStayDuration } from '@/lib/place';
-import { formatCost } from '@/lib/cost';
+import { formatCost } from '@/lib/place';
 
 export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
   const DUMMY_IMAGE_URL =
