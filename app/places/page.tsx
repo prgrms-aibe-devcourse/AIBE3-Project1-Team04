@@ -1,4 +1,3 @@
-
 import Header from '../../components/Header';
 import PlacesList from './PlacesList';
 

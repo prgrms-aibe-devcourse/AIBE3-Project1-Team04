@@ -1,6 +1,7 @@
 import { differenceInCalendarDays, differenceInHours, parseISO } from 'date-fns';
 
-export const getStayDuration = (startDateStr: string, endDateStr: string) => {
+export const getStayDuration = (startDateStr?: string, endDateStr?: string) => {
+  if (!startDateStr || !endDateStr) return `날짜 미정`;
   const start = parseISO(startDateStr);
   const end = parseISO(endDateStr);
 
@@ -11,8 +12,9 @@ export const getStayDuration = (startDateStr: string, endDateStr: string) => {
   return `${nights}박 ${days}일`;
 };
 
-export const formatCost = (cost: number) => {
+export const formatCost = (cost?: number) => {
   if (cost === 0) return '무료';
+  if (!cost) return '알 수 없음';
   if (cost >= 10000) {
     return `${(cost / 10000).toFixed(0)}만원`;
   }

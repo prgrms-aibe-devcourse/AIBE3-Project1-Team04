@@ -1,37 +1,34 @@
 'use client';
-
-import { useCallback, useEffect, useState } from 'react';
-import PlaceCard from '@/components/places/PlaceCard';
+import PostCard from '@/components/posts/PostCard';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
-import { usePlace } from '@/hooks/usePlace';
-import { PlaceWithUserAction } from '@/types/place.type';
+import { usePost } from '@/hooks/usePost';
+import React, { useCallback, useEffect, useState } from 'react';
 
-export default function PlacesList() {
+const PostList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedRegion, setSelectedRegion] = useState('전체');
-
-  const [places, setPlaces] = useState<PlaceWithUserAction[]>([]);
-  const { getAllPlacesWithUserAction } = usePlace();
-  const fetchAllPlaces = useCallback(async () => {
+  const [posts, setPosts] = useState<any[]>([]);
+  const { getAllPostsWithUserAction } = usePost();
+  const fetchAllPosts = useCallback(async () => {
     try {
-      const data = await getAllPlacesWithUserAction();
-      setPlaces(data);
+      const data = await getAllPostsWithUserAction();
+      setPosts(data);
     } catch (error) {
-      console.error('여행지 목록을 가져오는 중 오류 발생:', error);
+      console.error('게시글 목록을 가져오는 중 오류 발생:', error);
     }
-  }, [getAllPlacesWithUserAction]);
+  }, [getAllPostsWithUserAction]);
 
   useEffect(() => {
-    fetchAllPlaces();
-  }, [fetchAllPlaces]);
+    fetchAllPosts();
+  }, [fetchAllPosts]);
 
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">여행지 목록</h1>
-          <p className="text-gray-600">다양한 여행지를 둘러보고 나만의 여행 계획을 세워보세요</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">여행 게시글</h1>
+          <p className="text-gray-600">다양한 여행 경험과 팁을 공유하는 공간입니다</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
@@ -81,7 +78,7 @@ export default function PlacesList() {
 
         <div className="flex justify-between items-center mb-6">
           <p className="text-gray-600">
-            총 <span className="font-semibold text-blue-600">{places.length}</span>개의 여행지가
+            총 <span className="font-semibold text-blue-600">{posts.length}</span>개의 게시글이
             있습니다
           </p>
 
@@ -102,12 +99,12 @@ export default function PlacesList() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {places.map((place) => (
-            <PlaceCard key={place.id} place={place} />
+          {posts.map((post, index) => (
+            <PostCard key={index} post={post} />
           ))}
         </div>
 
-        {places.length === 0 && (
+        {posts.length === 0 && (
           <div className="text-center py-12">
             <i className="ri-map-pin-line text-6xl text-gray-300 mb-4 w-16 h-16 flex items-center justify-center mx-auto"></i>
             <h3 className="text-lg font-medium text-gray-900 mb-2">검색 결과가 없습니다</h3>
@@ -117,4 +114,6 @@ export default function PlacesList() {
       </div>
     </div>
   );
-}
+};
+
+export default PostList;
