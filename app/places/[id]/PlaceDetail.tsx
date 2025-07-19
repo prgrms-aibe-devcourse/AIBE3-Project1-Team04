@@ -79,7 +79,7 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
                     <i className="ri-time-line mr-3 w-5 h-5 flex items-center justify-center text-gray-600"></i>
                     <span className="text-gray-600 whitespace-nowrap">방문 시간:</span>
                     <span className="ml-2 font-medium whitespace-nowrap">
-                      {format(place.visit_start_time, 'yyyy-MM-dd HH:mm:ss')} -{' '}
+                      {format(place.visit_start_time, 'yyyy-MM-dd HH:mm:ss')} -
                       {format(place.visit_end_time, 'yyyy-MM-dd HH:mm:ss')}
                     </span>
                   </div>
