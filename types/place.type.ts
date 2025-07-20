@@ -48,14 +48,19 @@ export interface PlaceInputType {
   name: string;
   state_id: number;
   city_id: number;
-  visit_start_time: string; // ISO string or Date
-  visit_end_time: string;
+  visit_start_time: Date; // ISO string or Date
+  visit_end_time: Date;
   category: string;
   memo: string;
   isviewed?: boolean;
   cost: number;
 }
 
+export interface PlaceFileType {
+  image_file: File;
+  image_string: string;
+  is_representative?: boolean;
+}
 export interface PlaceImageInputType {
   place_id: number;
   image_url: string;
@@ -72,4 +77,26 @@ export interface PlaceReview {
   modified_at: Date;
   user_name: string;
   avatar_url: string;
+}
+export interface Place {
+  id: number;
+  name: string;
+  state_id: number;
+  city_id: number;
+  cost: number;
+  created_at: Date;
+  modified_at: Date;
+  visit_start_time: Date;
+  visit_end_time: Date;
+  category: string;
+  memo: string;
+  isviewed: boolean;
+  user_id: string;
+  thumbnail_image_id: null;
+}
+
+export interface PostedPlace {
+  place_id: number;
+  currentPlace: PlaceInputType;
+  images: PlaceFileType[];
 }
