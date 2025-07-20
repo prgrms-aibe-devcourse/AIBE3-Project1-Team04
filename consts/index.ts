@@ -30,5 +30,25 @@ export const PLACE_STATES: Place_State[] = [
   '제주특별자치도',
 ];
 
+export const MAX_FILE_COUNT = 5;
+export const MAX_FILE_SIZE = 5 * 1024 * 1024;
+export const MEGA_BYTE = 1024 * 1024;
+
+export const INIT_POST_FORM_VALUE = {
+  title: '',
+  content: '',
+};
+
+export const INIT_PLACE_FORM_VALUE = {
+  name: '',
+  state_id: 0, // number로 변경
+  city_id: 0, // number로 변경
+  category: '',
+  memo: '',
+  cost: 0,
+  visit_start_time: new Date(),
+  visit_end_time: new Date(),
+};
+
 export const DUMMY_IMAGE_URL =
   'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape';

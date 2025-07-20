@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabaseClient';
-import { PostWithUserAction, PostReview } from '@/types/post.type';
+import { PostWithUserAction, PostReview, PostInputType } from '@/types/post.type';
 import { useCallback } from 'react';
 
 export const usePost = () => {
@@ -93,5 +93,44 @@ export const usePost = () => {
     []
   );
 
-  return { getAllPostsWithUserAction, getPostWithUserAction, getPostReviews, createPostReivew };
+  const createPost = useCallback(async (postData: PostInputType) => {
+    const { data, error } = await supabase
+      .from('posts')
+      .insert({
+        title: postData.title,
+        content: postData.content,
+        thumbnail_image_id: postData.thumbnail_image_id,
+        user_id: postData.user_id,
+      })
+      .select()
+      .single();
+
+    if (error || !data) {
+      throw new Error(`게시글 등록 실패: ${error?.message}`);
+    }
+
+    return data;
+  }, []);
+
+  const linkPostToPlaces = useCallback(async (postId: number, placeIds: number[]) => {
+    const insertData = placeIds.map((id) => ({
+      post_id: postId,
+      place_id: id,
+    }));
+
+    const { error } = await supabase.from('post_places').insert(insertData);
+
+    if (error) {
+      throw new Error(`여행지 연결 실패: ${error.message}`);
+    }
+  }, []);
+
+  return {
+    getAllPostsWithUserAction,
+    getPostWithUserAction,
+    getPostReviews,
+    createPostReivew,
+    createPost,
+    linkPostToPlaces,
+  };
 };

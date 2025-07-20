@@ -5,11 +5,9 @@ import { PlaceWithUserAction } from '@/types/place.type';
 import { getStayDuration } from '@/lib/place';
 import { formatCost } from '@/lib/place';
 import { format } from 'date-fns';
+import { DUMMY_IMAGE_URL } from '@/consts';
 
 export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
-  const DUMMY_IMAGE_URL =
-    'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape';
-
   return (
     <Link href={`/places/${place.id}`}>
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
