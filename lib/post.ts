@@ -1,5 +1,4 @@
 import { PlaceWithUserAction } from '@/types/place.type';
-import { RegionLocation } from '@/types/post.type';
 import { uniq, uniqBy } from 'lodash';
 
 export const formatCategories = (places: PlaceWithUserAction[]): string => {
