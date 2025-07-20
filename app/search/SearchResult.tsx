@@ -27,7 +27,7 @@ export default function SearchPage() {
   return (
     <div className="p-4">
       <h2 className="text-xl font-semibold mb-4">
-        🔍 '{query}' 검색 결과 <span className="text-blue-600">({results.length})</span>
+        🔍 &quot;{query}&quot; 검색 결과 <span className="text-blue-600">({results.length})</span>
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {results.map((item) =>
