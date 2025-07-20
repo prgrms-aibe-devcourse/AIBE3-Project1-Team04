@@ -16,12 +16,17 @@ interface PlaceDetailProps {
 export default function PlaceDetail({ placeId }: PlaceDetailProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [place, setPlace] = useState<PlaceWithUserAction | null>();
+  const [likes, setLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
   const { getPlaceWithUserAction } = usePlace();
 
   const fetchPlace = useCallback(async () => {
     try {
       const data = await getPlaceWithUserAction(placeId);
-      setPlace(data);
+      if (data) {
+        setPlace(data);
+        setLikes(data.like_count);
+      }
     } catch (error) {
       console.error('해당 여행지를 가져오는 중 오류 발생:', error);
     }
@@ -30,6 +35,19 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
   useEffect(() => {
     fetchPlace();
   }, [fetchPlace]);
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikes((prev) => prev - 1);
+      setIsLiked(false);
+    } else {
+      setLikes((prev) => prev + 1);
+      setIsLiked(true);
+    }
+
+    // 실제 구현시 API 호출
+    console.log('Place like toggled:', !isLiked);
+  };
 
   if (!place) return;
 
@@ -144,9 +162,20 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
             <div className="border-t border-gray-200 pt-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <button className="flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors whitespace-nowrap">
-                    <i className="ri-heart-line mr-2 w-5 h-5 flex items-center justify-center"></i>
-                    좋아요
+                  <button
+                    onClick={handleLike}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+                      isLiked
+                        ? 'bg-red-500 text-white hover:bg-red-600'
+                        : 'bg-red-50 text-red-600 hover:bg-red-100'
+                    }`}
+                  >
+                    <i
+                      className={`ri-heart-${
+                        isLiked ? 'fill' : 'line'
+                      } w-5 h-5 flex items-center justify-center`}
+                    ></i>
+                    좋아요 {likes}
                   </button>
                   <button className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap">
                     <i className="ri-share-line mr-2 w-5 h-5 flex items-center justify-center"></i>
