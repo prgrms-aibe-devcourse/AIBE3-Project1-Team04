@@ -1,4 +1,4 @@
-import { PostEditData, RegionsResponse } from '@/lib/database';
+import { PostEditData, RegionsResponse } from '@/types/mypage.type';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -51,7 +51,7 @@ function usePostEdit_getData() {
     getPostData();
   }, [params]);
 
-  return { postId: postId.current, postData, setPostData, regions };
+  return { postId: postId.current, postData, setPostData, regions, router };
 }
 
 export default usePostEdit_getData;
