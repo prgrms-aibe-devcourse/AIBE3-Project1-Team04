@@ -37,10 +37,15 @@ export default function PostForm() {
   const updatePostedPlace = usePostPlacesStore((state) => state.updatePostedPlace);
   const initPlaceFormData = usePostPlacesStore((state) => state.initPlaceFormData);
   const cancelEditingPlace = usePostPlacesStore((state) => state.cancelEditingPlace);
+  const resetPostedPlaces = usePostPlacesStore((state) => state.resetPostedPlaces);
 
   useEffect(() => {
     fetchPlaceCities();
   }, [fetchPlaceCities]);
+
+  useEffect(() => {
+    resetPostedPlaces();
+  }, [resetPostedPlaces]);
 
   const handleAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,15 +53,23 @@ export default function PostForm() {
     try {
       const place = await createPlace(currentPlace);
 
-      if (images.length > 0) {
-        const image = await uploadPlaceImage(place.id, images);
+      const finalImages = [...images];
+      if (finalImages.length > 0) {
+        const hasRepresentative = finalImages.some((img) => img.is_representative);
+        if (!hasRepresentative) {
+          finalImages[0] = {
+            ...finalImages[0],
+            is_representative: true,
+          };
+        }
+        const image = await uploadPlaceImage(place.id, finalImages);
         const representativeImage = image.saved.find((image) => image.is_representative);
         if (representativeImage) {
           await setRepresentativeImage(place.id, representativeImage.id);
         }
       }
 
-      addPostedPlace({ place_id: place.id, currentPlace, images });
+      addPostedPlace({ place_id: place.id, currentPlace, images: finalImages });
       initPlaceFormData();
     } catch (error) {
       console.error('여행지 생성 중 오류 발생:', error);
@@ -70,16 +83,28 @@ export default function PostForm() {
       const place = await updatePlace(editingPlaceId, currentPlace);
       const postedPlace = postedPlaces.find((place) => place.place_id === editingPlaceId)!;
 
-      if (!isEqual(postedPlace.images, images)) {
+      /** 이미지가 달라진 경우 */
+      const finalImages = [...images];
+      if (!isEqual(postedPlace.images, finalImages)) {
         await deleteAllPlaceImages(editingPlaceId);
-        const image = await uploadPlaceImage(place.id, images);
-        const representativeImage = image.saved.find((image) => image.is_representative);
-        if (representativeImage) {
-          await setRepresentativeImage(place.id, representativeImage.id);
+        // 새로 업로드할 이미지가 있는 경우에만 업로드 수행
+        if (finalImages.length > 0) {
+          const hasRepresentative = finalImages.some((img) => img.is_representative);
+          if (!hasRepresentative) {
+            finalImages[0] = {
+              ...finalImages[0],
+              is_representative: true,
+            };
+          }
+          const image = await uploadPlaceImage(place.id, finalImages);
+          const representativeImage = image.saved.find((image) => image.is_representative);
+          if (representativeImage) {
+            await setRepresentativeImage(place.id, representativeImage.id);
+          }
         }
       }
 
-      updatePostedPlace({ place_id: place.id, currentPlace, images });
+      updatePostedPlace({ place_id: place.id, currentPlace, images: finalImages });
       initPlaceFormData();
       cancelEditingPlace();
     } catch (error) {
@@ -96,7 +121,7 @@ export default function PostForm() {
     }
 
     try {
-      const post = await createPost({ ...postData, user_id: user.id });
+      const post = await createPost({ ...postData, user_id: user.id, isviewd: true });
       const placeIds = postedPlaces.map((postedPlace) => postedPlace.place_id);
       await linkPostToPlaces(post.id, placeIds);
 

@@ -101,6 +101,7 @@ export const usePost = () => {
         content: postData.content,
         thumbnail_image_id: postData.thumbnail_image_id,
         user_id: postData.user_id,
+        isviewed: postData.isviewd,
       })
       .select()
       .single();

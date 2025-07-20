@@ -45,7 +45,7 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
                   {format(place.visit_end_time, 'yyyy-MM-dd HH:mm')}
                 </span>
               </div>
-              {images?.length > 1 && (
+              {images?.length > 0 && (
                 <div className="flex gap-2 mb-2">
                   {images?.slice(0, 3).map((image, idx) => (
                     <img

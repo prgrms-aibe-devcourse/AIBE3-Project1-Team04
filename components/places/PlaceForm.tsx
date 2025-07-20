@@ -4,6 +4,7 @@ import { MAX_FILE_COUNT, MAX_FILE_SIZE, MEGA_BYTE, PLACE_CATEGORIES, PLACE_STATE
 import { useRegion } from '@/hooks/useRegion';
 import { usePostPlacesStore } from '@/stores/PostPlacesStore';
 import { format } from 'date-fns';
+import { FaStar } from 'react-icons/fa';
 
 interface PlaceFormPorps {
   type: string;
@@ -16,6 +17,7 @@ const PlaceForm = ({ type, callback }: PlaceFormPorps) => {
   const images = usePostPlacesStore((state) => state.images);
   const addImages = usePostPlacesStore((state) => state.addImages);
   const removeImage = usePostPlacesStore((state) => state.removeImage);
+  const toggleRepresentativeImage = usePostPlacesStore((state) => state.toggleRepresentativeImage);
   const initPlaceFormData = usePostPlacesStore((state) => state.initPlaceFormData);
   const cancelEditingPlace = usePostPlacesStore((state) => state.cancelEditingPlace);
   const { cities } = useRegion();
@@ -174,7 +176,16 @@ const PlaceForm = ({ type, callback }: PlaceFormPorps) => {
             {images.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {images.map((image, index) => (
-                  <div key={index} className="relative">
+                  <div
+                    key={index}
+                    className="relative cursor-pointer group"
+                    onClick={() => toggleRepresentativeImage(index)}
+                  >
+                    {image.is_representative && (
+                      <div className="absolute top-1 left-1 bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full shadow">
+                        대표
+                      </div>
+                    )}
                     <img
                       src={image.image_string}
                       alt={`미리보기 ${index + 1}`}
@@ -182,7 +193,10 @@ const PlaceForm = ({ type, callback }: PlaceFormPorps) => {
                     />
                     <button
                       type="button"
-                      onClick={() => removeImage(index)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeImage(index);
+                      }}
                       className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 cursor-pointer"
                     >
                       ×

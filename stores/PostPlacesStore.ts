@@ -19,6 +19,7 @@ interface PostPlacesState {
   setCurrentPlace: (currentPlace: PlaceInputType) => void;
   addImages: (image: PlaceFileType) => void;
   removeImage: (index: number) => void;
+  toggleRepresentativeImage: (index: number) => void;
 }
 
 export const usePostPlacesStore = create<PostPlacesState>((set) => ({
@@ -54,6 +55,14 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
   resetPostedPlaces: () =>
     set(() => ({
       postedPlaces: [],
+      isEditingPlace: false,
+      editingPlaceId: null,
+      currentPlace: {
+        ...INIT_PLACE_FORM_VALUE,
+        visit_start_time: new Date(),
+        visit_end_time: new Date(),
+      },
+      images: [],
     })),
 
   setEditingPlace: (postedPlace) =>
@@ -89,6 +98,13 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
   removeImage: (index) =>
     set((state) => ({
       images: state.images.filter((_, i) => i !== index),
+    })),
+  toggleRepresentativeImage: (index) =>
+    set((state) => ({
+      images: state.images.map((img, idx) => ({
+        ...img,
+        is_representative: idx === index,
+      })),
     })),
 }));
 
