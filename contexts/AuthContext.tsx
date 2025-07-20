@@ -1,43 +1,47 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import React, { createContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  signOut: () => Promise<void>;
-}
+import { fetchUserProfile } from '@/lib/auth';
+import { AuthContextType, UserProfile } from '@/types/auth.type';
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // 초기 사용자 상태 확인
-    const getInitialUser = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        setUser(user);
-      } catch (error) {
-        console.error('사용자 정보를 가져오는 중 오류 발생:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const getInitialUser = async () => {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
+      if (user) {
+        const profile = await fetchUserProfile(user.id);
+        setUser(profile);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('사용자 정보를 가져오는 중 오류 발생:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     getInitialUser();
 
-    // 인증 상태 변경 감지
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const profile = await fetchUserProfile(session.user.id);
+        setUser(profile);
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
@@ -56,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     loading,
     signOut,
+    getInitialUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

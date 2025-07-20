@@ -1,26 +1,7 @@
+import { LoginData, SignUpData, UserProfile, AuthResponse } from '@/types/auth.type';
 import { supabase } from './supabaseClient';
 import { User, AuthError } from '@supabase/supabase-js';
 
-export interface AuthResponse {
-  success: boolean;
-  user?: User | null;
-  error?: string;
-}
-
-export interface SignUpData {
-  email: string;
-  password: string;
-  options: {
-    data: object;
-  };
-}
-
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-// 회원가입 함수
 export async function signUp({ email, password, options }: SignUpData): Promise<AuthResponse> {
   try {
     const { data, error } = await supabase.auth.signUp({
@@ -36,9 +17,28 @@ export async function signUp({ email, password, options }: SignUpData): Promise<
       };
     }
 
+    const user = data.user;
+
+    // ✅ 회원가입 성공 시 user_profiles 테이블에 정보 저장
+    if (user) {
+      const meta = user.user_metadata || {};
+      const name = meta.name || meta.nickname || meta.full_name || '익명 유저';
+      const avatar_url = meta.avatar_url || null;
+
+      const { error: profileError } = await supabase.from('user_profiles').insert({
+        id: user.id,
+        name,
+        avatar_url,
+      });
+
+      if (profileError) {
+        console.error('user_profiles 저장 실패:', profileError.message);
+      }
+    }
+
     return {
       success: true,
-      user: data.user,
+      user,
     };
   } catch (error) {
     return {
@@ -97,6 +97,20 @@ export async function signOut(): Promise<AuthResponse> {
     };
   }
 }
+
+export const fetchUserProfile = async (userId: string): Promise<UserProfile | null> => {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('id, name, avatar_url')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    return null;
+  }
+
+  return data;
+};
 
 // 현재 사용자 가져오기
 export async function getCurrentUser(): Promise<User | null> {

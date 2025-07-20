@@ -87,6 +87,42 @@ export interface PlaceReview {
   modified_at: string;
 }
 
+//-- 마이페이지 탭 데이터 타입
+export interface MyPostViewType {
+  id: number; // post id (BIGINT)
+  title: string; // post title (TEXT)
+  created_at: string; // timestamp with time zone (ISO string)
+  modified_at: string | null; // timestamp with time zone (ISO string) or null
+  view_count: number; // 조회 수
+  review_count: number; // 리뷰 수
+  review_rate: number; // 평균 평점
+  post_like_count: number; // 좋아요 수
+  total_cost: number; // 장소 비용 합계
+  place_count: number; // 연관 장소 수
+  region_states: Array<{ f1: string; f2: string }>; // [(region_name, state_name), …]
+  first_start_time: string; // 가장 빠른 방문 시작 시간 (ISO string) or null
+  last_end_time: string; // 가장 늦은 방문 종료 시간 (ISO string) or null
+  categories: string[];
+}
+
+export interface MyPlaceViewType {
+  place_id: number; // BIGINT
+  name: string; // TEXT
+  category: string; // TEXT
+  cost: number; // INTEGER
+  created_at: string; // TIMESTAMPTZ (ISO 8601 문자열)
+  modified_at: string; // TIMESTAMPTZ (ISO 8601 문자열)
+  visit_start_time: string; // TIMESTAMPTZ (ISO 8601 문자열)
+  visit_end_time: string; // TIMESTAMPTZ (ISO 8601 문자열)
+  view_total: number; // BIGINT
+  like_total: number; // BIGINT
+  review_count: number; // BIGINT
+  review_rate: number; // NUMERIC
+  all_images: string[]; // TEXT[] (URL 문자열 배열)
+  region_states: string[]; // TEXT[] ("region:state" 문자열 배열)
+}
+
+// -- //
 export interface PostLike {
   id: string;
   created_at: string;
@@ -150,7 +186,12 @@ export class DatabaseAPI {
   }
 
   // 리뷰 작성
-  static async createPlaceReview(userId: string, placeId: string, rating: number, content: string): Promise<PlaceReview> {
+  static async createPlaceReview(
+    userId: string,
+    placeId: string,
+    rating: number,
+    content: string
+  ): Promise<PlaceReview> {
     // 실제 구현시 API 호출
     const review: PlaceReview = {
       id: Date.now().toString(),
@@ -159,14 +200,19 @@ export class DatabaseAPI {
       rating: rating.toString(),
       content,
       created_at: new Date().toISOString(),
-      modified_at: new Date().toISOString()
+      modified_at: new Date().toISOString(),
     };
     console.log('Create place review:', review);
     return review;
   }
 
   // 게시글 리뷰 작성
-  static async createPostReview(userId: string, postId: string, rating: number, content: string): Promise<PostReview> {
+  static async createPostReview(
+    userId: string,
+    postId: string,
+    rating: number,
+    content: string
+  ): Promise<PostReview> {
     // 실제 구현시 API 호출
     const review: PostReview = {
       id: Date.now().toString(),
@@ -175,33 +221,37 @@ export class DatabaseAPI {
       rating: rating.toString(),
       content,
       created_at: new Date().toISOString(),
-      modified_at: new Date().toISOString()
+      modified_at: new Date().toISOString(),
     };
     console.log('Create post review:', review);
     return review;
   }
 
   // 여행지 생성
-  static async createPlace(placeData: Omit<Place, 'id' | 'created_at' | 'modified_at'>): Promise<Place> {
+  static async createPlace(
+    placeData: Omit<Place, 'id' | 'created_at' | 'modified_at'>
+  ): Promise<Place> {
     // 실제 구현시 API 호출
     const place: Place = {
       ...placeData,
       id: Date.now().toString(),
       created_at: new Date().toISOString(),
-      modified_at: new Date().toISOString()
+      modified_at: new Date().toISOString(),
     };
     console.log('Create place:', place);
     return place;
   }
 
   // 게시글 생성
-  static async createPost(postData: Omit<Post, 'id' | 'created_at' | 'modified_at'>): Promise<Post> {
+  static async createPost(
+    postData: Omit<Post, 'id' | 'created_at' | 'modified_at'>
+  ): Promise<Post> {
     // 실제 구현시 API 호출
     const post: Post = {
       ...postData,
       id: Date.now().toString(),
       created_at: new Date().toISOString(),
-      modified_at: new Date().toISOString()
+      modified_at: new Date().toISOString(),
     };
     console.log('Create post:', post);
     return post;

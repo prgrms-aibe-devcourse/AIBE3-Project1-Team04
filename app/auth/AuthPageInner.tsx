@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { signUp, signIn, signInWithGoogle, signInWithKakao } from '../../lib/auth';
 import Header from '@/components/Header';
 import { Suspense } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AuthPageInner() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function AuthPageInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const { getInitialUser } = useAuth();
 
   useEffect(() => {
     const messageParam = searchParams.get('message');
@@ -76,9 +78,8 @@ export default function AuthPageInner() {
 
       if (result.success) {
         // 회원가입 성공 시 로그인 페이지로 이동
-        router.push(
-          '/auth?message=회원가입이 완료되었습니다. 이메일 인증 후 로그인해주세요.&isLogin=false'
-        );
+        await getInitialUser();
+        router.push('/');
       } else {
         setError(result.error || '회원가입에 실패했습니다.');
         setIsLoading(false);

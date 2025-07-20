@@ -49,9 +49,6 @@ export default function PlaceCard({ place }: FullPlace) {
     const end = typeof to === 'string' ? new Date(to) : to;
 
     const diffMs = end.getTime() - start.getTime();
-    if (diffMs <= 0) {
-      return '1시간 이내';
-    }
 
     const hourMs = 1000 * 60 * 60;
     const dayMs = hourMs * 24;
