@@ -34,6 +34,11 @@ export const MAX_FILE_COUNT = 5;
 export const MAX_FILE_SIZE = 5 * 1024 * 1024;
 export const MEGA_BYTE = 1024 * 1024;
 
+export const INIT_POST_FORM_VALUE = {
+  title: '',
+  content: '',
+};
+
 export const INIT_PLACE_FORM_VALUE = {
   name: '',
   state_id: 0, // number로 변경
