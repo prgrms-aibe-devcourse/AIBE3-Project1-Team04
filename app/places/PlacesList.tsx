@@ -46,9 +46,6 @@ export default function PlacesList() {
     } else {
       setPlaces(data);
     }
-    data.map((el) => {
-      console.log(el);
-    });
   };
 
   useEffect(() => {

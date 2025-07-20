@@ -84,11 +84,10 @@ export default function PlaceCard({ place }: FullPlace) {
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('버튼 클릭이다');
     if (isLiked) {
       // 이미 좋아요 눌렸으면 취소: 삭제
       const { error } = await supabase
-        .from('places_likes')
+        .from('place_likes')
         .delete()
         .eq('place_id', place.id)
         .eq('user_id', user.id);
@@ -102,7 +101,7 @@ export default function PlaceCard({ place }: FullPlace) {
     } else {
       // 좋아요 추가: 삽입
       const { error } = await supabase
-        .from('places_likes')
+        .from('place_likes')
         .insert({ place_id: place.id, user_id: user.id });
 
       if (!error) {
@@ -177,11 +176,11 @@ export default function PlaceCard({ place }: FullPlace) {
                 type="button"
                 onClick={handleLike}
                 className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-colors ${
-                  place.liked_by_me ? 'bg-red-50 text-red-600' : 'text-gray-500 hover:bg-gray-50'
+                  isLiked ? 'bg-red-50 text-red-600' : 'text-gray-500 hover:bg-gray-50'
                 }`}
               >
-                <i className={`ri-heart-${place.liked_by_me ? 'fill' : 'line'} w-4 h-4`} />
-                <span>{place.like_count}</span>
+                <i className={`ri-heart-${isLiked ? 'fill' : 'line'} w-4 h-4`} />
+                <span>{likes}</span>
               </button>
             </div>
           </div>
