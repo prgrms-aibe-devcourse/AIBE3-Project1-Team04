@@ -8,19 +8,18 @@ import PostedPlaceCard from '@/components/places/PostPlaceCard';
 import { usePlace } from '@/hooks/usePlace';
 import { useRegion } from '@/hooks/useRegion';
 import { differenceInCalendarDays, isAfter, isBefore } from 'date-fns';
+import { INIT_POST_FORM_VALUE } from '@/consts';
+import { useAuth } from '@/hooks/useAuth';
+import { usePost } from '@/hooks/usePost';
+import { useRouter } from 'next/navigation';
 
 export default function PostForm() {
-  const [postData, setPostData] = useState({
-    title: '',
-    content: '',
-    category: '',
-    region: '',
-    startDate: '',
-    endDate: '',
-    duration: '',
-  });
+  const [postData, setPostData] = useState(INIT_POST_FORM_VALUE);
 
+  const router = useRouter();
+  const { user } = useAuth();
   const { fetchPlaceCities } = useRegion();
+  const { createPost, linkPostToPlaces } = usePost();
   const { createPlace, uploadPlaceImage, setRepresentativeImage } = usePlace();
   const currentPlace = usePostPlacesStore((state) => state.currentPlace);
   const images = usePostPlacesStore((state) => state.images);
@@ -28,6 +27,7 @@ export default function PostForm() {
   const isEditingPlace = usePostPlacesStore((state) => state.isEditingPlace);
   const editingPlaceId = usePostPlacesStore((state) => state.editingPlaceId);
   const addPostedPlace = usePostPlacesStore((state) => state.addPostedPlace);
+  const initPlaceFormData = usePostPlacesStore((state) => state.initPlaceFormData);
 
   useEffect(() => {
     fetchPlaceCities();
@@ -48,21 +48,30 @@ export default function PostForm() {
       }
 
       addPostedPlace({ place_id: place.id, currentPlace, images });
+      initPlaceFormData();
     } catch (error) {
       console.error('여행지 생성 중 오류 발생:', error);
     }
   };
 
-  const handleSubmitPost = (e: React.FormEvent) => {
+  const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault();
-    // NOTE : 카테고리, 지역, 여행 날짜에 대한 검증 없음
+    if (!user) return;
     if (!postData.title || !postData.content || postedPlaces.length === 0) {
       alert('제목, 내용, 그리고 최소 1개의 여행지를 입력해주세요.');
       return;
     }
 
-    alert('게시글이 성공적으로 작성되었습니다!');
-    console.log('게시글 데이터:', { ...postData, postedPlaces });
+    try {
+      const post = await createPost({ ...postData, user_id: user.id });
+      const placeIds = postedPlaces.map((postedPlace) => postedPlace.place_id);
+      await linkPostToPlaces(post.id, placeIds);
+
+      alert('게시글이 성공적으로 작성되었습니다!');
+      router.push(`/posts/${post.id}`);
+    } catch (error) {
+      console.error('[게시글 등록 실패]', error);
+    }
   };
 
   // 여행지 개수와 총 비용 계산
