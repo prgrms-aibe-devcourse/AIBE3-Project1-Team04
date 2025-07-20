@@ -36,8 +36,6 @@ export const useMypage = () => {
         return;
       }
 
-      console.log('postData', postData);
-      console.log('placeData', placeData);
       setMyPostList(postData);
       setMyPlaceList(placeData);
     };

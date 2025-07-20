@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ChatOpenButton from '@/components/chat/ChatOpenButton';
 import ChatModal from '@/components/chat/ChatModal';
+import MessageModal from '@/components/modal/MessageModal';
 
 const pacifico = Pacifico({
   weight: '400',
@@ -41,6 +42,7 @@ export default function RootLayout({
           {children}
           <ChatOpenButton />
           <ChatModal />
+          <MessageModal />
         </AuthProvider>
       </body>
     </html>

@@ -9,6 +9,7 @@ import {
 } from '@/types/place.type';
 import { PlaceImage } from '@/types/place_image.type';
 import { useCallback } from 'react';
+import { nanoid } from 'nanoid';
 
 export const usePlace = () => {
   /** 여행지 전체 조회 */
@@ -120,7 +121,9 @@ export const usePlace = () => {
     for (const data of imageData) {
       const { image_file: file, is_representative } = data;
       try {
-        const filePath = `places/${postId}/${Date.now()}_${file.name}`;
+        const ext = file.name.split('.').pop();
+        const safeName = `${Date.now()}_${nanoid()}.${ext}`;
+        const filePath = `places/${postId}/${safeName}`;
 
         // 1. Storage에 이미지 업로드
         const { error: uploadError } = await supabase.storage
@@ -180,9 +183,61 @@ export const usePlace = () => {
   const setRepresentativeImage = async (placeId: number, imageId: number) => {
     const { error } = await supabase
       .from('places')
-      .update({ representative_image_id: imageId })
+      .update({ thumbnail_image_id: imageId })
       .eq('id', placeId);
     if (error) throw error;
+  };
+
+  /** 여행지 수정정 */
+  const updatePlace = async (place_id: number, placeData: PlaceInputType): Promise<Place> => {
+    const { data, error } = await supabase
+      .from('places')
+      .update(placeData)
+      .eq('id', place_id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as Place;
+  };
+
+  const deleteAllPlaceImages = async (placeId: number) => {
+    // 1. 썸네일 이미지 참조 해제
+    const { error: nullifyError } = await supabase
+      .from('places')
+      .update({ thumbnail_image_id: null })
+      .eq('id', placeId);
+
+    if (nullifyError) throw new Error('썸네일 초기화 실패: ' + nullifyError.message);
+    // 2. 기존 이미지 목록 조회
+    const { data: existingImages, error: fetchError } = await supabase
+      .from('place_images')
+      .select('id, image_url')
+      .eq('place_id', placeId);
+
+    if (fetchError) throw new Error('기존 이미지 조회 실패: ' + fetchError.message);
+    if (!existingImages || existingImages.length === 0) return; // 삭제할 이미지 없음
+
+    // 3. DB에서 이미지 삭제
+    const imageIds = existingImages.map((img) => img.id);
+    const { error: dbDeleteError } = await supabase
+      .from('place_images')
+      .delete()
+      .in('id', imageIds);
+
+    if (dbDeleteError) throw new Error('DB 이미지 삭제 실패: ' + dbDeleteError.message);
+
+    // 4. 스토리지에서 이미지 삭제
+    const paths = existingImages.map((img) => {
+      const url = new URL(img.image_url);
+      return decodeURIComponent(
+        url.pathname.replace('/storage/v1/object/public/place-images/', '')
+      );
+    });
+
+    const { error: storageDeleteError } = await supabase.storage.from('place-images').remove(paths);
+
+    if (storageDeleteError)
+      throw new Error('스토리지 이미지 삭제 실패: ' + storageDeleteError.message);
   };
 
   return {
@@ -193,5 +248,7 @@ export const usePlace = () => {
     createPlace,
     uploadPlaceImage,
     setRepresentativeImage,
+    updatePlace,
+    deleteAllPlaceImages,
   };
 };

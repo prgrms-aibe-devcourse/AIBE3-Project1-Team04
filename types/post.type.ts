@@ -36,3 +36,11 @@ export interface PostReview {
   user_name: string;
   avatar_url: string;
 }
+
+export interface PostInputType {
+  title: string;
+  content: string;
+  user_id: string;
+  thumbnail_image_id?: number;
+  isviewd: boolean;
+}

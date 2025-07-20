@@ -8,30 +8,44 @@ import PostedPlaceCard from '@/components/places/PostPlaceCard';
 import { usePlace } from '@/hooks/usePlace';
 import { useRegion } from '@/hooks/useRegion';
 import { differenceInCalendarDays, isAfter, isBefore } from 'date-fns';
+import { INIT_POST_FORM_VALUE } from '@/consts';
+import { useAuth } from '@/hooks/useAuth';
+import { usePost } from '@/hooks/usePost';
+import { useRouter } from 'next/navigation';
+import { isEqual } from 'lodash';
 
 export default function PostForm() {
-  const [postData, setPostData] = useState({
-    title: '',
-    content: '',
-    category: '',
-    region: '',
-    startDate: '',
-    endDate: '',
-    duration: '',
-  });
+  const [postData, setPostData] = useState(INIT_POST_FORM_VALUE);
 
+  const router = useRouter();
+  const { user } = useAuth();
   const { fetchPlaceCities } = useRegion();
-  const { createPlace, uploadPlaceImage, setRepresentativeImage } = usePlace();
+  const { createPost, linkPostToPlaces } = usePost();
+  const {
+    createPlace,
+    uploadPlaceImage,
+    setRepresentativeImage,
+    updatePlace,
+    deleteAllPlaceImages,
+  } = usePlace();
   const currentPlace = usePostPlacesStore((state) => state.currentPlace);
   const images = usePostPlacesStore((state) => state.images);
   const postedPlaces = usePostPlacesStore((state) => state.postedPlaces);
   const isEditingPlace = usePostPlacesStore((state) => state.isEditingPlace);
   const editingPlaceId = usePostPlacesStore((state) => state.editingPlaceId);
   const addPostedPlace = usePostPlacesStore((state) => state.addPostedPlace);
+  const updatePostedPlace = usePostPlacesStore((state) => state.updatePostedPlace);
+  const initPlaceFormData = usePostPlacesStore((state) => state.initPlaceFormData);
+  const cancelEditingPlace = usePostPlacesStore((state) => state.cancelEditingPlace);
+  const resetPostedPlaces = usePostPlacesStore((state) => state.resetPostedPlaces);
 
   useEffect(() => {
     fetchPlaceCities();
   }, [fetchPlaceCities]);
+
+  useEffect(() => {
+    resetPostedPlaces();
+  }, [resetPostedPlaces]);
 
   const handleAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,30 +53,83 @@ export default function PostForm() {
     try {
       const place = await createPlace(currentPlace);
 
-      if (images.length > 0) {
-        const image = await uploadPlaceImage(place.id, images);
+      const finalImages = [...images];
+      if (finalImages.length > 0) {
+        const hasRepresentative = finalImages.some((img) => img.is_representative);
+        if (!hasRepresentative) {
+          finalImages[0] = {
+            ...finalImages[0],
+            is_representative: true,
+          };
+        }
+        const image = await uploadPlaceImage(place.id, finalImages);
         const representativeImage = image.saved.find((image) => image.is_representative);
         if (representativeImage) {
           await setRepresentativeImage(place.id, representativeImage.id);
         }
       }
 
-      addPostedPlace({ place_id: place.id, currentPlace, images });
+      addPostedPlace({ place_id: place.id, currentPlace, images: finalImages });
+      initPlaceFormData();
     } catch (error) {
       console.error('여행지 생성 중 오류 발생:', error);
     }
   };
 
-  const handleSubmitPost = (e: React.FormEvent) => {
+  const handleUpdatePlace = async (e: React.FormEvent) => {
     e.preventDefault();
-    // NOTE : 카테고리, 지역, 여행 날짜에 대한 검증 없음
+    if (!editingPlaceId) return;
+    try {
+      const place = await updatePlace(editingPlaceId, currentPlace);
+      const postedPlace = postedPlaces.find((place) => place.place_id === editingPlaceId)!;
+
+      /** 이미지가 달라진 경우 */
+      const finalImages = [...images];
+      if (!isEqual(postedPlace.images, finalImages)) {
+        await deleteAllPlaceImages(editingPlaceId);
+        // 새로 업로드할 이미지가 있는 경우에만 업로드 수행
+        if (finalImages.length > 0) {
+          const hasRepresentative = finalImages.some((img) => img.is_representative);
+          if (!hasRepresentative) {
+            finalImages[0] = {
+              ...finalImages[0],
+              is_representative: true,
+            };
+          }
+          const image = await uploadPlaceImage(place.id, finalImages);
+          const representativeImage = image.saved.find((image) => image.is_representative);
+          if (representativeImage) {
+            await setRepresentativeImage(place.id, representativeImage.id);
+          }
+        }
+      }
+
+      updatePostedPlace({ place_id: place.id, currentPlace, images: finalImages });
+      initPlaceFormData();
+      cancelEditingPlace();
+    } catch (error) {
+      console.error('여행지 수정정 중 오류 발생:', error);
+    }
+  };
+
+  const handleSubmitPost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
     if (!postData.title || !postData.content || postedPlaces.length === 0) {
       alert('제목, 내용, 그리고 최소 1개의 여행지를 입력해주세요.');
       return;
     }
 
-    alert('게시글이 성공적으로 작성되었습니다!');
-    console.log('게시글 데이터:', { ...postData, postedPlaces });
+    try {
+      const post = await createPost({ ...postData, user_id: user.id, isviewd: true });
+      const placeIds = postedPlaces.map((postedPlace) => postedPlace.place_id);
+      await linkPostToPlaces(post.id, placeIds);
+
+      alert('게시글이 성공적으로 작성되었습니다!');
+      router.push(`/posts/${post.id}`);
+    } catch (error) {
+      console.error('[게시글 등록 실패]', error);
+    }
   };
 
   // 여행지 개수와 총 비용 계산
@@ -171,12 +238,7 @@ export default function PostForm() {
                   <div className="bg-blue-50 rounded-lg shadow-sm p-4 border-2 border-blue-200 mt-3">
                     <h3 className="text-lg font-bold mb-4 text-blue-800">여행지 수정</h3>
 
-                    <PlaceForm
-                      type={'edit'}
-                      callback={async () => {
-                        console.log('수정 예정');
-                      }}
-                    />
+                    <PlaceForm type={'edit'} callback={handleUpdatePlace} />
                   </div>
                 )}
               </div>

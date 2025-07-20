@@ -1,5 +1,6 @@
 import { INIT_PLACE_FORM_VALUE } from '@/consts';
 import { PlaceFileType, PlaceInputType, PostedPlace } from '@/types/place.type';
+import { compareAsc } from 'date-fns';
 import { create } from 'zustand';
 
 interface PostPlacesState {
@@ -18,6 +19,7 @@ interface PostPlacesState {
   setCurrentPlace: (currentPlace: PlaceInputType) => void;
   addImages: (image: PlaceFileType) => void;
   removeImage: (index: number) => void;
+  toggleRepresentativeImage: (index: number) => void;
 }
 
 export const usePostPlacesStore = create<PostPlacesState>((set) => ({
@@ -32,15 +34,18 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
   images: [],
   addPostedPlace: (postedPlace) =>
     set((state) => ({
-      postedPlaces: [...state.postedPlaces, postedPlace],
+      postedPlaces: sortPlacesByStartTime([...state.postedPlaces, postedPlace]),
     })),
 
   updatePostedPlace: (updatedPlace) =>
-    set((state) => ({
-      postedPlaces: state.postedPlaces.map((place) =>
+    set((state) => {
+      const newPlaces = state.postedPlaces.map((place) =>
         place.place_id === updatedPlace.place_id ? updatedPlace : place
-      ),
-    })),
+      );
+      return {
+        postedPlaces: sortPlacesByStartTime(newPlaces),
+      };
+    }),
 
   removePostedPlace: (id) =>
     set((state) => ({
@@ -50,6 +55,14 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
   resetPostedPlaces: () =>
     set(() => ({
       postedPlaces: [],
+      isEditingPlace: false,
+      editingPlaceId: null,
+      currentPlace: {
+        ...INIT_PLACE_FORM_VALUE,
+        visit_start_time: new Date(),
+        visit_end_time: new Date(),
+      },
+      images: [],
     })),
 
   setEditingPlace: (postedPlace) =>
@@ -86,4 +99,16 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
     set((state) => ({
       images: state.images.filter((_, i) => i !== index),
     })),
+  toggleRepresentativeImage: (index) =>
+    set((state) => ({
+      images: state.images.map((img, idx) => ({
+        ...img,
+        is_representative: idx === index,
+      })),
+    })),
 }));
+
+const sortPlacesByStartTime = (places: PostedPlace[]) =>
+  [...places].sort((a, b) =>
+    compareAsc(a.currentPlace.visit_start_time, b.currentPlace.visit_start_time)
+  );
