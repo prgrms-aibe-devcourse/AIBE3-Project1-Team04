@@ -99,7 +99,7 @@ export const usePost = () => {
       .insert({
         title: postData.title,
         content: postData.content,
-        thumbnail_image_id: postData.thumbnail_image_id,
+        representative_place_id: postData.representative_place_id,
         user_id: postData.user_id,
         isviewed: postData.isviewd,
       })

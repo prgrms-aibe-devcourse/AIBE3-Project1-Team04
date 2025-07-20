@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PlaceForm from '@/components/places/PlaceForm';
 import { usePostPlacesStore } from '@/stores/PostPlacesStore';
-import PostedPlaceCard from '@/components/places/PostPlaceCard';
+import PostedPlaceCard from '@/components/places/PostedPlaceCard';
 import { usePlace } from '@/hooks/usePlace';
 import { useRegion } from '@/hooks/useRegion';
 import { differenceInCalendarDays, isAfter, isBefore } from 'date-fns';
@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePost } from '@/hooks/usePost';
 import { useRouter } from 'next/navigation';
 import { isEqual } from 'lodash';
+import { getRepresentativePlaceId } from '@/lib/post';
 
 export default function PostForm() {
   const [postData, setPostData] = useState(INIT_POST_FORM_VALUE);
@@ -33,6 +34,7 @@ export default function PostForm() {
   const postedPlaces = usePostPlacesStore((state) => state.postedPlaces);
   const isEditingPlace = usePostPlacesStore((state) => state.isEditingPlace);
   const editingPlaceId = usePostPlacesStore((state) => state.editingPlaceId);
+  const representativePlaceId = usePostPlacesStore((state) => state.representativePlaceId);
   const addPostedPlace = usePostPlacesStore((state) => state.addPostedPlace);
   const updatePostedPlace = usePostPlacesStore((state) => state.updatePostedPlace);
   const initPlaceFormData = usePostPlacesStore((state) => state.initPlaceFormData);
@@ -47,6 +49,7 @@ export default function PostForm() {
     resetPostedPlaces();
   }, [resetPostedPlaces]);
 
+  /** 여행지 등록 */
   const handleAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -76,6 +79,7 @@ export default function PostForm() {
     }
   };
 
+  /** 여행지 수정 */
   const handleUpdatePlace = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingPlaceId) return;
@@ -112,6 +116,7 @@ export default function PostForm() {
     }
   };
 
+  /** 게시물 등록 */
   const handleSubmitPost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -121,7 +126,13 @@ export default function PostForm() {
     }
 
     try {
-      const post = await createPost({ ...postData, user_id: user.id, isviewd: true });
+      const representative_place_id = getRepresentativePlaceId(postedPlaces, representativePlaceId);
+      const post = await createPost({
+        ...postData,
+        user_id: user.id,
+        isviewd: true,
+        representative_place_id,
+      });
       const placeIds = postedPlaces.map((postedPlace) => postedPlace.place_id);
       await linkPostToPlaces(post.id, placeIds);
 
@@ -209,7 +220,7 @@ export default function PostForm() {
             <div className="text-3xl font-bold">
               {totalPlaces > 0 ? Math.round(totalCost / totalPlaces).toLocaleString() : 0}
             </div>
-            <div className="text-sm opacity-90">여행 비용 (원)</div>
+            <div className="text-sm opacity-90">평균 여행 비용 (원)</div>
           </div>
         </div>
       </div>
