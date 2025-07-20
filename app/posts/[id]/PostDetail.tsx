@@ -90,7 +90,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
           {/* 대표 이미지 추가 */}
           <div className="aspect-[2/1] relative overflow-hidden">
             <img
-              src={DUMMY_IMAGE_URL}
+              src={post.thumbnail_url || DUMMY_IMAGE_URL}
               alt={post.title}
               className="w-full h-full object-cover object-top"
             />
@@ -113,7 +113,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
                   </div>
                   <div className="flex items-center">
                     <i className="ri-user-line mr-1 w-4 h-4 flex items-center justify-center"></i>
-                    <span>{post.user_name}</span>
+                    <span>{post.name}</span>
                   </div>
                   <div className="flex items-center">
                     <i className="ri-calendar-line mr-1 w-4 h-4 flex items-center justify-center"></i>
@@ -200,8 +200,8 @@ export default function PostDetail({ postId }: PostDetailProps) {
             </div>
           </div>
         </div>
+        <PostReviewForm postId={postId} />
       </div>
-      <PostReviewForm postId={postId} />
       {selectedPlace && <PlaceDetailModal place={selectedPlace} onClose={handleCloseModal} />}
     </div>
   );

@@ -51,4 +51,4 @@ export const INIT_PLACE_FORM_VALUE = {
 };
 
 export const DUMMY_IMAGE_URL =
-  'https://readdy.ai/api/search-image?query=Traditional%20Korean%20hanok%20village%20in%20Jeonju%20with%20beautiful%20wooden%20architecture%2C%20curved%20rooftiles%2C%20people%20in%20hanbok%20walking%2C%20cultural%20atmosphere%2C%20warm%20afternoon%20lighting&width=400&height=300&seq=place8&orientation=landscape';
+  'https://ionwvcdgjauhpubafztg.supabase.co/storage/v1/object/public/place-images//no_image.jpeg';

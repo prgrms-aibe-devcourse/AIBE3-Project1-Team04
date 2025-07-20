@@ -10,7 +10,7 @@ export const formatCategories = (places: PlaceWithUserAction[]): string => {
 
 export const formatRegions = (places: PlaceWithUserAction[]): string => {
   const regions = uniqBy(
-    places.map((place) => ({ state: place.state, city: place.city })),
+    places.map((place) => ({ state: place.state_name, city: place.city_name })),
     (place) => `${place.state}-${place.city}` // 복합 키 기준으로 중복 제거
   );
   if (!regions || regions.length === 0) return '지역미정';

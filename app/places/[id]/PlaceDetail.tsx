@@ -7,6 +7,7 @@ import { PlaceWithUserAction } from '@/types/place.type';
 import { format } from 'date-fns';
 import { formatCost } from '@/lib/place';
 import PlaceReviewForm from '@/components/places/PlaceReviewForm';
+import { DUMMY_IMAGE_URL } from '@/consts';
 
 interface PlaceDetailProps {
   placeId: string;
@@ -15,12 +16,17 @@ interface PlaceDetailProps {
 export default function PlaceDetail({ placeId }: PlaceDetailProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [place, setPlace] = useState<PlaceWithUserAction | null>();
+  const [likes, setLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
   const { getPlaceWithUserAction } = usePlace();
 
   const fetchPlace = useCallback(async () => {
     try {
       const data = await getPlaceWithUserAction(placeId);
-      setPlace(data);
+      if (data) {
+        setPlace(data);
+        setLikes(data.like_count);
+      }
     } catch (error) {
       console.error('해당 여행지를 가져오는 중 오류 발생:', error);
     }
@@ -29,6 +35,19 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
   useEffect(() => {
     fetchPlace();
   }, [fetchPlace]);
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikes((prev) => prev - 1);
+      setIsLiked(false);
+    } else {
+      setLikes((prev) => prev + 1);
+      setIsLiked(true);
+    }
+
+    // 실제 구현시 API 호출
+    console.log('Place like toggled:', !isLiked);
+  };
 
   if (!place) return;
 
@@ -45,13 +64,13 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
                     {place.category}
                   </span>
                   <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
-                    {place.state}
+                    {place.state_name}
                   </span>
                 </div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{place.name}</h1>
                 <div className="flex items-center text-gray-600 mb-2">
                   <i className="ri-map-pin-line mr-2 w-5 h-5 flex items-center justify-center"></i>
-                  <span>{place.state}</span>
+                  <span>{place.state_name}</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <i className="ri-user-line mr-2 w-5 h-5 flex items-center justify-center"></i>
@@ -87,7 +106,7 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
                     <i className="ri-map-2-line mr-3 w-5 h-5 flex items-center justify-center text-gray-600"></i>
                     <span className="text-gray-600">지역:</span>
                     <span className="ml-2 font-medium">
-                      {place.state} {place.city}
+                      {place.state_name} {place.city_name}
                     </span>
                   </div>
                   <div className="flex items-center">
@@ -101,37 +120,37 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
               </div>
             </div>
 
-            <div className="mb-8">
-              <h3 className="font-bold text-lg mb-4">사진 (장)</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="lg:col-span-1">
-                  {/* <img
-                    src={place.images[selectedImageIndex]}
-                    alt={`${place.name} 사진 ${selectedImageIndex + 1}`}
-                    className="w-full h-80 object-cover object-top rounded-lg"
-                  /> */}
-                  이미지지
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {/* {place.images.slice(0, 6).map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImageIndex(index)}
-                      className={`relative overflow-hidden rounded-lg ${
-                        selectedImageIndex === index ? 'ring-2 ring-blue-500' : ''
-                      }`}
-                    >
-                      <img
-                        src={image}
-                        alt={`${place.name} 썸네일 ${index + 1}`}
-                        className="w-full h-24 object-cover object-top"
-                      />
-                    </button>
-                  ))} */}
-                  이미지지
+            {place.image_urls && (
+              <div className="mb-8">
+                <h3 className="font-bold text-lg mb-4">사진 ({place.image_urls.length}장)</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="lg:col-span-1">
+                    <img
+                      src={place.image_urls?.[selectedImageIndex] || DUMMY_IMAGE_URL}
+                      alt={`${place.name} 사진 ${selectedImageIndex + 1}`}
+                      className="w-full h-80 object-cover object-top rounded-lg"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {place.image_urls.slice(0, 6).map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`relative overflow-hidden rounded-lg ${
+                          selectedImageIndex === index ? 'ring-2 ring-blue-500' : ''
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`${place.name} 썸네일 ${index + 1}`}
+                          className="w-full h-24 object-cover object-top"
+                        />
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="mb-8">
               <h3 className="font-bold text-lg mb-4">여행 메모</h3>
@@ -143,9 +162,20 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
             <div className="border-t border-gray-200 pt-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <button className="flex items-center px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors whitespace-nowrap">
-                    <i className="ri-heart-line mr-2 w-5 h-5 flex items-center justify-center"></i>
-                    좋아요
+                  <button
+                    onClick={handleLike}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
+                      isLiked
+                        ? 'bg-red-500 text-white hover:bg-red-600'
+                        : 'bg-red-50 text-red-600 hover:bg-red-100'
+                    }`}
+                  >
+                    <i
+                      className={`ri-heart-${
+                        isLiked ? 'fill' : 'line'
+                      } w-5 h-5 flex items-center justify-center`}
+                    ></i>
+                    좋아요 {likes}
                   </button>
                   <button className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap">
                     <i className="ri-share-line mr-2 w-5 h-5 flex items-center justify-center"></i>

@@ -13,7 +13,7 @@ interface ContentTabProps {
 export default function ContentTab({ post }: ContentTabProps) {
   const [selectedImageIndexes, setSelectedImageIndexes] = useState<{ [key: string]: number }>({});
 
-  const setSelectedImageIndex = (placeId: string, index: number) => {
+  const setSelectedImageIndex = (placeId: number, index: number) => {
     setSelectedImageIndexes((prev) => ({
       ...prev,
       [placeId]: index,
@@ -50,7 +50,9 @@ export default function ContentTab({ post }: ContentTabProps) {
                     <h4 className="text-3xl font-bold text-gray-900 mb-2">{place.name}</h4>
                     <div className="flex items-center text-gray-600 mb-2">
                       <i className="ri-map-pin-line mr-2 w-5 h-5 flex items-center justify-center"></i>
-                      <span>{place.state}</span>
+                      <span>
+                        {place.state_name} {place.city_name}
+                      </span>
                     </div>
                   </div>
                   <div className="text-right">
@@ -80,42 +82,44 @@ export default function ContentTab({ post }: ContentTabProps) {
                       <div className="flex items-center">
                         <i className="ri-heart-line mr-3 w-5 h-5 flex items-center justify-center text-gray-600"></i>
                         <span className="text-gray-600">좋아요:</span>
-                        <span className="ml-2 font-medium">{place.like_count}명</span>
+                        <span className="ml-2 font-medium">{place.like_count}</span>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-8">
-                  <h5 className="font-bold text-lg mb-4">사진 ({0}장)</h5>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="lg:col-span-1">
-                      <img
-                        src={DUMMY_IMAGE_URL}
-                        alt={`${place.name} 사진`}
-                        className="w-full h-80 object-cover object-top rounded-lg"
-                      />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      {/* {allImages.slice(0, 6).map((image, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setSelectedImageIndex(place.id, index)}
-                          className={`relative overflow-hidden rounded-lg cursor-pointer ${
-                            selectedImageIndex === index ? 'ring-2 ring-blue-500' : ''
-                          }`}
-                        >
-                          <img
-                            src={image}
-                            alt={`${place.name} 썸네일 ${index + 1}`}
-                            className="w-full h-24 object-cover object-top"
-                          />
-                        </button>
-                      ))} */}
-                      이미지
+                {place.image_urls && (
+                  <div className="mb-8">
+                    <h5 className="font-bold text-lg mb-4">사진 ({place.image_urls.length}장)</h5>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="lg:col-span-1">
+                        <img
+                          src={place.image_urls?.[selectedImageIndex] || DUMMY_IMAGE_URL}
+                          alt={`${place.name} 사진`}
+                          className="w-full h-80 object-cover object-top rounded-lg"
+                        />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {place.image_urls.slice(0, 6).map((image, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setSelectedImageIndex(place.id, index)}
+                            className={`relative overflow-hidden rounded-lg cursor-pointer ${
+                              selectedImageIndex === index ? 'ring-2 ring-blue-500' : ''
+                            }`}
+                          >
+                            <img
+                              src={image}
+                              alt={`${place.name} 썸네일 ${index + 1}`}
+                              className="w-full h-24 object-cover object-top"
+                            />
+                          </button>
+                        ))}
+                        이미지
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 <div className="mb-8">
                   <h5 className="font-bold text-lg mb-4">여행 메모</h5>
