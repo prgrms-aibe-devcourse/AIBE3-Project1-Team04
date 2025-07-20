@@ -14,9 +14,19 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
   const cityName = cities.find((city) => (city.id = place.city_id))!.name;
   const removePostedPlace = usePostPlacesStore((state) => state.removePostedPlace);
   const setEditingPlace = usePostPlacesStore((state) => state.setEditingPlace);
+  const representativePlaceId = usePostPlacesStore((state) => state.representativePlaceId);
+  const toggleRepresentativePlace = usePostPlacesStore((state) => state.toggleRepresentativePlace);
 
   return (
-    <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+    <div
+      className="relative border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+      onClick={() => toggleRepresentativePlace(place_id)}
+    >
+      {place_id === representativePlaceId && (
+        <div className="absolute top-1 left-1 bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full shadow">
+          대표
+        </div>
+      )}
       <div className="flex items-start gap-4">
         <div className="w-24 h-24 flex-shrink-0">
           <img
@@ -68,14 +78,20 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
               <div className="font-bold text-blue-600 mb-2">{formatCost(place.cost)}</div>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setEditingPlace(postedPlace)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingPlace(postedPlace);
+                  }}
                   className="text-blue-600 hover:text-blue-700 p-1 cursor-pointer"
                   title="수정"
                 >
                   <i className="ri-edit-line w-4 h-4 flex items-center justify-center"></i>
                 </button>
                 <button
-                  onClick={() => removePostedPlace(place_id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removePostedPlace(place_id);
+                  }}
                   className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
                   title="삭제"
                 >

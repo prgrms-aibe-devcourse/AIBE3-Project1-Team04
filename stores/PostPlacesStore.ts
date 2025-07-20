@@ -9,6 +9,7 @@ interface PostPlacesState {
   editingPlaceId: number | null;
   currentPlace: PlaceInputType;
   images: PlaceFileType[];
+  representativePlaceId: number | null;
   addPostedPlace: (postedPlace: PostedPlace) => void;
   updatePostedPlace: (updatedPlace: PostedPlace) => void;
   removePostedPlace: (id: number) => void;
@@ -20,6 +21,7 @@ interface PostPlacesState {
   addImages: (image: PlaceFileType) => void;
   removeImage: (index: number) => void;
   toggleRepresentativeImage: (index: number) => void;
+  toggleRepresentativePlace: (id: number) => void;
 }
 
 export const usePostPlacesStore = create<PostPlacesState>((set) => ({
@@ -32,6 +34,7 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
     visit_end_time: new Date(),
   },
   images: [],
+  representativePlaceId: null,
   addPostedPlace: (postedPlace) =>
     set((state) => ({
       postedPlaces: sortPlacesByStartTime([...state.postedPlaces, postedPlace]),
@@ -63,6 +66,7 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
         visit_end_time: new Date(),
       },
       images: [],
+      representativePlaceId: null,
     })),
 
   setEditingPlace: (postedPlace) =>
@@ -106,6 +110,8 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
         is_representative: idx === index,
       })),
     })),
+  toggleRepresentativePlace: (id) =>
+    set((state) => ({ representativePlaceId: state.representativePlaceId !== id ? id : null })),
 }));
 
 const sortPlacesByStartTime = (places: PostedPlace[]) =>
