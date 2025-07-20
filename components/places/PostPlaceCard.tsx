@@ -14,6 +14,7 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
   const cityName = cities.find((city) => (city.id = place.city_id))!.name;
   const removePostedPlace = usePostPlacesStore((state) => state.removePostedPlace);
   const setEditingPlace = usePostPlacesStore((state) => state.setEditingPlace);
+
   return (
     <div className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start gap-4">

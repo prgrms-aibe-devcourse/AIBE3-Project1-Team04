@@ -6,8 +6,49 @@ import { getStayDuration } from '@/lib/place';
 import { formatCost } from '@/lib/place';
 import { format } from 'date-fns';
 import { DUMMY_IMAGE_URL } from '@/consts';
+import { useContext, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { getCurrentUser } from '@/lib/auth';
+import { AuthContext } from '@/contexts/AuthContext';
 
 export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
+  const { user } = useContext(AuthContext); //getCurrentUser(); //
+  const [likes, setLikes] = useState<number>(place.like_count ?? 0);
+  const [isLiked, setIsLiked] = useState<boolean>(place.liked_by_me ?? false);
+
+  const handleLike = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (isLiked) {
+      // 이미 좋아요 눌렸으면 취소: 삭제
+      const { error } = await supabase
+        .from('place_likes')
+        .delete()
+        .eq('place_id', place.id)
+        .eq('user_id', user.id);
+
+      if (!error) {
+        setLikes(likes - 1);
+        setIsLiked(false);
+      } else {
+        console.error('좋아요 취소 중 에러', error);
+      }
+    } else {
+      // 좋아요 추가: 삽입
+      const { error } = await supabase
+        .from('place_likes')
+        .insert({ place_id: place.id, user_id: user.id });
+
+      if (!error) {
+        setLikes(likes + 1);
+        setIsLiked(true);
+      } else {
+        console.error('좋아요 중 에러', error);
+      }
+    }
+  };
+
   return (
     <Link href={`/places/${place.id}`}>
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
@@ -71,12 +112,13 @@ export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
               </div>
               <button
                 type="button"
+                onClick={handleLike}
                 className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-colors ${
-                  place.liked_by_me ? 'bg-red-50 text-red-600' : 'text-gray-500 hover:bg-gray-50'
+                  isLiked ? 'bg-red-50 text-red-600' : 'text-gray-500 hover:bg-gray-50'
                 }`}
               >
-                <i className={`ri-heart-${place.liked_by_me ? 'fill' : 'line'} w-4 h-4`} />
-                <span>{place.like_count}</span>
+                <i className={`ri-heart-${isLiked ? 'fill' : 'line'} w-4 h-4`} />
+                <span>{likes}</span>
               </button>
             </div>
           </div>
