@@ -12,6 +12,7 @@ import { INIT_POST_FORM_VALUE } from '@/consts';
 import { useAuth } from '@/hooks/useAuth';
 import { usePost } from '@/hooks/usePost';
 import { useRouter } from 'next/navigation';
+import { isEqual } from 'lodash';
 
 export default function PostForm() {
   const [postData, setPostData] = useState(INIT_POST_FORM_VALUE);
@@ -20,14 +21,22 @@ export default function PostForm() {
   const { user } = useAuth();
   const { fetchPlaceCities } = useRegion();
   const { createPost, linkPostToPlaces } = usePost();
-  const { createPlace, uploadPlaceImage, setRepresentativeImage } = usePlace();
+  const {
+    createPlace,
+    uploadPlaceImage,
+    setRepresentativeImage,
+    updatePlace,
+    deleteAllPlaceImages,
+  } = usePlace();
   const currentPlace = usePostPlacesStore((state) => state.currentPlace);
   const images = usePostPlacesStore((state) => state.images);
   const postedPlaces = usePostPlacesStore((state) => state.postedPlaces);
   const isEditingPlace = usePostPlacesStore((state) => state.isEditingPlace);
   const editingPlaceId = usePostPlacesStore((state) => state.editingPlaceId);
   const addPostedPlace = usePostPlacesStore((state) => state.addPostedPlace);
+  const updatePostedPlace = usePostPlacesStore((state) => state.updatePostedPlace);
   const initPlaceFormData = usePostPlacesStore((state) => state.initPlaceFormData);
+  const cancelEditingPlace = usePostPlacesStore((state) => state.cancelEditingPlace);
 
   useEffect(() => {
     fetchPlaceCities();
@@ -51,6 +60,30 @@ export default function PostForm() {
       initPlaceFormData();
     } catch (error) {
       console.error('여행지 생성 중 오류 발생:', error);
+    }
+  };
+
+  const handleUpdatePlace = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPlaceId) return;
+    try {
+      const place = await updatePlace(editingPlaceId, currentPlace);
+      const postedPlace = postedPlaces.find((place) => place.place_id === editingPlaceId)!;
+
+      if (!isEqual(postedPlace.images, images)) {
+        await deleteAllPlaceImages(editingPlaceId);
+        const image = await uploadPlaceImage(place.id, images);
+        const representativeImage = image.saved.find((image) => image.is_representative);
+        if (representativeImage) {
+          await setRepresentativeImage(place.id, representativeImage.id);
+        }
+      }
+
+      updatePostedPlace({ place_id: place.id, currentPlace, images });
+      initPlaceFormData();
+      cancelEditingPlace();
+    } catch (error) {
+      console.error('여행지 수정정 중 오류 발생:', error);
     }
   };
 
@@ -180,12 +213,7 @@ export default function PostForm() {
                   <div className="bg-blue-50 rounded-lg shadow-sm p-4 border-2 border-blue-200 mt-3">
                     <h3 className="text-lg font-bold mb-4 text-blue-800">여행지 수정</h3>
 
-                    <PlaceForm
-                      type={'edit'}
-                      callback={async () => {
-                        console.log('수정 예정');
-                      }}
-                    />
+                    <PlaceForm type={'edit'} callback={handleUpdatePlace} />
                   </div>
                 )}
               </div>
