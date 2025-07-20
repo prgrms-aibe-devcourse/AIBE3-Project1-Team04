@@ -1,5 +1,6 @@
 import { INIT_PLACE_FORM_VALUE } from '@/consts';
 import { PlaceFileType, PlaceInputType, PostedPlace } from '@/types/place.type';
+import { compareAsc } from 'date-fns';
 import { create } from 'zustand';
 
 interface PostPlacesState {
@@ -32,15 +33,18 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
   images: [],
   addPostedPlace: (postedPlace) =>
     set((state) => ({
-      postedPlaces: [...state.postedPlaces, postedPlace],
+      postedPlaces: sortPlacesByStartTime([...state.postedPlaces, postedPlace]),
     })),
 
   updatePostedPlace: (updatedPlace) =>
-    set((state) => ({
-      postedPlaces: state.postedPlaces.map((place) =>
+    set((state) => {
+      const newPlaces = state.postedPlaces.map((place) =>
         place.place_id === updatedPlace.place_id ? updatedPlace : place
-      ),
-    })),
+      );
+      return {
+        postedPlaces: sortPlacesByStartTime(newPlaces),
+      };
+    }),
 
   removePostedPlace: (id) =>
     set((state) => ({
@@ -87,3 +91,8 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
       images: state.images.filter((_, i) => i !== index),
     })),
 }));
+
+const sortPlacesByStartTime = (places: PostedPlace[]) =>
+  [...places].sort((a, b) =>
+    compareAsc(a.currentPlace.visit_start_time, b.currentPlace.visit_start_time)
+  );
