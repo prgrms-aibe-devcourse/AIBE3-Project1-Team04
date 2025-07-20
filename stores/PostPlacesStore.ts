@@ -55,6 +55,14 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
   resetPostedPlaces: () =>
     set(() => ({
       postedPlaces: [],
+      isEditingPlace: false,
+      editingPlaceId: null,
+      currentPlace: {
+        ...INIT_PLACE_FORM_VALUE,
+        visit_start_time: new Date(),
+        visit_end_time: new Date(),
+      },
+      images: [],
     })),
 
   setEditingPlace: (postedPlace) =>

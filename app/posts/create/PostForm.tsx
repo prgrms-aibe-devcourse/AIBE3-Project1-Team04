@@ -37,10 +37,15 @@ export default function PostForm() {
   const updatePostedPlace = usePostPlacesStore((state) => state.updatePostedPlace);
   const initPlaceFormData = usePostPlacesStore((state) => state.initPlaceFormData);
   const cancelEditingPlace = usePostPlacesStore((state) => state.cancelEditingPlace);
+  const resetPostedPlaces = usePostPlacesStore((state) => state.resetPostedPlaces);
 
   useEffect(() => {
     fetchPlaceCities();
   }, [fetchPlaceCities]);
+
+  useEffect(() => {
+    resetPostedPlaces();
+  }, [resetPostedPlaces]);
 
   const handleAddPlace = async (e: React.FormEvent) => {
     e.preventDefault();
