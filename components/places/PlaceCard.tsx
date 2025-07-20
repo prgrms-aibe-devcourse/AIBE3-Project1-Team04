@@ -6,19 +6,19 @@ import { getStayDuration } from '@/lib/place';
 import { formatCost } from '@/lib/place';
 import { format } from 'date-fns';
 import { DUMMY_IMAGE_URL } from '@/consts';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { getCurrentUser } from '@/lib/auth';
-import { AuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
-  const { user } = useContext(AuthContext); //getCurrentUser(); //
+  const { user } = useAuth();
   const [likes, setLikes] = useState<number>(place.like_count ?? 0);
   const [isLiked, setIsLiked] = useState<boolean>(place.liked_by_me ?? false);
 
   const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!user) return;
 
     if (isLiked) {
       // 이미 좋아요 눌렸으면 취소: 삭제
@@ -54,7 +54,7 @@ export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
         <div className="relative">
           <img
-            src={DUMMY_IMAGE_URL}
+            src={place?.thumbnail_image_url || DUMMY_IMAGE_URL}
             alt={place?.name || '장소 이미지'}
             className="w-full h-48 object-cover object-top"
           />
@@ -65,7 +65,7 @@ export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
           </div>
           <div className="absolute top-3 right-3">
             <span className="px-2 py-1 bg-black/50 text-white text-xs font-medium rounded-full">
-              {place.state}
+              {place.state_name}
             </span>
           </div>
         </div>
@@ -76,7 +76,7 @@ export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <i className="ri-map-pin-line mr-1 w-4 h-4 flex items-center justify-center" />
             <span className="line-clamp-1">
-              {place.state} {place.city}
+              {place.state_name} {place.city_name}
             </span>
           </div>
 

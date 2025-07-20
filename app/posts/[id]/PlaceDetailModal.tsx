@@ -38,13 +38,13 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
                     {place.category}
                   </span>
                   <span className="px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full">
-                    {place.state}
+                    {place.state_name}
                   </span>
                 </div>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{place.name}</h1>
                 <div className="flex items-center text-gray-600 mb-2">
                   <i className="ri-map-pin-line mr-2 w-5 h-5 flex items-center justify-center"></i>
-                  <span>{place.state}</span>
+                  <span>{place.state_name}</span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <i className="ri-user-line mr-2 w-5 h-5 flex items-center justify-center"></i>
@@ -54,7 +54,7 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
               <div className="text-right flex flex-col items-end">
                 <button
                   onClick={onClose}
-                  className="w-8 h-8 flex items-center justify-end hover:bg-gray-100 rounded-full cursor-pointer mt-2"
+                  className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer mt-2"
                 >
                   <i className="ri-close-line text-xl"></i>
                 </button>
@@ -86,7 +86,7 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
                     <i className="ri-map-2-line mr-3 w-5 h-5 flex items-center justify-center text-gray-600"></i>
                     <span className="text-gray-600">지역:</span>
                     <span className="ml-2 font-medium">
-                      {place.state} {place.city}
+                      {place.state_name} {place.city_name}
                     </span>
                   </div>
                   <div className="flex items-center">
@@ -100,36 +100,38 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
               </div>
             </div>
 
-            <div className="mb-8">
-              <h3 className="font-bold text-lg mb-4">사진 ({0}장)</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="lg:col-span-1">
-                  <img
-                    src={DUMMY_IMAGE_URL}
-                    alt={`${place.name} 사진 ${selectedImageIndex + 1}`}
-                    className="w-full h-80 object-cover object-top rounded-lg"
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  {/* {allImages.slice(0, 6).map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImageIndex(index)}
-                      className={`relative overflow-hidden rounded-lg cursor-pointer ${
-                        selectedImageIndex === index ? 'ring-2 ring-blue-500' : ''
-                      }`}
-                    >
-                      <img
-                        src={image}
-                        alt={`${place.name} 썸네일 ${index + 1}`}
-                        className="w-full h-24 object-cover object-top"
-                      />
-                    </button>
-                  ))} */}
-                  이미지
+            {place.image_urls && (
+              <div className="mb-8">
+                <h3 className="font-bold text-lg mb-4">사진 ({place.image_urls.length}장)</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="lg:col-span-1">
+                    <img
+                      src={place.image_urls?.[selectedImageIndex] ?? DUMMY_IMAGE_URL}
+                      alt={`${place.name} 사진 ${selectedImageIndex + 1}`}
+                      className="w-full h-80 object-cover object-top rounded-lg"
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {place.image_urls.slice(0, 6).map((image, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`relative overflow-hidden rounded-lg cursor-pointer ${
+                          selectedImageIndex === index ? 'ring-2 ring-blue-500' : ''
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`${place.name} 썸네일 ${index + 1}`}
+                          className="w-full h-24 object-cover object-top"
+                        />
+                      </button>
+                    ))}
+                    이미지
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="mb-8">
               <h3 className="font-bold text-lg mb-4">여행 메모</h3>

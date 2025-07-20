@@ -15,7 +15,7 @@ export default function PostCard({ post }: { post: PostWithUserAction }) {
       <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
         <div className="relative">
           <img
-            src={DUMMY_IMAGE_URL}
+            src={post.thumbnail_url || DUMMY_IMAGE_URL}
             alt={post?.title || '여행 제목'}
             className="w-full h-48 object-cover object-top"
           />
@@ -42,7 +42,7 @@ export default function PostCard({ post }: { post: PostWithUserAction }) {
           <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
             <div className="flex items-center">
               <i className="ri-user-line mr-1 w-4 h-4 flex items-center justify-center" />
-              <span>{post.user_name ?? '-'}</span>
+              <span>{post.name ?? '-'}</span>
             </div>
           </div>
 

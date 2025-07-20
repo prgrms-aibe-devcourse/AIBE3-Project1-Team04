@@ -16,7 +16,7 @@ export default function ItineraryTab({ post, onPlaceClick }: ItineraryTabProps) 
   // 실제 예산 계산 (places 배열의 cost 합계)
   const actualTotalBudget = post.places.reduce((sum, place) => sum + place.cost, 0);
   const regions = uniqBy(
-    post.places.map((place) => ({ state: place.state, city: place.city })),
+    post.places.map((place) => ({ state: place.state_name, city: place.city_name })),
     (place) => `${place.state}-${place.city}` // 복합 키 기준으로 중복 제거
   );
 
@@ -125,13 +125,15 @@ export default function ItineraryTab({ post, onPlaceClick }: ItineraryTabProps) 
               <div className="lg:w-56 flex-shrink-0">
                 <div className="relative">
                   <img
-                    src={DUMMY_IMAGE_URL}
+                    src={place.thumbnail_image_url || DUMMY_IMAGE_URL}
                     alt={place.name}
                     className="w-full h-40 lg:h-32 object-cover object-top rounded-lg shadow-sm"
                   />
-                  <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium">
-                    + 이미지 갯수 장
-                  </div>
+                  {place.image_urls && place.image_urls.length > 1 && (
+                    <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-full text-xs font-medium">
+                      + {place.image_urls.length - 1} 장
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -143,7 +145,7 @@ export default function ItineraryTab({ post, onPlaceClick }: ItineraryTabProps) 
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                       <span className="flex items-center gap-1 text-gray-600">
                         <i className="ri-map-pin-line w-4 h-4 flex items-center justify-center"></i>
-                        {place.state}
+                        {place.state_name}
                       </span>
                       <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-medium">
                         {place.category}
