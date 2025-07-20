@@ -19,6 +19,7 @@ interface PostPlacesState {
   setCurrentPlace: (currentPlace: PlaceInputType) => void;
   addImages: (image: PlaceFileType) => void;
   removeImage: (index: number) => void;
+  toggleRepresentativeImage: (index: number) => void;
 }
 
 export const usePostPlacesStore = create<PostPlacesState>((set) => ({
@@ -89,6 +90,13 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
   removeImage: (index) =>
     set((state) => ({
       images: state.images.filter((_, i) => i !== index),
+    })),
+  toggleRepresentativeImage: (index) =>
+    set((state) => ({
+      images: state.images.map((img, idx) => ({
+        ...img,
+        is_representative: idx === index,
+      })),
     })),
 }));
 

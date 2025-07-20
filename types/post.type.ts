@@ -42,4 +42,5 @@ export interface PostInputType {
   content: string;
   user_id: string;
   thumbnail_image_id?: number;
+  isviewd: boolean;
 }
