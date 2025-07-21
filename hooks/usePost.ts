@@ -1,10 +1,11 @@
+import { SortOption } from '@/components/posts/SortButton';
 import { supabase } from '@/lib/supabaseClient';
-import { PostWithUserAction, PostReview, PostInputType, SortOption } from '@/types/post.type';
+import { PostWithUserAction, PostReview, PostInputType, FilterOption } from '@/types/post.type';
 import { useCallback } from 'react';
 
 export const usePost = () => {
   const getAllPostsWithUserAction = useCallback(
-    async (sortBy?: SortOption): Promise<PostWithUserAction[]> => {
+    async (sortBy?: SortOption, filter?: FilterOption): Promise<PostWithUserAction[]> => {
       try {
         let query = supabase.rpc('get_posts_with_user_action');
 
@@ -23,6 +24,10 @@ export const usePost = () => {
               query = query.order('like_count', { ascending: false });
               break;
           }
+        }
+
+        if (filter?.searchTerm && filter.searchTerm.trim() !== '') {
+          query = query.like('title', `%${filter.searchTerm.trim()}%`);
         }
 
         const { data, error } = await query;
