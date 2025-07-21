@@ -45,3 +45,9 @@ export interface PostInputType {
   representative_place_id?: number;
   isviewd: boolean;
 }
+
+export interface FilterOption {
+  category?: string;
+  region?: string;
+  searchTerm?: string;
+}

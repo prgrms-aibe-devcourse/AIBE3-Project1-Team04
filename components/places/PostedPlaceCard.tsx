@@ -12,7 +12,7 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
   const { place_id, currentPlace: place, images } = postedPlace;
   const representative_image = images.find((image) => image.is_representative);
   const stateName = PLACE_STATES[place.state_id - 1];
-  const cityName = cities.find((city) => (city.id = place.city_id))!.name;
+  const cityName = cities.find((city) => city.id === place.city_id)!.name;
   const removePostedPlace = usePostPlacesStore((state) => state.removePostedPlace);
   const setEditingPlace = usePostPlacesStore((state) => state.setEditingPlace);
   const representativePlaceId = usePostPlacesStore((state) => state.representativePlaceId);

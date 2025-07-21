@@ -7,20 +7,21 @@ import { usePostPlacesStore } from '@/stores/PostPlacesStore';
 import PostedPlaceCard from '@/components/places/PostedPlaceCard';
 import { usePlace } from '@/hooks/usePlace';
 import { useRegion } from '@/hooks/useRegion';
-import { differenceInCalendarDays, isAfter, isBefore } from 'date-fns';
+import { differenceInCalendarDays, isAfter, isBefore, max, min } from 'date-fns';
 import { INIT_POST_FORM_VALUE } from '@/consts';
 import { useAuth } from '@/hooks/useAuth';
 import { usePost } from '@/hooks/usePost';
 import { useRouter } from 'next/navigation';
 import { isEqual } from 'lodash';
-import { getRepresentativePlaceId } from '@/lib/post';
+import { getRepresentativePlaceId, validatePlace } from '@/lib/post';
+import { PlaceInputType } from '@/types/place.type';
 
 export default function PostForm() {
   const [postData, setPostData] = useState(INIT_POST_FORM_VALUE);
 
   const router = useRouter();
   const { user } = useAuth();
-  const { fetchPlaceCities } = useRegion();
+  const { cities, fetchPlaceCities } = useRegion();
   const { createPost, linkPostToPlaces } = usePost();
   const {
     createPlace,
@@ -54,6 +55,7 @@ export default function PostForm() {
     e.preventDefault();
 
     try {
+      if (!validatePlace(currentPlace, postedPlaces)) return;
       const newCurrentPlace = { ...currentPlace, isviewed };
       const place = await createPlace(newCurrentPlace);
 
@@ -154,18 +156,10 @@ export default function PostForm() {
   const visiblePlaces = postedPlaces.filter((place) => place.currentPlace.isviewed === true);
   const totalPlaces = visiblePlaces.length;
   const totalCost = visiblePlaces.reduce((sum, place) => sum + place.currentPlace.cost, 0);
-  const firstVisitTime = visiblePlaces.reduce(
-    (acc, place) =>
-      isBefore(acc, place.currentPlace.visit_start_time)
-        ? acc
-        : place.currentPlace.visit_start_time,
-    new Date()
-  );
-  const lastVisitTime = visiblePlaces.reduce(
-    (acc, place) =>
-      isAfter(acc, place.currentPlace.visit_end_time) ? acc : place.currentPlace.visit_end_time,
-    new Date()
-  );
+  const startTimes = visiblePlaces.map((p) => p.currentPlace.visit_start_time);
+  const endTimes = visiblePlaces.map((p) => p.currentPlace.visit_end_time);
+  const firstVisitTime = startTimes.length > 0 ? min(startTimes) : null;
+  const lastVisitTime = endTimes.length > 0 ? max(endTimes) : null;
 
   return (
     <div className="space-y-8">
@@ -218,8 +212,8 @@ export default function PostForm() {
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold">
-              {visiblePlaces.length
-                ? differenceInCalendarDays(firstVisitTime, lastVisitTime) + 1
+              {firstVisitTime && lastVisitTime
+                ? differenceInCalendarDays(lastVisitTime, firstVisitTime) + 1
                 : 0}
             </div>
             <div className="text-sm opacity-90">총 여행 기간 (일)</div>
