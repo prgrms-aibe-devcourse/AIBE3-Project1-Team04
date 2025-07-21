@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-function usePostEdit_getData() {
+function usePostEdit() {
   const params = useSearchParams();
   const postId = useRef<string>(params.get('post')!);
   const router = useRouter();
@@ -54,4 +54,4 @@ function usePostEdit_getData() {
   return { postId: postId.current, postData, setPostData, regions, router };
 }
 
-export default usePostEdit_getData;
+export default usePostEdit;
