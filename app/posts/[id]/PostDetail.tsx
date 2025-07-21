@@ -14,6 +14,8 @@ import { DUMMY_IMAGE_URL } from '@/consts';
 import PostReviewForm from '@/components/posts/PostReviewForm';
 import { PostWithUserAction } from '@/types/post.type';
 import { compareAsc } from 'date-fns';
+import { handleShare } from '@/lib/share';
+import { FaRegStar, FaStar } from 'react-icons/fa';
 
 interface PostDetailProps {
   postId: string;
@@ -23,9 +25,10 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const [activeTab, setActiveTab] = useState<'itinerary' | 'content'>('itinerary');
   const [likes, setLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [post, setPost] = useState<PostWithUserAction | null>(null);
-  const { getPostWithUserAction } = usePost();
+  const { getPostWithUserAction, togglePostLike, togglePostFavorite } = usePost();
 
   const fetchPostWithPlace = useCallback(async () => {
     try {
@@ -38,7 +41,9 @@ export default function PostDetail({ postId }: PostDetailProps) {
           ),
         };
         setPost(sortedPostByPlace);
-        setLikes(sortedPostByPlace.like_count);
+        setLikes(sortedPostByPlace.like_count ?? 0);
+        setIsLiked(sortedPostByPlace.liked_by_me ?? false);
+        setIsFavorite(sortedPostByPlace.favorite_by_me ?? false);
       }
     } catch (error) {
       console.error('해당 여행지를 가져오는 중 오류 발생:', error);
@@ -51,25 +56,51 @@ export default function PostDetail({ postId }: PostDetailProps) {
 
   if (!post) return;
 
-  const handleLike = () => {
-    if (isLiked) {
-      setLikes((prev) => prev - 1);
-      setIsLiked(false);
-    } else {
-      setLikes((prev) => prev + 1);
-      setIsLiked(true);
-    }
+  /** 좋아요 기능 */
+  const handleLikeToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    // 실제 구현시 API 호출
-    console.log('Post like toggled:', postId, !isLiked);
+    await togglePostLike(post.id, isLiked, () => {
+      setIsLiked(!isLiked);
+      setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+    });
+  };
+
+  /** 즐겨찾기 기능 */
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    await togglePostFavorite(post.id, isFavorite, () => {
+      setIsFavorite(!isFavorite);
+    });
   };
 
   const handlePlaceClick = (place: PlaceWithUserAction) => {
     setSelectedPlace(place);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseModal = (
+    placeId: number,
+    like_count: number,
+    liked_by_me: boolean,
+    favorite_by_me: boolean
+  ) => {
+    changePlaceWithUserAction(placeId, like_count, liked_by_me, favorite_by_me);
     setSelectedPlace(null);
+  };
+
+  const changePlaceWithUserAction = (
+    placeId: number,
+    like_count: number,
+    liked_by_me: boolean,
+    favorite_by_me: boolean
+  ) => {
+    const newPlaces = post.places.map((place) =>
+      place.id === placeId ? { ...place, like_count, liked_by_me, favorite_by_me } : place
+    );
+    setPost((prev) => (prev ? { ...prev, places: newPlaces } : prev));
   };
 
   return (
@@ -94,7 +125,17 @@ export default function PostDetail({ postId }: PostDetailProps) {
               alt={post.title}
               className="w-full h-full object-cover object-top"
             />
-            <div className="absolute top-4 left-4">
+            <div className="absolute top-4 left-4 flex items-center gap-2">
+              <button
+                onClick={handleFavoriteToggle}
+                className="w-6 h-6 flex items-center justify-center rounded-full border border-yellow-400 bg-white/80 shadow-sm"
+              >
+                {isFavorite ? (
+                  <FaStar className="text-yellow-400 w-4 h-4" />
+                ) : (
+                  <FaRegStar className="text-yellow-400 w-4 h-4" />
+                )}
+              </button>
               <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                 {formatCategories(post.places)}
               </span>
@@ -141,7 +182,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
             <div className="flex items-center justify-between border-t border-gray-200 pt-4">
               <div className="flex items-center gap-3">
                 <button
-                  onClick={handleLike}
+                  onClick={handleLikeToggle}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
                     isLiked
                       ? 'bg-red-500 text-white hover:bg-red-600'
@@ -155,14 +196,14 @@ export default function PostDetail({ postId }: PostDetailProps) {
                   ></i>
                   좋아요 {likes}
                 </button>
-                <button className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 whitespace-nowrap cursor-pointer">
+                <button
+                  className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-full hover:bg-blue-100 whitespace-nowrap cursor-pointer"
+                  onClick={handleShare}
+                >
                   <i className="ri-share-line w-5 h-5 flex items-center justify-center"></i>
                   공유하기
                 </button>
               </div>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 whitespace-nowrap cursor-pointer">
-                여행 일정 복사
-              </button>
             </div>
           </div>
         </div>
@@ -171,7 +212,11 @@ export default function PostDetail({ postId }: PostDetailProps) {
           <div className="p-6">
             <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-full">
               <button
-                onClick={() => setActiveTab('itinerary')}
+                onClick={async () => {
+                  if (activeTab === 'itinerary') return;
+                  await fetchPostWithPlace();
+                  setActiveTab('itinerary');
+                }}
                 className={`flex-1 py-2 px-4 rounded-full text-sm font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   activeTab === 'itinerary'
                     ? 'bg-white text-blue-600 shadow-sm'
@@ -196,7 +241,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
               {activeTab === 'itinerary' && (
                 <ItineraryTab post={post} onPlaceClick={handlePlaceClick} />
               )}
-              {activeTab === 'content' && <ContentTab post={post} />}
+              {activeTab === 'content' && <ContentTab post={post} setPost={setPost} />}
             </div>
           </div>
         </div>

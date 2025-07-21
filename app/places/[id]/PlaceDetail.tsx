@@ -8,28 +8,30 @@ import { format } from 'date-fns';
 import { formatCost } from '@/lib/place';
 import PlaceReviewForm from '@/components/places/PlaceReviewForm';
 import { DUMMY_IMAGE_URL } from '@/consts';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/lib/supabaseClient';
+import { FaRegStar, FaStar } from 'react-icons/fa';
+import { handleShare } from '@/lib/share';
 
 interface PlaceDetailProps {
   placeId: string;
 }
 
 export default function PlaceDetail({ placeId }: PlaceDetailProps) {
-  const { user } = useAuth();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [place, setPlace] = useState<PlaceWithUserAction | null>();
-  const [likes, setLikes] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
+  const [likes, setLikes] = useState<number>(0);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const { getPlaceWithUserAction } = usePlace();
+  const { togglePlaceLike, togglePlaceFavorite } = usePlace();
 
   const fetchPlace = useCallback(async () => {
     try {
       const data = await getPlaceWithUserAction(placeId);
       if (data) {
         setPlace(data);
-        setLikes(data.like_count);
-        setIsLiked(data.liked_by_me);
+        setLikes(data.like_count ?? 0);
+        setIsLiked(data.liked_by_me ?? false);
+        setIsFavorite(data.favorite_by_me ?? false);
       }
     } catch (error) {
       console.error('해당 여행지를 가져오는 중 오류 발생:', error);
@@ -40,36 +42,27 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
     fetchPlace();
   }, [fetchPlace]);
 
-  const handleLike = async () => {
-    if (!user) return;
+  /** 좋아요 기능 */
+  const handleLikeToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    // 이미 좋아요 눌렸으면 취소: 삭제
-    if (isLiked) {
-      const { error } = await supabase
-        .from('place_likes')
-        .delete()
-        .eq('place_id', placeId)
-        .eq('user_id', user.id);
+    if (!place) return;
+    await togglePlaceLike(place.id, isLiked, () => {
+      setIsLiked(!isLiked);
+      setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+    });
+  };
 
-      if (error) {
-        console.error('좋아요 취소 중 에러', error);
-      } else {
-        setLikes((like) => like - 1);
-        setIsLiked(false);
-      }
-      // 좋아요 추가: 삽입
-    } else {
-      const { error } = await supabase
-        .from('place_likes')
-        .insert({ place_id: placeId, user_id: user.id });
+  /** 즐겨찾기 기능 */
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-      if (error) {
-        console.error('좋아요 중 에러', error);
-      } else {
-        setLikes((like) => like + 1);
-        setIsLiked(true);
-      }
-    }
+    if (!place) return;
+    await togglePlaceFavorite(place.id, isFavorite, () => {
+      setIsFavorite(!isFavorite);
+    });
   };
 
   if (!place) return;
@@ -83,6 +76,22 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="flex items-center mb-2">
+                  <button
+                    onClick={handleFavoriteToggle}
+                    className={`flex items-center justify-center px-2 py-2 text-sm font-medium rounded-full transition mr-3
+                      ${
+                        isFavorite
+                          ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }
+                    `}
+                  >
+                    {isFavorite ? (
+                      <FaStar className="text-yellow-400 inline w-4 h-4" />
+                    ) : (
+                      <FaRegStar className="text-yellow-400 inline w-4 h-4" />
+                    )}
+                  </button>
                   <span className="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-full mr-3">
                     {place.category}
                   </span>
@@ -186,7 +195,7 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <button
-                    onClick={handleLike}
+                    onClick={handleLikeToggle}
                     className={`flex items-center gap-2 px-4 py-2 rounded-full transition-colors whitespace-nowrap cursor-pointer ${
                       isLiked
                         ? 'bg-red-500 text-white hover:bg-red-600'
@@ -200,14 +209,14 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
                     ></i>
                     좋아요 {likes}
                   </button>
-                  <button className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap">
+                  <button
+                    className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap"
+                    onClick={handleShare}
+                  >
                     <i className="ri-share-line mr-2 w-5 h-5 flex items-center justify-center"></i>
                     공유하기
                   </button>
                 </div>
-                <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap">
-                  여행 계획에 추가
-                </button>
               </div>
             </div>
           </div>
