@@ -13,14 +13,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePost } from '@/hooks/usePost';
 import { useRouter } from 'next/navigation';
 import { isEqual } from 'lodash';
-import { getRepresentativePlaceId } from '@/lib/post';
+import { getRepresentativePlaceId, validatePlace } from '@/lib/post';
+import { PlaceInputType } from '@/types/place.type';
 
 export default function PostForm() {
   const [postData, setPostData] = useState(INIT_POST_FORM_VALUE);
 
   const router = useRouter();
   const { user } = useAuth();
-  const { fetchPlaceCities } = useRegion();
+  const { cities, fetchPlaceCities } = useRegion();
   const { createPost, linkPostToPlaces } = usePost();
   const {
     createPlace,
@@ -54,6 +55,7 @@ export default function PostForm() {
     e.preventDefault();
 
     try {
+      if (!validatePlace(currentPlace, postedPlaces)) return;
       const newCurrentPlace = { ...currentPlace, isviewed };
       const place = await createPlace(newCurrentPlace);
 
