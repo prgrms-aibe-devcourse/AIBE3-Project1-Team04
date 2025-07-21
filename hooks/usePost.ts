@@ -2,12 +2,17 @@ import { SortOption } from '@/components/posts/SortButton';
 import { supabase } from '@/lib/supabaseClient';
 import { PostWithUserAction, PostReview, PostInputType, FilterOption } from '@/types/post.type';
 import { useCallback } from 'react';
+import { useAuth } from './useAuth';
 
 export const usePost = () => {
+  const { user } = useAuth();
+
   const getAllPostsWithUserAction = useCallback(
     async (sortBy?: SortOption, filter?: FilterOption): Promise<PostWithUserAction[]> => {
       try {
-        let query = supabase.rpc('get_posts_with_user_action');
+        let query = supabase.rpc('get_posts_with_user_action', {
+          _user_id: user?.id ?? null,
+        });
 
         if (sortBy) {
           switch (sortBy) {
@@ -38,9 +43,17 @@ export const usePost = () => {
         }
 
         // 사용자 정보 없이 포스트만 반환
-        const placesWithUserActions = ((data as PostWithUserAction[]) || []).map((post) => ({
+        let placesWithUserActions = ((data as PostWithUserAction[]) || []).map((post) => ({
           ...post,
         }));
+
+        if (sortBy === 'cost') {
+          placesWithUserActions = placesWithUserActions.slice().sort((a, b) => {
+            const aCost = a.places.reduce((sum, place) => sum + (place.cost || 0), 0);
+            const bCost = b.places.reduce((sum, place) => sum + (place.cost || 0), 0);
+            return aCost - bCost;
+          });
+        }
 
         return placesWithUserActions;
       } catch (error) {
@@ -48,14 +61,16 @@ export const usePost = () => {
         return [];
       }
     },
-    []
+    [user]
   );
 
   const getPostWithUserAction = useCallback(
     async (postId: string): Promise<PostWithUserAction | null> => {
       try {
         const { data, error } = await supabase
-          .rpc('get_posts_with_user_action')
+          .rpc('get_posts_with_user_action', {
+            _user_id: user?.id ?? null,
+          })
           .eq('id', postId)
           .single();
         if (error) {
@@ -70,7 +85,7 @@ export const usePost = () => {
         return null;
       }
     },
-    []
+    [user]
   );
 
   const getPostReviews = useCallback(async (postId: string): Promise<PostReview[]> => {
