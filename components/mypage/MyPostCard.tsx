@@ -1,6 +1,6 @@
 'use client';
 
-import { MyPostViewType } from '@/lib/database';
+import { MyPostViewType } from '@/types/mypage.type';
 import { formatCost, getStayDuration_withTime } from '@/lib/place';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -44,7 +44,10 @@ export default function MyPostCard({
           <div className="flex items-center gap-2 mb-3">
             <i className="ri-map-pin-line w-4 h-4 flex items-center justify-center text-gray-500"></i>
             <span className="text-gray-600 text-sm">
-              {region_states.map(({ f1, f2 }) => `${f1} ${f2}`).join(', ')}
+              {region_states.map((region_state) => {
+                const [f1, f2] = region_state.split(':');
+                return `${f1} ${f2}`;
+              })}
             </span>
           </div>
 
