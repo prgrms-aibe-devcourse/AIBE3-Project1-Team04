@@ -5,7 +5,7 @@ import { formatCost, getStayDuration } from '@/lib/place';
 import { PlaceWithUserAction } from '@/types/place.type';
 import { PostWithUserAction } from '@/types/post.type';
 import { format } from 'date-fns';
-import { uniqBy } from 'lodash';
+import { uniq, uniqBy } from 'lodash';
 
 interface ItineraryTabProps {
   post: PostWithUserAction;
@@ -15,6 +15,7 @@ interface ItineraryTabProps {
 export default function ItineraryTab({ post, onPlaceClick }: ItineraryTabProps) {
   // 실제 예산 계산 (places 배열의 cost 합계)
   const actualTotalBudget = post.places.reduce((sum, place) => sum + place.cost, 0);
+  const categories = uniq(post.places.map((place) => place.category));
   const regions = uniqBy(
     post.places.map((place) => ({ state: place.state_name, city: place.city_name })),
     (place) => `${place.state}-${place.city}` // 복합 키 기준으로 중복 제거
@@ -75,12 +76,12 @@ export default function ItineraryTab({ post, onPlaceClick }: ItineraryTabProps) 
               카테고리
             </h4>
             <div className="flex flex-wrap gap-2">
-              {post.places.map((place) => (
+              {categories.map((category) => (
                 <span
-                  key={place.id}
+                  key={category}
                   className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium"
                 >
-                  {place.category}
+                  {category}
                 </span>
               ))}
             </div>
