@@ -2,12 +2,17 @@ import { SortOption } from '@/components/posts/SortButton';
 import { supabase } from '@/lib/supabaseClient';
 import { PostWithUserAction, PostReview, PostInputType, FilterOption } from '@/types/post.type';
 import { useCallback } from 'react';
+import { useAuth } from './useAuth';
 
 export const usePost = () => {
+  const { user } = useAuth();
+
   const getAllPostsWithUserAction = useCallback(
     async (sortBy?: SortOption, filter?: FilterOption): Promise<PostWithUserAction[]> => {
       try {
-        let query = supabase.rpc('get_posts_with_user_action');
+        let query = supabase.rpc('get_posts_with_user_action', {
+          _user_id: user?.id ?? null,
+        });
 
         if (sortBy) {
           switch (sortBy) {
@@ -48,14 +53,16 @@ export const usePost = () => {
         return [];
       }
     },
-    []
+    [user]
   );
 
   const getPostWithUserAction = useCallback(
     async (postId: string): Promise<PostWithUserAction | null> => {
       try {
         const { data, error } = await supabase
-          .rpc('get_posts_with_user_action')
+          .rpc('get_posts_with_user_action', {
+            _user_id: user?.id ?? null,
+          })
           .eq('id', postId)
           .single();
         if (error) {
@@ -70,7 +77,7 @@ export const usePost = () => {
         return null;
       }
     },
-    []
+    [user]
   );
 
   const getPostReviews = useCallback(async (postId: string): Promise<PostReview[]> => {

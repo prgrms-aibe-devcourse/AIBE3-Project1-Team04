@@ -115,7 +115,6 @@ export default function ContentTab({ post }: ContentTabProps) {
                             />
                           </button>
                         ))}
-                        이미지
                       </div>
                     </div>
                   </div>

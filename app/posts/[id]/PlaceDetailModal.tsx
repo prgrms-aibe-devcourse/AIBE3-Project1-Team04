@@ -127,7 +127,6 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
                         />
                       </button>
                     ))}
-                    이미지
                   </div>
                 </div>
               </div>

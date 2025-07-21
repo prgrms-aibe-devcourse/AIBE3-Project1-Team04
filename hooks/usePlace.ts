@@ -58,7 +58,7 @@ export const usePlace = () => {
         return [];
       }
     },
-    []
+    [user]
   );
 
   /** 여행지 단일 조회 */
@@ -84,7 +84,7 @@ export const usePlace = () => {
         return null;
       }
     },
-    []
+    [user]
   );
 
   /** 여행지 리뷰 조회 */
