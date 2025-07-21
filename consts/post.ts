@@ -1,6 +1,6 @@
-import { SortOption } from '@/types/post.type';
+import { SortOption } from '@/components/posts/SortButton';
 
-export const sortOptions: { label: string; value: SortOption }[] = [
+export const SORT_OPTIONS: { label: string; value: SortOption }[] = [
   { label: '최신순', value: 'latest' },
   { label: '인기순', value: 'popular' },
   { label: '평점순', value: 'rating' },

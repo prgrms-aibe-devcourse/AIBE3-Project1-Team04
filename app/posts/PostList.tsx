@@ -1,10 +1,9 @@
 'use client';
 import PostCard from '@/components/posts/PostCard';
-import SortButton from '@/components/posts/SortButton';
+import SortButton, { SortOption } from '@/components/posts/SortButton';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
-import { sortOptions } from '@/consts/post';
+import { SORT_OPTIONS } from '@/consts/post';
 import { usePost } from '@/hooks/usePost';
-import { SortOption } from '@/types/post.type';
 import { compareAsc } from 'date-fns';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -99,7 +98,7 @@ const PostList = () => {
           </p>
 
           <div className="flex gap-2">
-            {sortOptions.map((opt) => (
+            {SORT_OPTIONS.map((opt) => (
               <SortButton
                 key={opt.value}
                 label={opt.label}

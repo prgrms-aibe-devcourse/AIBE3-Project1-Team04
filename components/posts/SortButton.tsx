@@ -1,4 +1,11 @@
-import { SortButtonProps } from '@/types/post.type';
+interface SortButtonProps {
+  label: string;
+  value: SortOption;
+  selected: boolean;
+  onClick: (value: SortOption) => void;
+}
+
+export type SortOption = 'latest' | 'popular' | 'rating' | 'likes';
 
 const SortButton = ({ label, value, selected, onClick }: SortButtonProps) => (
   <button
