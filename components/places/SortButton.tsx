@@ -5,7 +5,7 @@ interface SortButtonProps {
   onClick: (value: SortOption) => void;
 }
 
-export type SortOption = 'latest' | 'popular' | 'rating' | 'likes';
+export type SortOption = 'latest' | 'popular' | 'rating' | 'likes' | 'cost';
 
 const SortButton = ({ label, value, selected, onClick }: SortButtonProps) => (
   <button
