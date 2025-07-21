@@ -102,3 +102,9 @@ export interface PostedPlace {
   currentPlace: PlaceInputType;
   images: PlaceFileType[];
 }
+
+export interface FilterOption {
+  category?: string;
+  region?: string;
+  term?: string;
+}
