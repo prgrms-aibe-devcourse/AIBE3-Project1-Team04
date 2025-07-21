@@ -36,8 +36,13 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
   return (
     <div
       className="relative border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-      onClick={() => toggleRepresentativePlace(place_id)}
+      onClick={() => place.isviewed && toggleRepresentativePlace(place_id)}
     >
+      {!place.isviewed && (
+        <div className="absolute top-1 left-1 bg-gray-400 text-white text-xs px-2 py-0.5 rounded-full shadow">
+          임시
+        </div>
+      )}
       {place_id === representativePlaceId && (
         <div className="absolute top-1 left-1 bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full shadow">
           대표
