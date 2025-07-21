@@ -36,38 +36,3 @@ export interface MyPlaceViewType {
 }
 
 // -- //
-
-// -- 게시글 수정 타입
-export interface PostEditData {
-  title: string;
-  content: string;
-  stats: {
-    place_count: number; // 연동된 여행지 개수
-    total_days: number; // 총 여행 기간 (일수)
-    total_cost: number; // 총 여행 비용
-  };
-  places: {
-    place_id: number; // places.id
-    place_name: string; // places.name
-    category: string; // public.place_categories enum
-    city_id: number; // places.city_id
-    state_id: number; // places.state_id
-    cost: number; // places.cost
-    images: string[]; // place_images.image_url[]
-    visit_start: string; // places.visit_start_time (ISO timestamp)
-    visit_end: string; // places.visit_end_time   (ISO timestamp)
-    memo: string | null; // places.memo
-  }[];
-}
-
-// -- //
-
-// -- 지역 타입 get_regions RPC 호출 결과
-export interface RegionData {
-  state_name: string; // 예: "서울특별시"
-  city_map: Record<string, string>; // { [cityId]: cityName }
-  // 예: { "10": "종로구", "11": "중구" }
-}
-export type RegionsResponse = Record<string, RegionData>;
-
-// --

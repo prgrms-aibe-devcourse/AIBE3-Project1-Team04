@@ -10,6 +10,7 @@ interface PostPlacesState {
   currentPlace: PlaceInputType;
   images: PlaceFileType[];
   representativePlaceId: number | null;
+  setRepresentativePlaceId: (id: number) => void;
   addPostedPlace: (postedPlace: PostedPlace) => void;
   updatePostedPlace: (updatedPlace: PostedPlace) => void;
   removePostedPlace: (id: number) => void;
@@ -22,6 +23,7 @@ interface PostPlacesState {
   removeImage: (index: number) => void;
   toggleRepresentativeImage: (index: number) => void;
   toggleRepresentativePlace: (id: number) => void;
+  addAllPostedPlaces: (postedPlaces: PostedPlace[]) => void;
 }
 
 export const usePostPlacesStore = create<PostPlacesState>((set) => ({
@@ -35,6 +37,11 @@ export const usePostPlacesStore = create<PostPlacesState>((set) => ({
   },
   images: [],
   representativePlaceId: null,
+  setRepresentativePlaceId: (id) => set(() => ({ representativePlaceId: id })),
+  addAllPostedPlaces: (postedPlaces: PostedPlace[]) =>
+    set(() => ({
+      postedPlaces: sortPlacesByStartTime(postedPlaces),
+    })),
   addPostedPlace: (postedPlace) =>
     set((state) => ({
       postedPlaces: sortPlacesByStartTime([...state.postedPlaces, postedPlace]),

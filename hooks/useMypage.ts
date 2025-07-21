@@ -62,23 +62,28 @@ export const useMypage = () => {
     setMyPostList((prev) => ({
       ...prev,
       viewed: prev.viewed.filter((post) => post.id !== postId),
+      not_viewed: prev.not_viewed.filter((post) => post.id !== postId),
     }));
   };
 
   const deletePlace = async (placeId: number) => {
-    const { error } = await supabase.from('places').delete().eq('id', placeId);
+    const { data: success, error } = await supabase.rpc('delete_place_if_unlinked', {
+      _place_id: placeId,
+    });
+
     if (error) {
-      console.log(error);
-      console.error('여행지 삭제 오류:', error);
-      addModal('여행지 삭제 중 오류가 발생했습니다.');
-      return;
+      console.error('RPC 오류:', error);
     }
 
-    addModal('여행지가 삭제되었습니다.');
-    setMyPlaceList((prev) => ({
-      ...prev,
-      places: prev.places.filter((place) => place.place_id !== placeId),
-    }));
+    if (success) {
+      setMyPlaceList((prev) => ({
+        ...prev,
+        places: prev.places.filter((place) => place.place_id !== placeId),
+      }));
+      addModal('여행지가 삭제되었습니다.');
+    } else {
+      addModal('대표 여행지는 삭제할 수 없습니다.');
+    }
   };
 
   return {

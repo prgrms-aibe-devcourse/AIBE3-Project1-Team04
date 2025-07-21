@@ -38,12 +38,6 @@ function PlaceListTab({
             <i className="ri-map-pin-line w-16 h-16 flex items-center justify-center text-gray-300 mx-auto mb-4 text-4xl"></i>
             <h3 className="text-lg font-medium text-gray-900 mb-2">등록한 여행지가 없습니다</h3>
             <p className="text-gray-500 mb-4">새로운 여행지를 등록해보세요</p>
-            <Link
-              href="/places/create"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 cursor-pointer"
-            >
-              여행지 등록하기
-            </Link>
           </div>
         )}
       </div>

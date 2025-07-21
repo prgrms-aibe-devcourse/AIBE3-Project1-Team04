@@ -1,24 +1,46 @@
-import { PostEditData, RegionsResponse } from '@/types/mypage.type';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+
+export interface GetPostAndPlacesResult {
+  post: {
+    title: string;
+    content: string;
+    representative_place_id: number;
+  };
+  places: Array<{
+    place_id: number;
+    currentPlace: {
+      name: string;
+      category: string;
+      city_id: number;
+      state_id: number;
+      cost: number;
+      visit_start_time: string; // ISO timestamp
+      visit_end_time: string; // ISO timestamp
+      memo: string | null;
+      isviewed: boolean;
+      rep_image_url: string;
+      images: Array<{
+        image_url: string;
+        is_representative: boolean;
+      }>;
+    };
+  }>;
+}
 
 function usePostEdit() {
   const params = useSearchParams();
   const postId = useRef<string>(params.get('post')!);
   const router = useRouter();
-
-  const [postData, setPostData] = useState<PostEditData>({
-    title: '',
-    content: '',
-    stats: {
-      place_count: 0,
-      total_days: 0,
-      total_cost: 0,
+  const [resData, setResData] = useState<GetPostAndPlacesResult>({
+    post: {
+      title: '',
+      content: '',
+      representative_place_id: 0,
     },
     places: [],
   });
-  const [regions, setRegions] = useState<RegionsResponse>({});
 
   useEffect(() => {
     if (!postId.current) {
@@ -29,14 +51,7 @@ function usePostEdit() {
 
   useEffect(() => {
     const getPostData = async () => {
-      const { data: regionData, error: regionError } = await supabase.rpc('get_regions');
-
-      if (regionError) {
-        console.error('RPC 오류:', regionError);
-        return;
-      }
-
-      const { data: postData, error: postError } = await supabase.rpc('get_post_edit_data', {
+      const { data: postData, error: postError } = await supabase.rpc('get_post_and_places_new', {
         _post_id: postId.current,
       });
 
@@ -45,13 +60,12 @@ function usePostEdit() {
         return;
       }
 
-      setRegions(regionData);
-      setPostData(postData);
+      setResData(postData);
     };
     getPostData();
   }, [params]);
 
-  return { postId: postId.current, postData, setPostData, regions, router };
+  return { postId: postId.current, resData, setResData, router };
 }
 
 export default usePostEdit;

@@ -1,8 +1,9 @@
 'use client';
 
 import Header from '@/components/Header';
-import PostForm from './PostForm';
+
 import { Suspense } from 'react';
+import PostForm from './PostForm';
 
 export default function EditPostPage() {
   return (
