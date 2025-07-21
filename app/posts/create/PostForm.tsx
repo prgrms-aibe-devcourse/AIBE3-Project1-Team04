@@ -112,7 +112,7 @@ export default function PostForm() {
       initPlaceFormData();
       cancelEditingPlace();
     } catch (error) {
-      console.error('여행지 수정정 중 오류 발생:', error);
+      console.error('여행지 수정 중 오류 발생:', error);
     }
   };
 
