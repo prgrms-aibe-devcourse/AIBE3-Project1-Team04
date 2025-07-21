@@ -43,9 +43,17 @@ export const usePost = () => {
         }
 
         // 사용자 정보 없이 포스트만 반환
-        const placesWithUserActions = ((data as PostWithUserAction[]) || []).map((post) => ({
+        let placesWithUserActions = ((data as PostWithUserAction[]) || []).map((post) => ({
           ...post,
         }));
+
+        if (sortBy === 'cost') {
+          placesWithUserActions = placesWithUserActions.slice().sort((a, b) => {
+            const aCost = a.places.reduce((sum, place) => sum + (place.cost || 0), 0);
+            const bCost = b.places.reduce((sum, place) => sum + (place.cost || 0), 0);
+            return aCost - bCost;
+          });
+        }
 
         return placesWithUserActions;
       } catch (error) {
