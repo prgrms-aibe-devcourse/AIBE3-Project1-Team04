@@ -37,6 +37,9 @@ export const usePlace = () => {
             case 'likes': //좋아요순
               query = query.order('like_count', { ascending: false });
               break;
+            case 'cost': //비용순
+              query = query.order('cost', { ascending: true, nullsFirst: false });
+              break;
           }
         }
 
