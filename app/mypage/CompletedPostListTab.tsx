@@ -1,8 +1,14 @@
 import Link from 'next/link';
-import { MyPostViewType } from '@/lib/database';
+import { MyPostViewType } from '@/types/mypage.type';
 import MyPostCard from '@/components/mypage/MyPostCard';
 
-function CompletedPostListTab({ postList }: { postList: MyPostViewType[] }) {
+function CompletedPostListTab({
+  postList,
+  deletePost,
+}: {
+  postList: MyPostViewType[];
+  deletePost: (postId: number) => void;
+}) {
   return (
     <>
       <div>
@@ -23,7 +29,10 @@ function CompletedPostListTab({ postList }: { postList: MyPostViewType[] }) {
                   >
                     <i className="ri-edit-line w-4 h-4 flex items-center justify-center text-gray-600"></i>
                   </Link>
-                  <button className="bg-white/90 hover:bg-white p-2 rounded-full shadow-sm cursor-pointer">
+                  <button
+                    className="bg-white/90 hover:bg-white p-2 rounded-full shadow-sm cursor-pointer"
+                    onClick={() => deletePost(post.id)}
+                  >
                     <i className="ri-delete-bin-line w-4 h-4 flex items-center justify-center text-red-600"></i>
                   </button>
                 </div>

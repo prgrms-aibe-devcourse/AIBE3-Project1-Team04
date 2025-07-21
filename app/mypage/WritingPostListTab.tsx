@@ -1,7 +1,13 @@
 import Link from 'next/link';
-import { MyPostViewType } from '@/lib/database';
+import { MyPostViewType } from '@/types/mypage.type';
 
-function WritingPostListTab({ notPostList }: { notPostList: MyPostViewType[] }) {
+function WritingPostListTab({
+  notPostList,
+  deletePost,
+}: {
+  notPostList: MyPostViewType[];
+  deletePost: (postId: number) => void;
+}) {
   return (
     <>
       <div>
@@ -37,7 +43,10 @@ function WritingPostListTab({ notPostList }: { notPostList: MyPostViewType[] }) 
                     >
                       편집
                     </Link>
-                    <button className="px-3 py-1 text-red-600 hover:bg-red-50 rounded cursor-pointer">
+                    <button
+                      className="px-3 py-1 text-red-600 hover:bg-red-50 rounded cursor-pointer"
+                      onClick={() => deletePost(post.id)}
+                    >
                       삭제
                     </button>
                   </div>
