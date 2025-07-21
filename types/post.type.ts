@@ -45,3 +45,5 @@ export interface PostInputType {
   representative_place_id?: number;
   isviewd: boolean;
 }
+
+export type SortOption = 'latest' | 'popular' | 'rating' | 'likes';

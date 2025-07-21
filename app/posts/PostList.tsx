@@ -2,6 +2,7 @@
 import PostCard from '@/components/posts/PostCard';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
 import { usePost } from '@/hooks/usePost';
+import { SortOption } from '@/types/post.type';
 import { compareAsc } from 'date-fns';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -9,11 +10,13 @@ const PostList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedRegion, setSelectedRegion] = useState('전체');
+  const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [posts, setPosts] = useState<any[]>([]);
   const { getAllPostsWithUserAction } = usePost();
+
   const fetchAllPosts = useCallback(async () => {
     try {
-      const data = await getAllPostsWithUserAction();
+      const data = await getAllPostsWithUserAction(sortBy);
       const sortedPostByPlace = data.map((post) => ({
         ...post,
         places: [...post.places].sort((a, b) =>
@@ -24,11 +27,15 @@ const PostList = () => {
     } catch (error) {
       console.error('게시글 목록을 가져오는 중 오류 발생:', error);
     }
-  }, [getAllPostsWithUserAction]);
+  }, [getAllPostsWithUserAction, sortBy]);
 
   useEffect(() => {
     fetchAllPosts();
   }, [fetchAllPosts]);
+
+  const handleSortChange = (newSortBy: SortOption) => {
+    setSortBy(newSortBy);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -90,16 +97,44 @@ const PostList = () => {
           </p>
 
           <div className="flex gap-2">
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                sortBy === 'latest'
+                  ? 'text-blue-600 bg-blue-50 border border-blue-200 rounded-lg'
+                  : 'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'
+              } whitespace-nowrap`}
+              onClick={() => handleSortChange('latest')}
+            >
               최신순
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                sortBy === 'popular'
+                  ? 'text-blue-600 bg-blue-50 border border-blue-200 rounded-lg'
+                  : 'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'
+              } whitespace-nowrap`}
+              onClick={() => handleSortChange('popular')}
+            >
               인기순
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                sortBy === 'rating'
+                  ? 'text-blue-600 bg-blue-50 border border-blue-200 rounded-lg'
+                  : 'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'
+              } whitespace-nowrap`}
+              onClick={() => handleSortChange('rating')}
+            >
               평점순
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">
+            <button
+              className={`px-4 py-2 text-sm font-medium ${
+                sortBy === 'likes'
+                  ? 'text-blue-600 bg-blue-50 border border-blue-200 rounded-lg'
+                  : 'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'
+              } whitespace-nowrap`}
+              onClick={() => handleSortChange('likes')}
+            >
               좋아요순
             </button>
           </div>
