@@ -259,7 +259,7 @@ const PlaceForm = ({ type, callback }: PlaceFormPorps) => {
         <button
           type="button"
           onClick={(e) => {
-            callback(e, false); // true는 임시저장 플래그
+            callback(e, false);
           }}
           className="bg-yellow-500 text-white px-8 py-3 rounded-lg hover:bg-yellow-600 font-medium whitespace-nowrap cursor-pointer"
         >

@@ -151,7 +151,7 @@ export default function PostForm() {
   };
 
   // 여행지 개수와 총 비용 계산
-  const visiblePlaces = postedPlaces.filter((place) => place.currentPlace.isviewed !== false);
+  const visiblePlaces = postedPlaces.filter((place) => place.currentPlace.isviewed === true);
   const totalPlaces = visiblePlaces.length;
   const totalCost = visiblePlaces.reduce((sum, place) => sum + place.currentPlace.cost, 0);
   const firstVisitTime = visiblePlaces.reduce(
