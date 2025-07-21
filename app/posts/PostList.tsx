@@ -124,7 +124,9 @@ const PostList = () => {
               </select>
             </div>
             <button
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg border border-blue-500"
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg border border-blue-500
+              transition-all duration-150
+              hover:bg-blue-600 hover:shadow-lg hover:scale-105"
               onClick={handleSearch}
             >
               검색
