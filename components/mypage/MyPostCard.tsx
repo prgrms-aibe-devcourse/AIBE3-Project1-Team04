@@ -5,19 +5,7 @@ import { formatCost, getStayDuration_withTime } from '@/lib/place';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { DUMMY_IMAGE_URL } from '@/consts';
-import { formatRating } from '@/lib/post';
-
-export const formatCategories = (categories: string[]): string => {
-  if (!categories || categories.length === 0) return '전체';
-  if (categories.length === 1) return categories[0];
-  return `${categories[0]} 외 ${categories.length - 1}개`;
-};
-
-export const formatRegions = (regions: string[]): string => {
-  if (!regions || regions.length === 0) return '지역미정';
-  if (regions.length === 1) return regions[0].split(':').join(' ');
-  return `${regions[0].split(':').join(' ')} 외 ${regions.length - 1}개`;
-};
+import { formatCategories, formatRegions, formatRating } from '@/lib/post';
 
 export default function MyPostCard({
   id,
