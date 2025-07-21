@@ -1,30 +1,57 @@
 'use client';
 
 import { DUMMY_IMAGE_URL } from '@/consts';
+import { usePlace } from '@/hooks/usePlace';
 import { formatCost } from '@/lib/place';
+import { copyPlaceUrlToClipboard } from '@/lib/share';
 import { PlaceWithUserAction } from '@/types/place.type';
 import { format } from 'date-fns';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { FaRegStar, FaStar } from 'react-icons/fa';
 
 interface PlaceDetailModalProps {
   place: PlaceWithUserAction;
-  onClose: () => void;
+  onClose: (
+    placeId: number,
+    like_count: number,
+    liked_by_me: boolean,
+    favorite_by_me: boolean
+  ) => void;
 }
 
 export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [likes, setLikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(place.like_count);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const { togglePlaceLike, togglePlaceFavorite } = usePlace();
 
-  const handleLike = () => {
-    if (isLiked) {
-      setLikes((prev) => prev - 1);
-      setIsLiked(false);
-    } else {
-      setLikes((prev) => prev + 1);
-      setIsLiked(true);
-    }
+  /** 좋아요 기능 */
+  const handleLikeToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    await togglePlaceLike(place.id, isLiked, () => {
+      setIsLiked(!isLiked);
+      setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+    });
   };
+
+  /** 즐겨찾기 기능 */
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    await togglePlaceFavorite(place.id, isFavorite, () => {
+      setIsFavorite(!isFavorite);
+    });
+  };
+
+  useEffect(() => {
+    setLikes(place.like_count ?? 0);
+    setIsLiked(place.liked_by_me ?? false);
+    setIsFavorite(place.favorite_by_me ?? false);
+  }, [place]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -34,6 +61,22 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
             <div className="flex items-start justify-between mb-4">
               <div>
                 <div className="flex items-center mb-2">
+                  <button
+                    onClick={handleFavoriteToggle}
+                    className={`flex items-center justify-center px-2 py-2 text-sm font-medium rounded-full transition mr-3
+                      ${
+                        isFavorite
+                          ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }
+                    `}
+                  >
+                    {isFavorite ? (
+                      <FaStar className="text-yellow-400 inline w-4 h-4" />
+                    ) : (
+                      <FaRegStar className="text-yellow-400 inline w-4 h-4" />
+                    )}
+                  </button>
                   <span className="px-3 py-1 bg-blue-600 text-white text-sm font-medium rounded-full mr-3">
                     {place.category}
                   </span>
@@ -53,7 +96,7 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
               </div>
               <div className="text-right flex flex-col items-end">
                 <button
-                  onClick={onClose}
+                  onClick={() => onClose(place.id, likes, isLiked, isFavorite)}
                   className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer mt-2"
                 >
                   <i className="ri-close-line text-xl"></i>
@@ -66,7 +109,7 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
                   <span className="font-bold text-lg">{place.average_rating}</span>
                   <span className="text-gray-500 ml-1">({place.rating_count})</span>
                 </div>
-                <div className="text-sm text-gray-500">조회수 1250</div>
+                <div className="text-sm text-gray-500">조회수 {place.view_count}</div>
               </div>
             </div>
 
@@ -143,7 +186,7 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <button
-                    onClick={handleLike}
+                    onClick={handleLikeToggle}
                     className={`flex items-center px-4 py-2 rounded-lg transition-colors whitespace-nowrap cursor-pointer ${
                       isLiked
                         ? 'bg-red-500 text-white hover:bg-red-600'
@@ -157,7 +200,10 @@ export default function PlaceDetailModal({ place, onClose }: PlaceDetailModalPro
                     ></i>
                     좋아요 {likes}
                   </button>
-                  <button className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap cursor-pointer">
+                  <button
+                    className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors whitespace-nowrap cursor-pointer"
+                    onClick={() => copyPlaceUrlToClipboard(place.id)}
+                  >
                     <i className="ri-share-line mr-2 w-5 h-5 flex items-center justify-center"></i>
                     공유하기
                   </button>

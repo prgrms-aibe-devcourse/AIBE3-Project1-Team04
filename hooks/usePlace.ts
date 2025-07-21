@@ -273,6 +273,84 @@ export const usePlace = () => {
       throw new Error('스토리지 이미지 삭제 실패: ' + storageDeleteError.message);
   };
 
+  /** 좋아요 토글 */
+  const togglePlaceLike = useCallback(
+    async (
+      placeId: number,
+      isLiked: boolean,
+      onSuccess: () => void,
+      onError?: (error: any) => void
+    ) => {
+      if (!user) return;
+
+      try {
+        if (isLiked) {
+          const { error } = await supabase
+            .from('place_likes')
+            .delete()
+            .eq('place_id', placeId)
+            .eq('user_id', user.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('place_likes')
+            .upsert(
+              { place_id: placeId, user_id: user.id },
+              { onConflict: 'place_id, user_id', ignoreDuplicates: true }
+            );
+
+          if (error) throw error;
+        }
+
+        onSuccess();
+      } catch (error) {
+        console.error('여행지 좋아요 기능 에러:', error);
+        onError?.(error);
+      }
+    },
+    [user]
+  );
+
+  /** 즐겨찾기 토글 */
+  const togglePlaceFavorite = useCallback(
+    async (
+      placeId: number,
+      isFavorite: boolean,
+      onSuccess: () => void,
+      onError?: (error: any) => void
+    ) => {
+      if (!user) return;
+
+      try {
+        if (isFavorite) {
+          const { error } = await supabase
+            .from('place_favorites')
+            .delete()
+            .eq('place_id', placeId)
+            .eq('user_id', user.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('place_favorites')
+            .upsert(
+              { place_id: placeId, user_id: user.id },
+              { onConflict: 'place_id, user_id', ignoreDuplicates: true }
+            );
+
+          if (error) throw error;
+        }
+
+        onSuccess();
+      } catch (error) {
+        console.error('여행지 즐겨찾기 기능 에러:', error);
+        onError?.(error);
+      }
+    },
+    [user]
+  );
+
   return {
     getAllPlacesWithUserAction,
     getPlaceWithUserAction,
@@ -283,5 +361,7 @@ export const usePlace = () => {
     setRepresentativeImage,
     updatePlace,
     deleteAllPlaceImages,
+    togglePlaceLike,
+    togglePlaceFavorite,
   };
 };

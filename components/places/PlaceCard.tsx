@@ -6,49 +6,42 @@ import { getStayDuration } from '@/lib/place';
 import { formatCost } from '@/lib/place';
 import { format } from 'date-fns';
 import { DUMMY_IMAGE_URL } from '@/consts';
-import { useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/hooks/useAuth';
+import { useEffect, useState } from 'react';
+import { usePlace } from '@/hooks/usePlace';
+import { FaRegStar, FaStar } from 'react-icons/fa';
 
 export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
-  const { user } = useAuth();
+  const [likes, setLikes] = useState<number>(0);
+  const [isLiked, setIsLiked] = useState<boolean>(false);
+  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const { togglePlaceLike, togglePlaceFavorite } = usePlace();
 
-  const [likes, setLikes] = useState<number>(place.like_count ?? 0);
-  const [isLiked, setIsLiked] = useState<boolean>(place.liked_by_me ?? false);
-
-  const handleLike = async (e: React.MouseEvent) => {
+  /** 좋아요 기능 */
+  const handleLikeToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) return;
 
-    if (isLiked) {
-      // 이미 좋아요 눌렸으면 취소: 삭제
-      const { error } = await supabase
-        .from('place_likes')
-        .delete()
-        .eq('place_id', place.id)
-        .eq('user_id', user.id);
-
-      if (!error) {
-        setLikes(likes - 1);
-        setIsLiked(false);
-      } else {
-        console.error('좋아요 취소 중 에러', error);
-      }
-    } else {
-      // 좋아요 추가: 삽입
-      const { error } = await supabase
-        .from('place_likes')
-        .insert({ place_id: place.id, user_id: user.id });
-
-      if (!error) {
-        setLikes(likes + 1);
-        setIsLiked(true);
-      } else {
-        console.error('좋아요 중 에러', error);
-      }
-    }
+    await togglePlaceLike(place.id, isLiked, () => {
+      setIsLiked(!isLiked);
+      setLikes((prev) => (isLiked ? prev - 1 : prev + 1));
+    });
   };
+
+  /** 즐겨찾기 기능 */
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    await togglePlaceFavorite(place.id, isFavorite, () => {
+      setIsFavorite(!isFavorite);
+    });
+  };
+
+  useEffect(() => {
+    setLikes(place.like_count ?? 0);
+    setIsLiked(place.liked_by_me ?? false);
+    setIsFavorite(place.favorite_by_me ?? false);
+  }, [place]);
 
   return (
     <Link href={`/places/${place.id}`}>
@@ -59,7 +52,17 @@ export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
             alt={place?.name || '장소 이미지'}
             className="w-full h-48 object-cover object-top"
           />
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 flex items-center gap-2">
+            <button
+              onClick={handleFavoriteToggle}
+              className="w-6 h-6 flex items-center justify-center rounded-full border border-yellow-400 bg-white/80 shadow-sm"
+            >
+              {isFavorite ? (
+                <FaStar className="text-yellow-400 w-4 h-4" />
+              ) : (
+                <FaRegStar className="text-yellow-400 w-4 h-4" />
+              )}
+            </button>
             <span className="px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded-full">
               {place.category}
             </span>
@@ -113,7 +116,7 @@ export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
               </div>
               <button
                 type="button"
-                onClick={handleLike}
+                onClick={handleLikeToggle}
                 className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-colors ${
                   isLiked ? 'bg-red-50 text-red-600' : 'text-gray-500 hover:bg-gray-50'
                 }`}

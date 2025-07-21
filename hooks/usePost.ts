@@ -168,6 +168,84 @@ export const usePost = () => {
     }
   }, []);
 
+  /** 좋아요 토글 */
+  const togglePostLike = useCallback(
+    async (
+      postId: number,
+      isLiked: boolean,
+      onSuccess: () => void,
+      onError?: (error: any) => void
+    ) => {
+      if (!user) return;
+
+      try {
+        if (isLiked) {
+          const { error } = await supabase
+            .from('post_likes')
+            .delete()
+            .eq('post_id', postId)
+            .eq('user_id', user.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('post_likes')
+            .upsert(
+              { post_id: postId, user_id: user.id },
+              { onConflict: 'post_id, user_id', ignoreDuplicates: true }
+            );
+
+          if (error) throw error;
+        }
+
+        onSuccess();
+      } catch (error) {
+        console.error('게시글 좋아요 기능 에러:', error);
+        onError?.(error);
+      }
+    },
+    [user]
+  );
+
+  /** 즐겨찾기 토글 */
+  const togglePostFavorite = useCallback(
+    async (
+      postId: number,
+      isFavorite: boolean,
+      onSuccess: () => void,
+      onError?: (error: any) => void
+    ) => {
+      if (!user) return;
+
+      try {
+        if (isFavorite) {
+          const { error } = await supabase
+            .from('post_favorites')
+            .delete()
+            .eq('post_id', postId)
+            .eq('user_id', user.id);
+
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from('post_favorites')
+            .upsert(
+              { post_id: postId, user_id: user.id },
+              { onConflict: 'post_id, user_id', ignoreDuplicates: true }
+            );
+
+          if (error) throw error;
+        }
+
+        onSuccess();
+      } catch (error) {
+        console.error('게시글 즐겨찾기 기능 에러:', error);
+        onError?.(error);
+      }
+    },
+    [user]
+  );
+
   return {
     getAllPostsWithUserAction,
     getPostWithUserAction,
@@ -175,5 +253,7 @@ export const usePost = () => {
     createPostReivew,
     createPost,
     linkPostToPlaces,
+    togglePostLike,
+    togglePostFavorite,
   };
 };
