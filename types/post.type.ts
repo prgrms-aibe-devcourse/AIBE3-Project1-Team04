@@ -46,4 +46,11 @@ export interface PostInputType {
   isviewd: boolean;
 }
 
+export interface SortButtonProps {
+  label: string;
+  value: SortOption;
+  selected: boolean;
+  onClick: (value: SortOption) => void;
+}
+
 export type SortOption = 'latest' | 'popular' | 'rating' | 'likes';

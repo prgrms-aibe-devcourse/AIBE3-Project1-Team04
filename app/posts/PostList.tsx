@@ -1,6 +1,8 @@
 'use client';
 import PostCard from '@/components/posts/PostCard';
+import SortButton from '@/components/posts/SortButton';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
+import { sortOptions } from '@/consts/post';
 import { usePost } from '@/hooks/usePost';
 import { SortOption } from '@/types/post.type';
 import { compareAsc } from 'date-fns';
@@ -97,46 +99,15 @@ const PostList = () => {
           </p>
 
           <div className="flex gap-2">
-            <button
-              className={`px-4 py-2 text-sm font-medium ${
-                sortBy === 'latest'
-                  ? 'text-blue-600 bg-blue-50 border border-blue-200 rounded-lg'
-                  : 'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'
-              } whitespace-nowrap`}
-              onClick={() => handleSortChange('latest')}
-            >
-              최신순
-            </button>
-            <button
-              className={`px-4 py-2 text-sm font-medium ${
-                sortBy === 'popular'
-                  ? 'text-blue-600 bg-blue-50 border border-blue-200 rounded-lg'
-                  : 'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'
-              } whitespace-nowrap`}
-              onClick={() => handleSortChange('popular')}
-            >
-              인기순
-            </button>
-            <button
-              className={`px-4 py-2 text-sm font-medium ${
-                sortBy === 'rating'
-                  ? 'text-blue-600 bg-blue-50 border border-blue-200 rounded-lg'
-                  : 'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'
-              } whitespace-nowrap`}
-              onClick={() => handleSortChange('rating')}
-            >
-              평점순
-            </button>
-            <button
-              className={`px-4 py-2 text-sm font-medium ${
-                sortBy === 'likes'
-                  ? 'text-blue-600 bg-blue-50 border border-blue-200 rounded-lg'
-                  : 'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'
-              } whitespace-nowrap`}
-              onClick={() => handleSortChange('likes')}
-            >
-              좋아요순
-            </button>
+            {sortOptions.map((opt) => (
+              <SortButton
+                key={opt.value}
+                label={opt.label}
+                value={opt.value}
+                selected={sortBy === opt.value}
+                onClick={handleSortChange}
+              />
+            ))}
           </div>
         </div>
 
