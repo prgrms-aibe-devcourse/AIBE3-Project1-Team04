@@ -246,6 +246,18 @@ export const usePost = () => {
     [user]
   );
 
+  /** 게시글글 조회 */
+  const viewPost = useCallback(
+    async (postId: string) => {
+      const { error } = await supabase
+        .from('post_view_logs')
+        .insert({ post_id: postId, user_id: user?.id ?? null });
+
+      if (error) throw error;
+    },
+    [user]
+  );
+
   return {
     getAllPostsWithUserAction,
     getPostWithUserAction,
@@ -255,5 +267,6 @@ export const usePost = () => {
     linkPostToPlaces,
     togglePostLike,
     togglePostFavorite,
+    viewPost,
   };
 };

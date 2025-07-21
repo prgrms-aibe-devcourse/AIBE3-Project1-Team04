@@ -28,7 +28,21 @@ export default function PostDetail({ postId }: PostDetailProps) {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [selectedPlace, setSelectedPlace] = useState<any>(null);
   const [post, setPost] = useState<PostWithUserAction | null>(null);
-  const { getPostWithUserAction, togglePostLike, togglePostFavorite } = usePost();
+  const { getPostWithUserAction, togglePostLike, togglePostFavorite, viewPost } = usePost();
+
+  const logPostView = useCallback(async () => {
+    if (!postId) return;
+    try {
+      await viewPost(postId);
+    } catch (error) {
+      console.error('해당 게시글을 조회하는 중 오류 발생:', error);
+    }
+  }, [postId, viewPost]);
+
+  useEffect(() => {
+    console.log('ttt');
+    logPostView();
+  }, [logPostView]);
 
   const fetchPostWithPlace = useCallback(async () => {
     try {

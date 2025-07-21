@@ -351,6 +351,18 @@ export const usePlace = () => {
     [user]
   );
 
+  /** 여행지 조회 */
+  const viewPlace = useCallback(
+    async (placeId: string) => {
+      const { error } = await supabase
+        .from('place_view_logs')
+        .insert({ place_id: placeId, user_id: user?.id ?? null });
+
+      if (error) throw error;
+    },
+    [user]
+  );
+
   return {
     getAllPlacesWithUserAction,
     getPlaceWithUserAction,
@@ -363,5 +375,6 @@ export const usePlace = () => {
     deleteAllPlaceImages,
     togglePlaceLike,
     togglePlaceFavorite,
+    viewPlace,
   };
 };

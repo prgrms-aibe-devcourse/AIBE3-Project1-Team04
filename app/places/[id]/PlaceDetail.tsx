@@ -21,8 +21,7 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
   const [likes, setLikes] = useState<number>(0);
   const [isLiked, setIsLiked] = useState<boolean>(false);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const { getPlaceWithUserAction } = usePlace();
-  const { togglePlaceLike, togglePlaceFavorite } = usePlace();
+  const { getPlaceWithUserAction, togglePlaceLike, togglePlaceFavorite, viewPlace } = usePlace();
 
   const fetchPlace = useCallback(async () => {
     try {
@@ -37,6 +36,18 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
       console.error('해당 여행지를 가져오는 중 오류 발생:', error);
     }
   }, [placeId, getPlaceWithUserAction]);
+
+  const logPlaceView = useCallback(async () => {
+    if (!placeId) return;
+    try {
+      await viewPlace(placeId);
+    } catch (error) {
+      console.error('해당 여행지를 조회하는 중 오류 발생:', error);
+    }
+  }, [placeId, viewPlace]);
+  useEffect(() => {
+    logPlaceView();
+  }, [logPlaceView]);
 
   useEffect(() => {
     fetchPlace();
