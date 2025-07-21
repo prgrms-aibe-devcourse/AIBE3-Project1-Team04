@@ -1,8 +1,9 @@
 import { DUMMY_IMAGE_URL, PLACE_STATES } from '@/consts';
+import { usePlace } from '@/hooks/usePlace';
 import { useRegion } from '@/hooks/useRegion';
 import { formatCost } from '@/lib/place';
 import { usePostPlacesStore } from '@/stores/PostPlacesStore';
-import { PostedPlace } from '@/types/place.type';
+import { PlaceInputType, PostedPlace } from '@/types/place.type';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -16,6 +17,21 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
   const setEditingPlace = usePostPlacesStore((state) => state.setEditingPlace);
   const representativePlaceId = usePostPlacesStore((state) => state.representativePlaceId);
   const toggleRepresentativePlace = usePostPlacesStore((state) => state.toggleRepresentativePlace);
+  const { updatePlace } = usePlace();
+
+  const handleRemove = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+
+    if (!postedPlace) return;
+    try {
+      const newPlace: PlaceInputType = { ...place };
+      newPlace.isviewed = false;
+      await updatePlace(place_id, newPlace);
+      removePostedPlace(place_id);
+    } catch (error) {
+      console.error('여행지 삭제제 중 오류 발생:', error);
+    }
+  };
 
   return (
     <div
@@ -88,10 +104,7 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
                   <i className="ri-edit-line w-4 h-4 flex items-center justify-center"></i>
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removePostedPlace(place_id);
-                  }}
+                  onClick={handleRemove}
                   className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
                   title="삭제"
                 >
