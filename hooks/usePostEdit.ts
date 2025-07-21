@@ -60,7 +60,6 @@ function usePostEdit() {
         return;
       }
 
-      console.log(postData);
       setResData(postData);
     };
     getPostData();

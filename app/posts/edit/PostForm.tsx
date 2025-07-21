@@ -123,7 +123,6 @@ export default function PostForm() {
         memo: currentPlace.memo,
         isviewed,
       };
-      console.log('place : ', newCurrentPlace);
 
       const place = await updatePlace(editingPlaceId, newCurrentPlace);
       const postedPlace = postedPlaces.find((place) => place.place_id === editingPlaceId)!;
@@ -185,7 +184,6 @@ export default function PostForm() {
 
       // data는 VOID 반환이기 때문에 undefined,
       // 만약 성공 후 추가 작업 (리다이렉트나 스낵바 표시 등)
-      console.log('게시글이 성공적으로 업데이트되었습니다.');
 
       router.push(`/posts/${postId}`);
     } catch (error) {

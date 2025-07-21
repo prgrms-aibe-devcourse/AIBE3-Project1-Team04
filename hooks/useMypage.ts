@@ -81,10 +81,8 @@ export const useMypage = () => {
         places: prev.places.filter((place) => place.place_id !== placeId),
       }));
       addModal('여행지가 삭제되었습니다.');
-      console.log('삭제 완료');
     } else {
       addModal('대표 여행지는 삭제할 수 없습니다.');
-      console.log('삭제 불가: 게시글이 대표 여행지로 사용 중');
     }
   };
 
