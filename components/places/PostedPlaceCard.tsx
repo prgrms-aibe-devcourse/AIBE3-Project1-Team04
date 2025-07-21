@@ -1,8 +1,9 @@
 import { DUMMY_IMAGE_URL, PLACE_STATES } from '@/consts';
+import { usePlace } from '@/hooks/usePlace';
 import { useRegion } from '@/hooks/useRegion';
 import { formatCost } from '@/lib/place';
 import { usePostPlacesStore } from '@/stores/PostPlacesStore';
-import { PostedPlace } from '@/types/place.type';
+import { PlaceInputType, PostedPlace } from '@/types/place.type';
 import { format } from 'date-fns';
 import React from 'react';
 
@@ -16,12 +17,32 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
   const setEditingPlace = usePostPlacesStore((state) => state.setEditingPlace);
   const representativePlaceId = usePostPlacesStore((state) => state.representativePlaceId);
   const toggleRepresentativePlace = usePostPlacesStore((state) => state.toggleRepresentativePlace);
+  const { updatePlace } = usePlace();
+
+  const handleRemove = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+
+    if (!postedPlace) return;
+    try {
+      const newPlace: PlaceInputType = { ...place };
+      newPlace.isviewed = false;
+      await updatePlace(place_id, newPlace);
+      removePostedPlace(place_id);
+    } catch (error) {
+      console.error('여행지 삭제제 중 오류 발생:', error);
+    }
+  };
 
   return (
     <div
       className="relative border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-      onClick={() => toggleRepresentativePlace(place_id)}
+      onClick={() => place.isviewed && toggleRepresentativePlace(place_id)}
     >
+      {!place.isviewed && (
+        <div className="absolute top-1 left-1 bg-gray-400 text-white text-xs px-2 py-0.5 rounded-full shadow">
+          임시
+        </div>
+      )}
       {place_id === representativePlaceId && (
         <div className="absolute top-1 left-1 bg-yellow-400 text-white text-xs px-2 py-0.5 rounded-full shadow">
           대표
@@ -88,10 +109,7 @@ const PostedPlaceCard = ({ postedPlace }: { postedPlace: PostedPlace }) => {
                   <i className="ri-edit-line w-4 h-4 flex items-center justify-center"></i>
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removePostedPlace(place_id);
-                  }}
+                  onClick={handleRemove}
                   className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
                   title="삭제"
                 >

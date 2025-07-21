@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function PlaceCard({ place }: { place: PlaceWithUserAction }) {
   const { user } = useAuth();
+
   const [likes, setLikes] = useState<number>(place.like_count ?? 0);
   const [isLiked, setIsLiked] = useState<boolean>(place.liked_by_me ?? false);
 
