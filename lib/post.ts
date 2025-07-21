@@ -8,6 +8,11 @@ export const formatCategories = (places: PlaceWithUserAction[]): string => {
   return `${categories[0]} 외 ${categories.length - 1}개`;
 };
 
+export const formatRating = (rating: number): string => {
+  if (rating === 0) return '0';
+  return rating.toFixed(1);
+};
+
 export const formatRegions = (places: PlaceWithUserAction[]): string => {
   const regions = uniqBy(
     places.map((place) => ({ state: place.state_name, city: place.city_name })),

@@ -14,6 +14,7 @@ export interface MyPostViewType {
   first_start_time: string; // 가장 빠른 방문 시작 시간 (ISO string) or null
   last_end_time: string; // 가장 늦은 방문 종료 시간 (ISO string) or null
   categories: string[];
+  thumbnail_url: string;
 }
 
 export interface MyPlaceViewType {
@@ -31,6 +32,7 @@ export interface MyPlaceViewType {
   review_rate: number; // NUMERIC
   all_images: string[]; // TEXT[] (URL 문자열 배열)
   region_states: string[]; // TEXT[] ("region:state" 문자열 배열)
+  thumbnail_url: string;
 }
 
 // -- //
