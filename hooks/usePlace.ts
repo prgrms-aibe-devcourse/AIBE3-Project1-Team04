@@ -10,12 +10,17 @@ import {
 import { PlaceImage } from '@/types/place_image.type';
 import { useCallback } from 'react';
 import { nanoid } from 'nanoid';
+import { useAuth } from './useAuth';
 
 export const usePlace = () => {
+  const { user } = useAuth();
+
   /** 여행지 전체 조회 */
   const getAllPlacesWithUserAction = useCallback(async (): Promise<PlaceWithUserAction[]> => {
     try {
-      const { data, error } = await supabase.rpc('get_places_with_user_action');
+      const { data, error } = await supabase.rpc('get_places_with_user_action', {
+        _user_id: user?.id ?? null,
+      });
 
       if (error) {
         console.error('여행지를 가져오는 중 오류 발생:', error);
@@ -39,9 +44,12 @@ export const usePlace = () => {
     async (placeId: string): Promise<PlaceWithUserAction | null> => {
       try {
         const { data, error } = await supabase
-          .rpc('get_places_with_user_action')
+          .rpc('get_places_with_user_action', {
+            _user_id: user?.id ?? null,
+          })
           .eq('id', placeId)
           .single();
+
         if (error) {
           console.error('해당 여행지를 가져오는 중 오류 발생:', error);
           return null;
