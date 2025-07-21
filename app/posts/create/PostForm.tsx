@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { usePost } from '@/hooks/usePost';
 import { useRouter } from 'next/navigation';
 import { isEqual } from 'lodash';
-import { getRepresentativePlaceId } from '@/lib/post';
+import { getRepresentativePlaceId, validatePlace } from '@/lib/post';
 import { PlaceInputType } from '@/types/place.type';
 
 export default function PostForm() {
@@ -55,7 +55,7 @@ export default function PostForm() {
     e.preventDefault();
 
     try {
-      if (!validatePlace(currentPlace)) return;
+      if (!validatePlace(currentPlace, postedPlaces)) return;
       const newCurrentPlace = { ...currentPlace, isviewed };
       const place = await createPlace(newCurrentPlace);
 
@@ -81,48 +81,6 @@ export default function PostForm() {
       console.error('여행지 생성 중 오류 발생:', error);
     }
   };
-
-  /** 여행지 검증 */
-  const validatePlace = (currentPlace: PlaceInputType) => {
-    const requiredFields = [];
-    if (!currentPlace.name) requiredFields.push('여행지 이름');
-    if (!currentPlace.category) requiredFields.push('카테고리');
-    if (!currentPlace.state_id) requiredFields.push('시/도');
-    if (!currentPlace.city_id) requiredFields.push('시/군/구');
-    if (!currentPlace.memo) requiredFields.push('메모');
-    if (!currentPlace.visit_start_time) requiredFields.push('방문 시작 일시');
-    if (!currentPlace.visit_end_time) requiredFields.push('방문 종료 일시');
-
-    // 방문 시작 일시가 방문 종료 일시보다 이후인 경우 검증 실패
-    if (currentPlace.visit_start_time && currentPlace.visit_end_time && currentPlace.visit_start_time > currentPlace.visit_end_time) {
-      requiredFields.push('방문 시작 일시는 방문 종료 일시보다 이전이어야 합니다.');
-    }
-
-    // 등록된 다른 여행지의 여행 시간과 겹치는지 검증
-    postedPlaces.forEach(place => {
-      if (currentPlace.visit_start_time && currentPlace.visit_end_time &&
-        (currentPlace.visit_start_time < place.currentPlace.visit_start_time && place.currentPlace.visit_start_time < currentPlace.visit_end_time)
-        || (currentPlace.visit_start_time < place.currentPlace.visit_end_time && place.currentPlace.visit_end_time < currentPlace.visit_end_time)) {
-        requiredFields.push('등록된 다른 여행지의 여행 시간과 겹칩니다.');
-      }
-    });
-
-    // 필수 필드 검증 실패 시 메시지 표시
-    if (requiredFields.length > 0) {
-      const errorMessage = document.createElement('div');
-      errorMessage.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-      errorMessage.textContent = `다음 항목을 확인해주세요: ${requiredFields.join(', ')}`;
-      document.body.appendChild(errorMessage);
-      setTimeout(() => {
-        if (document.body.contains(errorMessage)) {
-          document.body.removeChild(errorMessage);
-        }
-      }, 3000);
-      return false;
-    }
-
-    return true;
-  }
 
   /** 여행지 수정 */
   const handleUpdatePlace = async (e: React.FormEvent, isviewed: boolean = true) => {
