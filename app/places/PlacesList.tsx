@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import PlaceCard from '@/components/places/PlaceCard';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
 import { usePlace } from '@/hooks/usePlace';
-import { PlaceWithUserAction } from '@/types/place.type';
+import { FilterOption, PlaceWithUserAction } from '@/types/place.type';
 import SortButton, { SortOption } from '@/components/places/SortButton';
 import { compareAsc } from 'date-fns';
 import { SORT_OPTIONS } from '@/consts/place';
@@ -16,16 +16,28 @@ export default function PlacesList() {
   const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [places, setPlaces] = useState<PlaceWithUserAction[]>([]);
   const { getAllPlacesWithUserAction } = usePlace();
+  const [filter, setFilter] = useState<FilterOption>({
+    category: selectedCategory,
+    region: selectedRegion,
+    term: searchTerm,
+  });
 
   const fetchAllPlaces = useCallback(async () => {
     try {
       const data = await getAllPlacesWithUserAction(sortBy);
 
-      setPlaces(data);
+      const filtered = data.filter(
+        (place) =>
+          (!filter.term || place.name.includes(filter.term)) &&
+          (selectedCategory === '전체' || place.category === selectedCategory) &&
+          (selectedRegion === '전체' || place.state_name === selectedRegion)
+      );
+
+      setPlaces(filtered);
     } catch (error) {
       console.error('여행지 목록을 가져오는 중 오류 발생:', error);
     }
-  }, [getAllPlacesWithUserAction, sortBy]);
+  }, [getAllPlacesWithUserAction, sortBy, filter]);
 
   useEffect(() => {
     fetchAllPlaces();
@@ -33,6 +45,14 @@ export default function PlacesList() {
 
   const handleSortChange = (newSortBy: SortOption) => {
     setSortBy(newSortBy);
+  };
+
+  const handleSearch = () => {
+    setFilter({
+      category: selectedCategory,
+      region: selectedRegion,
+      term: searchTerm,
+    });
   };
 
   return (
@@ -49,9 +69,15 @@ export default function PlacesList() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="여행지나 지역을 검색해보세요..."
+                  placeholder="찾으시는 제목을 검색해보세요."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSearch();
+                    }
+                  }}
                   className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 <i className="ri-search-line absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 flex items-center justify-center"></i>
@@ -84,6 +110,12 @@ export default function PlacesList() {
                   </option>
                 ))}
               </select>
+              <button
+                className={`px-4 py-2 text-sm font-medium ${'text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50'} whitespace-nowrap`}
+                onClick={handleSearch}
+              >
+                검색
+              </button>
             </div>
           </div>
         </div>
