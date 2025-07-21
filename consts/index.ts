@@ -52,3 +52,5 @@ export const INIT_PLACE_FORM_VALUE = {
 
 export const DUMMY_IMAGE_URL =
   'https://ionwvcdgjauhpubafztg.supabase.co/storage/v1/object/public/place-images//no_image.jpeg';
+
+export const SORT_OPTIONS = ['인기순', '최신순', '평점순', '비용순'];

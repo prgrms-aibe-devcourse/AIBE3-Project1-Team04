@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PostCard from './PostCard';
+import { supabase } from '@/lib/supabaseClient';
+import { PostgrestError } from '@supabase/supabase-js';
 
 const mockPosts = [
   {
@@ -102,16 +104,39 @@ const mockPosts = [
   }
 ];
 
-const categories = ['전체', '자연/관광', '맛집/카페', '역사/문화', '액티비티'];
-const sortOptions = ['인기순', '최신순', '평점순', '비용순'];
+// 쿼리 결과 타입 정의 아직 사용되지 않음 (PostCard에서 category, rating, ratingCount, duration 제외)
+interface BestPostQueryResult {
+  id: string;
+  title: string;
+  region: string;
+  author: string;
+  views: number;
+  cost: number;
+  imageUrl: string;
+  startDate: string;
+  endDate: string;
+  createdAt: string;
+  likes: number;
+}
 
 export default function BestPostsSection() {
-  const [selectedCategory, setSelectedCategory] = useState('전체');
-  const [selectedSort, setSelectedSort] = useState('인기순');
+  const POSTS_LIMIT = 30;
+  const [posts, setPosts] = useState<any[]>([]);
+  const categories = ['게시글', '여행지'];
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
 
-  const filteredPosts = mockPosts.filter(post => 
-    selectedCategory === '전체' || post.category === selectedCategory
-  );
+  useEffect(() => {
+    async function fetchPosts() {
+      const { data, error } = await supabase
+        .rpc('get_best_posts', { posts_limit: POSTS_LIMIT });
+      if (error) {
+        console.error('Error fetching posts:', error);
+      }
+      console.log(data);
+      setPosts(data || []);
+    }
+    fetchPosts();
+  }, []);
 
   return (
     <section className="py-16">
@@ -127,40 +152,20 @@ export default function BestPostsSection() {
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap cursor-pointer transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap cursor-pointer transition-colors ${selectedCategory === category
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 {category}
               </button>
             ))}
           </div>
-          
-          <div className="sm:ml-auto">
-            <select
-              value={selectedSort}
-              onChange={(e) => setSelectedSort(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer pr-8"
-            >
-              {sortOptions.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </div>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPosts.map((post) => (
+          {posts.map((post) => (
             <PostCard key={post.id} {...post} />
           ))}
-        </div>
-
-        <div className="text-center mt-12">
-          <button className="bg-blue-600 text-white px-8 py-3 rounded-full hover:bg-blue-700 font-medium whitespace-nowrap cursor-pointer">
-            더 많은 게시글 보기
-          </button>
         </div>
       </div>
     </section>
