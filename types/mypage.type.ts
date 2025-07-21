@@ -10,10 +10,11 @@ export interface MyPostViewType {
   post_like_count: number; // 좋아요 수
   total_cost: number; // 장소 비용 합계
   place_count: number; // 연관 장소 수
-  region_states: Array<{ f1: string; f2: string }>; // [(region_name, state_name), …]
+  region_states: string[]; // ["region:state", "region:state", …]
   first_start_time: string; // 가장 빠른 방문 시작 시간 (ISO string) or null
   last_end_time: string; // 가장 늦은 방문 종료 시간 (ISO string) or null
   categories: string[];
+  thumbnail_url: string;
 }
 
 export interface MyPlaceViewType {
@@ -31,6 +32,7 @@ export interface MyPlaceViewType {
   review_rate: number; // NUMERIC
   all_images: string[]; // TEXT[] (URL 문자열 배열)
   region_states: string[]; // TEXT[] ("region:state" 문자열 배열)
+  thumbnail_url: string;
 }
 
 // -- //

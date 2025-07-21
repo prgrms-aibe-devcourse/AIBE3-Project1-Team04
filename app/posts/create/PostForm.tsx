@@ -14,14 +14,13 @@ import { usePost } from '@/hooks/usePost';
 import { useRouter } from 'next/navigation';
 import { isEqual } from 'lodash';
 import { getRepresentativePlaceId, validatePlace } from '@/lib/post';
-import { PlaceInputType } from '@/types/place.type';
 
 export default function PostForm() {
   const [postData, setPostData] = useState(INIT_POST_FORM_VALUE);
 
   const router = useRouter();
   const { user } = useAuth();
-  const { cities, fetchPlaceCities } = useRegion();
+  const { fetchPlaceCities } = useRegion();
   const { createPost, linkPostToPlaces } = usePost();
   const {
     createPlace,

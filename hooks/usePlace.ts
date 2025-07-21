@@ -11,33 +11,55 @@ import { PlaceImage } from '@/types/place_image.type';
 import { useCallback } from 'react';
 import { nanoid } from 'nanoid';
 import { useAuth } from './useAuth';
+import { SortOption } from '@/components/places/SortButton';
 
 export const usePlace = () => {
   const { user } = useAuth();
 
   /** 여행지 전체 조회 */
-  const getAllPlacesWithUserAction = useCallback(async (): Promise<PlaceWithUserAction[]> => {
-    try {
-      const { data, error } = await supabase.rpc('get_places_with_user_action', {
-        _user_id: user?.id ?? null,
-      });
+  const getAllPlacesWithUserAction = useCallback(
+    async (sortBy?: SortOption): Promise<PlaceWithUserAction[]> => {
+      try {
+        let query = supabase.rpc('get_places_with_user_action', {
+          _user_id: user?.id ?? null,
+        });
+        if (sortBy) {
+          switch (sortBy) {
+            case 'latest': //최신순
+              query = query.order('created_at', { ascending: false });
+              break;
+            case 'popular': //인기순(조회순)
+              query = query.order('view_count', { ascending: false });
+              break;
+            case 'rating': //평점순
+              query = query.order('average_rating', { ascending: false, nullsFirst: false });
+              break;
+            case 'likes': //좋아요순
+              query = query.order('like_count', { ascending: false });
+              break;
+          }
+        }
 
-      if (error) {
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('여행지를 가져오는 중 오류 발생:', error);
+          return [];
+        }
+
+        // 사용자 정보 없이 포스트만 반환
+        const placesWithUserActions = ((data as PlaceWithUserAction[]) || []).map((place) => ({
+          ...place,
+        }));
+
+        return placesWithUserActions;
+      } catch (error) {
         console.error('여행지를 가져오는 중 오류 발생:', error);
         return [];
       }
-
-      // 사용자 정보 없이 포스트만 반환
-      const placesWithUserActions = ((data as PlaceWithUserAction[]) || []).map((place) => ({
-        ...place,
-      }));
-
-      return placesWithUserActions;
-    } catch (error) {
-      console.error('여행지를 가져오는 중 오류 발생:', error);
-      return [];
-    }
-  }, [user]);
+    },
+    [user]
+  );
 
   /** 여행지 단일 조회 */
   const getPlaceWithUserAction = useCallback(
