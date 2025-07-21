@@ -43,31 +43,31 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
   const handleLike = async () => {
     if (!user) return;
 
+    // 이미 좋아요 눌렸으면 취소: 삭제
     if (isLiked) {
-      // 이미 좋아요 눌렸으면 취소: 삭제
       const { error } = await supabase
         .from('place_likes')
         .delete()
         .eq('place_id', placeId)
         .eq('user_id', user.id);
 
-      if (!error) {
-        setLikes(likes - 1);
-        setIsLiked(false);
-      } else {
+      if (error) {
         console.error('좋아요 취소 중 에러', error);
+      } else {
+        setLikes((like) => like - 1);
+        setIsLiked(false);
       }
-    } else {
       // 좋아요 추가: 삽입
+    } else {
       const { error } = await supabase
         .from('place_likes')
         .insert({ place_id: placeId, user_id: user.id });
 
-      if (!error) {
-        setLikes(likes + 1);
-        setIsLiked(true);
-      } else {
+      if (error) {
         console.error('좋아요 중 에러', error);
+      } else {
+        setLikes((like) => like + 1);
+        setIsLiked(true);
       }
     }
   };

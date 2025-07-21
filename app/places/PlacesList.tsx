@@ -16,14 +16,12 @@ export default function PlacesList() {
   const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [places, setPlaces] = useState<PlaceWithUserAction[]>([]);
   const { getAllPlacesWithUserAction } = usePlace();
+
   const fetchAllPlaces = useCallback(async () => {
     try {
       const data = await getAllPlacesWithUserAction(sortBy);
 
-      const sorted = [...data].sort((a, b) =>
-        compareAsc(new Date(a.visit_start_time), new Date(b.visit_start_time))
-      );
-      setPlaces(sorted);
+      setPlaces(data);
     } catch (error) {
       console.error('여행지 목록을 가져오는 중 오류 발생:', error);
     }
