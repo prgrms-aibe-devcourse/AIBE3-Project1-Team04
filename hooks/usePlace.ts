@@ -37,7 +37,7 @@ export const usePlace = () => {
       console.error('여행지를 가져오는 중 오류 발생:', error);
       return [];
     }
-  }, []);
+  }, [user]);
 
   /** 여행지 단일 조회 */
   const getPlaceWithUserAction = useCallback(
@@ -62,7 +62,7 @@ export const usePlace = () => {
         return null;
       }
     },
-    []
+    [user]
   );
 
   /** 여행지 리뷰 조회 */
