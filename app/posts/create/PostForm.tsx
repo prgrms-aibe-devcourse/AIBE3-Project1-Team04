@@ -50,11 +50,12 @@ export default function PostForm() {
   }, [resetPostedPlaces]);
 
   /** 여행지 등록 */
-  const handleAddPlace = async (e: React.FormEvent) => {
+  const handleAddPlace = async (e: React.FormEvent, isviewed: boolean = true) => {
     e.preventDefault();
 
     try {
-      const place = await createPlace(currentPlace);
+      const newCurrentPlace = { ...currentPlace, isviewed };
+      const place = await createPlace(newCurrentPlace);
 
       const finalImages = [...images];
       if (finalImages.length > 0) {
@@ -72,7 +73,7 @@ export default function PostForm() {
         }
       }
 
-      addPostedPlace({ place_id: place.id, currentPlace, images: finalImages });
+      addPostedPlace({ place_id: place.id, currentPlace: newCurrentPlace, images: finalImages });
       initPlaceFormData();
     } catch (error) {
       console.error('여행지 생성 중 오류 발생:', error);
@@ -80,11 +81,12 @@ export default function PostForm() {
   };
 
   /** 여행지 수정 */
-  const handleUpdatePlace = async (e: React.FormEvent) => {
+  const handleUpdatePlace = async (e: React.FormEvent, isviewed: boolean = true) => {
     e.preventDefault();
     if (!editingPlaceId) return;
     try {
-      const place = await updatePlace(editingPlaceId, currentPlace);
+      const newCurrentPlace = { ...currentPlace, isviewed };
+      const place = await updatePlace(editingPlaceId, newCurrentPlace);
       const postedPlace = postedPlaces.find((place) => place.place_id === editingPlaceId)!;
 
       /** 이미지가 달라진 경우 */
@@ -108,32 +110,37 @@ export default function PostForm() {
         }
       }
 
-      updatePostedPlace({ place_id: place.id, currentPlace, images: finalImages });
+      updatePostedPlace({ place_id: place.id, currentPlace: newCurrentPlace, images: finalImages });
       initPlaceFormData();
       cancelEditingPlace();
     } catch (error) {
-      console.error('여행지 수정정 중 오류 발생:', error);
+      console.error('여행지 수정 중 오류 발생:', error);
     }
   };
 
   /** 게시물 등록 */
-  const handleSubmitPost = async (e: React.FormEvent) => {
+  const handleSubmitPost = async (e: React.FormEvent, isviewd: boolean = true) => {
     e.preventDefault();
     if (!user) return;
-    if (!postData.title || !postData.content || postedPlaces.length === 0) {
+    const visiblePlaces = postedPlaces.filter((place) => place.currentPlace.isviewed !== false);
+
+    if (!postData.title || !postData.content || visiblePlaces.length === 0) {
       alert('제목, 내용, 그리고 최소 1개의 여행지를 입력해주세요.');
       return;
     }
 
     try {
-      const representative_place_id = getRepresentativePlaceId(postedPlaces, representativePlaceId);
+      const representative_place_id = getRepresentativePlaceId(
+        visiblePlaces,
+        representativePlaceId
+      );
       const post = await createPost({
         ...postData,
         user_id: user.id,
-        isviewd: true,
+        isviewd,
         representative_place_id,
       });
-      const placeIds = postedPlaces.map((postedPlace) => postedPlace.place_id);
+      const placeIds = visiblePlaces.map((postedPlace) => postedPlace.place_id);
       await linkPostToPlaces(post.id, placeIds);
 
       alert('게시글이 성공적으로 작성되었습니다!');
@@ -144,16 +151,17 @@ export default function PostForm() {
   };
 
   // 여행지 개수와 총 비용 계산
-  const totalPlaces = postedPlaces.length;
-  const totalCost = postedPlaces.reduce((sum, place) => sum + place.currentPlace.cost, 0);
-  const firstVisitTime = postedPlaces.reduce(
+  const visiblePlaces = postedPlaces.filter((place) => place.currentPlace.isviewed === true);
+  const totalPlaces = visiblePlaces.length;
+  const totalCost = visiblePlaces.reduce((sum, place) => sum + place.currentPlace.cost, 0);
+  const firstVisitTime = visiblePlaces.reduce(
     (acc, place) =>
       isBefore(acc, place.currentPlace.visit_start_time)
         ? acc
         : place.currentPlace.visit_start_time,
     new Date()
   );
-  const lastVisitTime = postedPlaces.reduce(
+  const lastVisitTime = visiblePlaces.reduce(
     (acc, place) =>
       isAfter(acc, place.currentPlace.visit_end_time) ? acc : place.currentPlace.visit_end_time,
     new Date()
@@ -210,7 +218,7 @@ export default function PostForm() {
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold">
-              {postedPlaces.length
+              {visiblePlaces.length
                 ? differenceInCalendarDays(firstVisitTime, lastVisitTime) + 1
                 : 0}
             </div>
@@ -266,6 +274,12 @@ export default function PostForm() {
         >
           취소
         </Link>
+        <button
+          onClick={(e) => handleSubmitPost(e, false)}
+          className="bg-yellow-500 text-white px-8 py-3 rounded-lg hover:bg-yellow-600 font-medium whitespace-nowrap cursor-pointer"
+        >
+          임시 저장
+        </button>
         <button
           onClick={handleSubmitPost}
           className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-medium whitespace-nowrap cursor-pointer"
