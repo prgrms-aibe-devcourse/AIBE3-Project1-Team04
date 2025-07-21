@@ -8,12 +8,15 @@ import { format } from 'date-fns';
 import { formatCost } from '@/lib/place';
 import PlaceReviewForm from '@/components/places/PlaceReviewForm';
 import { DUMMY_IMAGE_URL } from '@/consts';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabaseClient';
 
 interface PlaceDetailProps {
   placeId: string;
 }
 
 export default function PlaceDetail({ placeId }: PlaceDetailProps) {
+  const { user } = useAuth();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [place, setPlace] = useState<PlaceWithUserAction | null>();
   const [likes, setLikes] = useState(0);
@@ -26,6 +29,7 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
       if (data) {
         setPlace(data);
         setLikes(data.like_count);
+        setIsLiked(data.liked_by_me);
       }
     } catch (error) {
       console.error('해당 여행지를 가져오는 중 오류 발생:', error);
@@ -36,17 +40,36 @@ export default function PlaceDetail({ placeId }: PlaceDetailProps) {
     fetchPlace();
   }, [fetchPlace]);
 
-  const handleLike = () => {
-    if (isLiked) {
-      setLikes((prev) => prev - 1);
-      setIsLiked(false);
-    } else {
-      setLikes((prev) => prev + 1);
-      setIsLiked(true);
-    }
+  const handleLike = async () => {
+    if (!user) return;
 
-    // 실제 구현시 API 호출
-    console.log('Place like toggled:', !isLiked);
+    if (isLiked) {
+      // 이미 좋아요 눌렸으면 취소: 삭제
+      const { error } = await supabase
+        .from('place_likes')
+        .delete()
+        .eq('place_id', placeId)
+        .eq('user_id', user.id);
+
+      if (!error) {
+        setLikes(likes - 1);
+        setIsLiked(false);
+      } else {
+        console.error('좋아요 취소 중 에러', error);
+      }
+    } else {
+      // 좋아요 추가: 삽입
+      const { error } = await supabase
+        .from('place_likes')
+        .insert({ place_id: placeId, user_id: user.id });
+
+      if (!error) {
+        setLikes(likes + 1);
+        setIsLiked(true);
+      } else {
+        console.error('좋아요 중 에러', error);
+      }
+    }
   };
 
   if (!place) return;
