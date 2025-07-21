@@ -9,27 +9,27 @@ import { compareAsc } from 'date-fns';
 import React, { useCallback, useEffect, useState } from 'react';
 
 const PostList = () => {
-  const [searchInput, setSearchInput] = useState('');
-  const [categoryInput, setCategoryInput] = useState('전체');
-  const [regionInput, setRegionInput] = useState('전체');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('전체');
+  const [selectedRegion, setSelectedRegion] = useState('전체');
   const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [filter, setFilter] = useState<FilterOption>({
-    category: categoryInput,
-    region: regionInput,
-    searchTerm: '',
+    category: selectedCategory,
+    region: selectedRegion,
+    searchTerm: searchTerm,
   });
   const [posts, setPosts] = useState<any[]>([]);
   const { getAllPostsWithUserAction } = usePost();
 
-  const handleSearchInputChange = (value: string) => setSearchInput(value);
-  const handleCategoryInputChange = (value: string) => setCategoryInput(value);
-  const handleRegionInputChange = (value: string) => setRegionInput(value);
+  const handleSearchTermChange = (value: string) => setSearchTerm(value);
+  const handleSelectedCategoryChange = (value: string) => setSelectedCategory(value);
+  const handleSelectedRegionChange = (value: string) => setSelectedRegion(value);
 
   const handleSearch = () =>
     setFilter({
-      category: categoryInput,
-      region: regionInput,
-      searchTerm: searchInput,
+      category: selectedCategory,
+      region: selectedRegion,
+      searchTerm: searchTerm,
     });
 
   const fetchAllPosts = useCallback(async () => {
@@ -82,8 +82,8 @@ const PostList = () => {
                 <input
                   type="text"
                   placeholder="찾으시는 제목을 검색해보세요."
-                  value={searchInput}
-                  onChange={(e) => handleSearchInputChange(e.target.value)}
+                  value={searchTerm}
+                  onChange={(e) => handleSearchTermChange(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -98,8 +98,8 @@ const PostList = () => {
 
             <div className="flex gap-4">
               <select
-                value={categoryInput}
-                onChange={(e) => handleCategoryInputChange(e.target.value)}
+                value={selectedCategory}
+                onChange={(e) => handleSelectedCategoryChange(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
               >
                 <option value={'전체'}>전체</option>
@@ -111,8 +111,8 @@ const PostList = () => {
               </select>
 
               <select
-                value={regionInput}
-                onChange={(e) => handleRegionInputChange(e.target.value)}
+                value={selectedRegion}
+                onChange={(e) => handleSelectedRegionChange(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
               >
                 <option value={'전체'}>전체</option>
