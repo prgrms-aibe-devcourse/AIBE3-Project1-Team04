@@ -1,9 +1,9 @@
 'use client';
 
 import ActivitySummary from './ActivitySummary';
-import WritingPostListTab from './WritingPostListTab';
-import CompletedPostListTab from './CompletedPostListTab';
-import PlaceListTab from './PlaceListTab';
+import WritingPostListTab from './_tab/WritingPostListTab';
+import CompletedPostListTab from './_tab/CompletedPostListTab';
+import PlaceListTab from './_tab/PlaceListTab';
 import MyTabs from './MyTabs';
 import { useMypage } from '@/hooks/useMypage';
 import ProfileHeader from './ProfileHeader';

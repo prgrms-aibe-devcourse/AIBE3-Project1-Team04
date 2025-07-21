@@ -1,14 +1,15 @@
 'use client';
 
-import { MyPostViewType } from '@/lib/database';
+import { MyPostViewType } from '@/types/mypage.type';
 import { formatCost, getStayDuration_withTime } from '@/lib/place';
 import { format } from 'date-fns';
 import Link from 'next/link';
+import { DUMMY_IMAGE_URL } from '@/consts';
+import { formatCategories, formatRegions, formatRating } from '@/lib/post';
 
 export default function MyPostCard({
   id,
   title,
-  created_at,
   view_count,
   review_count,
   review_rate,
@@ -17,65 +18,63 @@ export default function MyPostCard({
   first_start_time,
   last_end_time,
   post_like_count,
-  modified_at,
+  created_at,
   categories,
+  thumbnail_url,
 }: MyPostViewType) {
   return (
-    <Link href={`/posts/${id}`} className="cursor-pointer">
-      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow overflow-hidden">
-        <div className="aspect-[4/3] relative overflow-hidden">
+    <Link href={`/posts/${id}`}>
+      <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+        <div className="relative">
           <img
-            src={
-              'https://ionwvcdgjauhpubafztg.supabase.co/storage/v1/object/sign/places-image/c76e07a4f26d0e95b67f6e45e29785a9.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV84MDkwYWMyYS0xODk5LTQzM2MtOWZhZS0wZDUwNjQxYzRhZmIiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJwbGFjZXMtaW1hZ2UvYzc2ZTA3YTRmMjZkMGU5NWI2N2Y2ZTQ1ZTI5Nzg1YTkuanBnIiwiaWF0IjoxNzUyODE3NjkzLCJleHAiOjE3NTM0MjI0OTN9.Lm2AdRINm6KSm-pnGNUJfdfUfnQudSVRQPPPv7mvDF4'
-            }
-            alt={title}
-            className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300"
+            src={thumbnail_url || DUMMY_IMAGE_URL}
+            alt={title || '여행 제목'}
+            className="w-full h-48 object-cover object-top"
           />
-          <div className="absolute top-3 left-3">
-            <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-              {categories.map((category) => category).join(', ')}
+          <section className="absolute top-3 left-3 flex gap-2">
+            <span className="px-2 py-1 bg-blue-600 text-white text-xs font-medium rounded-full">
+              {formatCategories(categories)}
             </span>
-          </div>
+            <span className="px-2 py-1 bg-black/50 text-white text-xs font-medium rounded-full">
+              {formatRegions(region_states)}
+            </span>
+          </section>
         </div>
 
-        <div className="p-5">
-          <h3 className="font-bold text-lg mb-2 line-clamp-2">{title}</h3>
+        <div className="p-4">
+          <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1">{title}</h3>
 
-          <div className="flex items-center gap-2 mb-3">
-            <i className="ri-map-pin-line w-4 h-4 flex items-center justify-center text-gray-500"></i>
-            <span className="text-gray-600 text-sm">
-              {region_states.map(({ f1, f2 }) => `${f1} ${f2}`).join(', ')}
-            </span>
+          <div className="flex items-center text-sm text-gray-600 mb-2">
+            <i className="ri-map-pin-line mr-1 w-4 h-4 flex items-center justify-center" />
+            <span className="line-clamp-1">{formatRegions(region_states)}</span>
           </div>
 
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <i className="ri-star-fill w-4 h-4 flex items-center justify-center text-yellow-500"></i>
-                <span className="font-medium text-sm">{review_rate}</span>
-                <span className="text-gray-500 text-sm">({review_count})</span>
+          <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
+            <div className="flex items-center">
+              <i className="ri-star-fill text-yellow-400 mr-1 w-4 h-4 flex items-center justify-center" />
+              <span className="font-medium text-gray-900">{formatRating(review_rate)}</span>
+              <span className="text-gray-500 text-sm ml-1">({review_count})</span>
+
+              <i className="ri-eye-line ml-4 mr-1 w-4 h-4 flex items-center justify-center" />
+              <span>{view_count}</span>
+            </div>
+
+            <div className="text-blue-600 font-bold">{formatCost(total_cost)}</div>
+          </div>
+
+          <div className="border-t border-gray-100 pt-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center text-sm text-gray-600">
+                <i className="ri-calendar-line mr-1 w-4 h-4 flex items-center justify-center" />
+                <span>{getStayDuration_withTime(first_start_time, last_end_time)}</span>
+                <span className="mx-2">•</span>
+                <span>{created_at ? format(created_at, 'yyyy-MM-dd') : '-'}</span>
               </div>
-              <span className="text-gray-300">•</span>
-              <div className="flex items-center gap-1">
-                <i className="ri-eye-line w-4 h-4 flex items-center justify-center text-gray-500"></i>
-                <span className="text-gray-500 text-sm">{view_count}회</span>
+              <div className={'flex gap-1 px-2 py-1 rounded-full text-sm text-gray-500'}>
+                <i className={`ri-heart-fill w-4 h-4`} />
+                <span>{post_like_count}</span>
               </div>
             </div>
-            <span className="font-bold text-blue-600">{formatCost(total_cost)}</span>
-          </div>
-
-          <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-            <span>{getStayDuration_withTime(first_start_time, last_end_time)}</span>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-            <div className="text-xs text-gray-400">{format(created_at, 'yyyy-MM-dd')}</div>
-            <button
-              className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm transition-colors text-gray-500 hover:bg-gray-50`}
-            >
-              <i className={`ri-heart-line w-4 h-4`}></i>
-              <span>{post_like_count}</span>
-            </button>
           </div>
         </div>
       </div>
