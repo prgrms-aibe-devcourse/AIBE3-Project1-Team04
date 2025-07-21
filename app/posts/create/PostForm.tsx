@@ -117,7 +117,7 @@ export default function PostForm() {
   };
 
   /** 게시물 등록 */
-  const handleSubmitPost = async (e: React.FormEvent) => {
+  const handleSubmitPost = async (e: React.FormEvent, isviewd: boolean = true) => {
     e.preventDefault();
     if (!user) return;
     if (!postData.title || !postData.content || postedPlaces.length === 0) {
@@ -130,7 +130,7 @@ export default function PostForm() {
       const post = await createPost({
         ...postData,
         user_id: user.id,
-        isviewd: true,
+        isviewd,
         representative_place_id,
       });
       const placeIds = postedPlaces.map((postedPlace) => postedPlace.place_id);
@@ -266,6 +266,12 @@ export default function PostForm() {
         >
           취소
         </Link>
+        <button
+          onClick={(e) => handleSubmitPost(e, false)}
+          className="bg-yellow-500 text-white px-8 py-3 rounded-lg hover:bg-yellow-600 font-medium whitespace-nowrap cursor-pointer"
+        >
+          임시 저장
+        </button>
         <button
           onClick={handleSubmitPost}
           className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-medium whitespace-nowrap cursor-pointer"
