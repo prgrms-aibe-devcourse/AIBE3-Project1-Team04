@@ -8,7 +8,7 @@ import { FaStar } from 'react-icons/fa';
 
 interface PlaceFormPorps {
   type: string;
-  callback: (e: React.FormEvent) => Promise<void>;
+  callback: (e: React.FormEvent, isviewd?: boolean) => Promise<void>;
 }
 
 const PlaceForm = ({ type, callback }: PlaceFormPorps) => {
@@ -255,6 +255,15 @@ const PlaceForm = ({ type, callback }: PlaceFormPorps) => {
           className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium whitespace-nowrap cursor-pointer"
         >
           {type === 'new' ? '여행지 추가' : '수정완료'}
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            callback(e, false);
+          }}
+          className="bg-yellow-500 text-white px-8 py-3 rounded-lg hover:bg-yellow-600 font-medium whitespace-nowrap cursor-pointer"
+        >
+          임시 저장
         </button>
         {type === 'edit' && (
           <button
