@@ -1,6 +1,8 @@
 'use client';
 import PostCard from '@/components/posts/PostCard';
+import SortButton, { SortOption } from '@/components/posts/SortButton';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
+import { SORT_OPTIONS } from '@/consts/post';
 import { usePost } from '@/hooks/usePost';
 import { compareAsc } from 'date-fns';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -9,11 +11,13 @@ const PostList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [selectedRegion, setSelectedRegion] = useState('전체');
+  const [sortBy, setSortBy] = useState<SortOption>('latest');
   const [posts, setPosts] = useState<any[]>([]);
   const { getAllPostsWithUserAction } = usePost();
+
   const fetchAllPosts = useCallback(async () => {
     try {
-      const data = await getAllPostsWithUserAction();
+      const data = await getAllPostsWithUserAction(sortBy);
       const sortedPostByPlace = data.map((post) => ({
         ...post,
         places: [...post.places].sort((a, b) =>
@@ -24,11 +28,15 @@ const PostList = () => {
     } catch (error) {
       console.error('게시글 목록을 가져오는 중 오류 발생:', error);
     }
-  }, [getAllPostsWithUserAction]);
+  }, [getAllPostsWithUserAction, sortBy]);
 
   useEffect(() => {
     fetchAllPosts();
   }, [fetchAllPosts]);
+
+  const handleSortChange = (newSortBy: SortOption) => {
+    setSortBy(newSortBy);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -90,18 +98,15 @@ const PostList = () => {
           </p>
 
           <div className="flex gap-2">
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">
-              최신순
-            </button>
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">
-              인기순
-            </button>
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">
-              평점순
-            </button>
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 whitespace-nowrap">
-              좋아요순
-            </button>
+            {SORT_OPTIONS.map((opt) => (
+              <SortButton
+                key={opt.value}
+                label={opt.label}
+                value={opt.value}
+                selected={sortBy === opt.value}
+                onClick={handleSortChange}
+              />
+            ))}
           </div>
         </div>
 

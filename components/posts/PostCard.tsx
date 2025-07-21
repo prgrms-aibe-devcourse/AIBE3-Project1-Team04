@@ -42,7 +42,7 @@ export default function PostCard({ post }: { post: PostWithUserAction }) {
           <div className="flex items-center justify-between text-sm text-gray-600 mb-3">
             <div className="flex items-center">
               <i className="ri-user-line mr-1 w-4 h-4 flex items-center justify-center" />
-              <span>{post.name ?? '-'}</span>
+              <span>{post.user_name ?? '-'}</span>
             </div>
           </div>
 

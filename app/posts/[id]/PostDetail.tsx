@@ -113,7 +113,7 @@ export default function PostDetail({ postId }: PostDetailProps) {
                   </div>
                   <div className="flex items-center">
                     <i className="ri-user-line mr-1 w-4 h-4 flex items-center justify-center"></i>
-                    <span>{post.name}</span>
+                    <span>{post.user_name}</span>
                   </div>
                   <div className="flex items-center">
                     <i className="ri-calendar-line mr-1 w-4 h-4 flex items-center justify-center"></i>

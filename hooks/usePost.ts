@@ -1,28 +1,50 @@
 import { supabase } from '@/lib/supabaseClient';
-import { PostWithUserAction, PostReview, PostInputType } from '@/types/post.type';
+import { PostWithUserAction, PostReview, PostInputType, SortOption } from '@/types/post.type';
 import { useCallback } from 'react';
 
 export const usePost = () => {
-  const getAllPostsWithUserAction = useCallback(async (): Promise<PostWithUserAction[]> => {
-    try {
-      const { data, error } = await supabase.rpc('get_posts_with_user_action');
+  const getAllPostsWithUserAction = useCallback(
+    async (sortBy?: SortOption): Promise<PostWithUserAction[]> => {
+      try {
+        let query = supabase.rpc('get_posts_with_user_action');
 
-      if (error) {
+        if (sortBy) {
+          switch (sortBy) {
+            case 'latest': //최신순
+              query = query.order('created_at', { ascending: false });
+              break;
+            case 'popular': //인기순(조회순)
+              query = query.order('view_count', { ascending: false });
+              break;
+            case 'rating': //평점순
+              query = query.order('average_rating', { ascending: false, nullsFirst: false });
+              break;
+            case 'likes': //좋아요순
+              query = query.order('like_count', { ascending: false });
+              break;
+          }
+        }
+
+        const { data, error } = await query;
+
+        if (error) {
+          console.error('게시글을 가져오는 중 오류 발생:', error);
+          return [];
+        }
+
+        // 사용자 정보 없이 포스트만 반환
+        const placesWithUserActions = ((data as PostWithUserAction[]) || []).map((post) => ({
+          ...post,
+        }));
+
+        return placesWithUserActions;
+      } catch (error) {
         console.error('게시글을 가져오는 중 오류 발생:', error);
         return [];
       }
-
-      // 사용자 정보 없이 포스트만 반환
-      const placesWithUserActions = ((data as PostWithUserAction[]) || []).map((post) => ({
-        ...post,
-      }));
-
-      return placesWithUserActions;
-    } catch (error) {
-      console.error('게시글을 가져오는 중 오류 발생:', error);
-      return [];
-    }
-  }, []);
+    },
+    []
+  );
 
   const getPostWithUserAction = useCallback(
     async (postId: string): Promise<PostWithUserAction | null> => {
