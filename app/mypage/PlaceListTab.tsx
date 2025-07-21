@@ -1,8 +1,14 @@
 import Link from 'next/link';
 import MyPlaceCard from '@/components/mypage/MyPlaceCard';
-import { MyPlaceViewType } from '@/lib/database';
+import { MyPlaceViewType } from '@/types/mypage.type';
 
-function PlaceListTab({ placeList }: { placeList: MyPlaceViewType[] }) {
+function PlaceListTab({
+  placeList,
+  deletePlace,
+}: {
+  placeList: MyPlaceViewType[];
+  deletePlace: (placeId: number) => void;
+}) {
   return (
     <>
       <div>
@@ -17,7 +23,10 @@ function PlaceListTab({ placeList }: { placeList: MyPlaceViewType[] }) {
               <div key={place.place_id} className="relative">
                 <MyPlaceCard {...place} />
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <button className="bg-white/90 hover:bg-white p-2 rounded-full shadow-sm cursor-pointer">
+                  <button
+                    className="bg-white/90 hover:bg-white p-2 rounded-full shadow-sm cursor-pointer"
+                    onClick={() => deletePlace(place.place_id)}
+                  >
                     <i className="ri-delete-bin-line w-4 h-4 flex items-center justify-center text-red-600"></i>
                   </button>
                 </div>

@@ -10,8 +10,17 @@ import ProfileHeader from './ProfileHeader';
 
 export default function MyPage() {
   const { activeTab, setActiveTab } = useMypage();
-  const { userName, numOfPost, numOfPlace, numOfLikes, postList, notPostList, placeList } =
-    useMypage();
+  const {
+    userName,
+    numOfPost,
+    numOfPlace,
+    numOfLikes,
+    postList,
+    notPostList,
+    placeList,
+    deletePost,
+    deletePlace,
+  } = useMypage();
 
   return (
     <>
@@ -33,13 +42,19 @@ export default function MyPage() {
           {/* 탭 콘텐츠 */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             {/* 임시저장 탭 */}
-            {activeTab === 'drafts' && <WritingPostListTab notPostList={notPostList} />}
+            {activeTab === 'drafts' && (
+              <WritingPostListTab notPostList={notPostList} deletePost={deletePost} />
+            )}
 
             {/* 내 게시글 탭 */}
-            {activeTab === 'posts' && <CompletedPostListTab postList={postList} />}
+            {activeTab === 'posts' && (
+              <CompletedPostListTab postList={postList} deletePost={deletePost} />
+            )}
 
             {/* 내 여행지 탭 */}
-            {activeTab === 'places' && <PlaceListTab placeList={placeList} />}
+            {activeTab === 'places' && (
+              <PlaceListTab placeList={placeList} deletePlace={deletePlace} />
+            )}
           </div>
         </div>
       </div>
