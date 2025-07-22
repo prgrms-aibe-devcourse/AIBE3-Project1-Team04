@@ -4,7 +4,7 @@ import SortButton, { SortOption } from '@/components/posts/SortButton';
 import { PLACE_CATEGORIES, PLACE_STATES } from '@/consts';
 import { SORT_OPTIONS } from '@/consts/post';
 import { usePost } from '@/hooks/usePost';
-import { FilterOption } from '@/types/post.type';
+import { FilterOption, PostWithUserAction } from '@/types/post.type';
 import { compareAsc } from 'date-fns';
 import React, { useCallback, useEffect, useState } from 'react';
 
@@ -18,7 +18,7 @@ const PostList = () => {
     region: selectedRegion,
     searchTerm: searchTerm,
   });
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<PostWithUserAction[]>([]);
   const { getAllPostsWithUserAction } = usePost();
 
   const handleSearchTermChange = (value: string) => setSearchTerm(value);
