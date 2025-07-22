@@ -43,19 +43,19 @@ export const usePost = () => {
         }
 
         // 사용자 정보 없이 포스트만 반환
-        let placesWithUserActions = ((data as PostWithUserAction[]) || []).map((post) => ({
+        let postsWithUserActions = ((data as PostWithUserAction[]) || []).map((post) => ({
           ...post,
         }));
 
         if (sortBy === 'cost') {
-          placesWithUserActions = placesWithUserActions.slice().sort((a, b) => {
+          postsWithUserActions = postsWithUserActions.slice().sort((a, b) => {
             const aCost = a.places.reduce((sum, place) => sum + (place.cost || 0), 0);
             const bCost = b.places.reduce((sum, place) => sum + (place.cost || 0), 0);
             return aCost - bCost;
           });
         }
 
-        return placesWithUserActions;
+        return postsWithUserActions;
       } catch (error) {
         console.error('게시글을 가져오는 중 오류 발생:', error);
         return [];

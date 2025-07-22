@@ -1,21 +1,26 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMainFilterStore } from '@/stores/mainFilterStore';
+import { useRef } from 'react';
 
 export default function HeroSection() {
-  const router = useRouter();
-  const [query, setQuery] = useState('');
-
-  const handleSearch = () => {
-    if (query.trim()) {
-      router.push(`/search?query=${encodeURIComponent(query)}`);
-    }
-  };
+  const inputRef = useRef<HTMLInputElement>(null);
+  const setSearchTerm = useMainFilterStore((state) => state.setSearchTerm);
 
   const handeKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleSearch();
+    }
+  };
+
+  const handleSearch = () => {
+    if (!inputRef.current) return;
+
+    const { value } = inputRef.current;
+    if (value.trim()) {
+      setSearchTerm(value);
+    } else {
+      setSearchTerm('');
     }
   };
 
@@ -43,8 +48,7 @@ export default function HeroSection() {
                 type="text"
                 placeholder="어디로 여행을 떠나고 싶으신가요?"
                 className="w-full px-6 py-4 rounded-full text-gray-800 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                ref={inputRef}
                 onKeyDown={handeKeyDown}
               />
               <button
