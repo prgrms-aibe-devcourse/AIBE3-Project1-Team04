@@ -313,7 +313,7 @@ export default function AuthPageInner() {
                       onClick={() => setIsLogin(!isLogin)}
                       className="ml-1 text-blue-600 hover:text-blue-500 font-medium cursor-pointer"
                     >
-                      회원가입
+                      {isLogin ? '회원가입' : '로그인'}
                     </button>
                   </div>
                 </div>
