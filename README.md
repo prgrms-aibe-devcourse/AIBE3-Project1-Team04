@@ -1,8 +1,19 @@
-# ✈️ 여행 추천 플랫폼
+# ✈️ TripHub [ 여행 계획 추천 플랫폼 ]
 
-[한마디 소개]
+여행지 정보를 기반으로 일정을 구성하고, 다른 사람의 여행 일정도 참고할 수 있는 여행 추천 플랫폼입니다.
+GPT 기반 챗봇을 통해 조건에 맞는 여행지를 추천받고, 여행지와 게시글을 연결하여 직접 일정을 구성할 수 있습니다.
 
-## 🧩 프로젝트 개요
+## 📅 개발 기간
+
+2025.07.15 ~ 2025.07.22
+
+## 🔗 배포 링크
+
+👉 [TripHub (VerCel 배포)](https://aibe-3-project1-team04.vercel.app/)
+
+---
+
+## 📖 프로젝트 개요
 
 - **여행지**와 **게시글(일정)**을 분리해 관리
 - **게시글**은 여러 여행지로 구성된 일정 공유 목적
@@ -10,11 +21,7 @@
 - 사용자는 리뷰/별점/좋아요/즐겨찾기를 통해 선호를 표현할 수 있음
 - 향후 추천 알고리즘 기반 기능 확장 예정
 
-## 📅 개발 기간
-
-2025.07.15 ~ 2025.07.22
-
-## 📐 주요 기능
+## ✨ 주요 기능
 
 ### 공통
 
@@ -55,14 +62,15 @@ AIBE3-Project1-Team04/
 | ---------- | ---------------------------------------- |
 | 프론트엔드 | Next.js, Tailwind CSS, shadcn/ui         |
 | 상태관리   | Context API, Zustand                     |
-| 백엔드     | Supabase (auth, DB, storage)             |
+| 백엔드     | Supabase (auth, DB, storage), PostgreSQL|
 | AI UI 도구 | Readdy.ai, Cursor                        |
 | 배포       | Vercel (CI/CD 자동 배포)                 |
 | 협업       | GitHub (GitHub Flow 전략), Notion, Slack |
 
-## 📄 ERD (초기 설계)
+## 🧩 ERD
 
-<img width="2048" height="1120" alt="image" src="https://github.com/user-attachments/assets/de632ca2-35b6-4e2a-969e-baba3e89ce2b" />
+<img width="2023" height="1285" alt="ERD Dialog" src="https://github.com/user-attachments/assets/15fd3ee1-1013-4235-b004-6059cc2ce232" />
+
 
 👉[ERD 보러가기](https://www.erdcloud.com/d/JPNZrTTS5buYdTdSr/)
 
@@ -70,7 +78,17 @@ AIBE3-Project1-Team04/
 - 리뷰, 좋아요, 즐겨찾기, 조회수 각각 분리 테이블
 - `auth.users`와 `users` 테이블 분리 사용 (확장 정보 저장용)
 
-## 🧭 작업 흐름
+## 🏗 시스템 아키텍처
+
+- 개발 & 배포
+<img width="501" height="1385" alt="image" src="https://github.com/user-attachments/assets/6c68aeca-2601-4bdf-aadc-d141eecd645d" />
+
+- 서비스 구성
+<img width="1424" height="1258" alt="image" src="https://github.com/user-attachments/assets/8dc9a13d-5b24-4303-b5e3-28803b8bfadf" />
+
+---
+
+## 🤝 팀 협업 방식
 
 > GitHub Flow 전략
 
@@ -81,31 +99,41 @@ AIBE3-Project1-Team04/
 5. 코드 리뷰 및 승인
 6. `main` 브랜치로 merge → Vercel 자동 배포
 
-## ✅ 현재 상태 (초기 세팅 중)
+## 📌 개발 현황 및 이슈
 
 - [x] ERD 초안 완료
 - [x] UI 초기 생성 (v0.dev, Readdy 기반)
 - [x] 이슈 템플릿 / PR 템플릿 정리
 - [x] README 초안 작성
 - [x] 임시 회원가입 / 로그인 페이지 개발
-- [x] AI 기반 UI 생성 도구 활용 초기 UI 개
+- [x] AI 기반 UI 생성 도구 활용 초기 UI 개발
 
-## 🧑‍💻 팀원
+## 🔄 향후 개선 계획
+- 
 
-| 이름   | 역할             |
-| ------ | ---------------- |
-| 김동엽 | AIBE3기 I들 멤버 |
-| 김희수 | AIBE3기 I들 멤버 |
-| 안지협 | AIBE3기 I들 멤버 |
-| 장근영 | AIBE3기 I들 멤버 |
-| 정다솔 | AIBE3기 I들 멤버 |
-| 이록은 | AIBE3기 I들 멤버 |
+## 🧑‍💻 팀원 및 담당 역할
 
-## 📌 향후 계획
+| 이름   | 역할             | GitHub                                 |
+| ------ | ---------------- | -------------------------------------- |
+| 김동엽 | AIBE3기 I들 멤버 | [@Yoepee](https://github.com/Yoepee)   |
+| 김희수 | AIBE3기 I들 멤버 | [@inti0](https://github.com/inti0)     |
+| 안지협 | AIBE3기 I들 멤버 | [@TooTo3](https://github.com/TooTo3)   |
+| 장근영 | AIBE3기 I들 멤버 | [@geun-00](https://github.com/geun-00) |
+| 정다솔 | AIBE3기 I들 멤버 | [@dbjoung](https://github.com/dbjoung) |
+| 이록은 | AIBE3기 I들 멤버 | [@Leere1](https://github.com/Leere1)   |
 
-- Supabase와 UI 연결
+---
 
-## 📎 참고
+## 💻 로컬 실행 방법
+
+```bash
+git clone https://github.com/prgrms-aibe-devcourse/AIBE3-Project1-Team04.git
+cd AIBE3-Project1-Team04
+npm install
+npm run dev
+```
+
+## 🔗 참고자료 및 관련 링크
 
 - [Gitmoji](https://gitmoji.dev/)
 - [Tailwind CSS Cheat Sheet](https://kombai.com/tailwind/cheat-sheet/)
