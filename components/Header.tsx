@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -14,7 +15,14 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link href="/" className="flex items-center">
-            <div className="text-2xl font-pacifico text-blue-600">TravelPlan</div>
+            <Image
+              src="/favicon.png"
+              alt="TripHub Logo"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
+            <div className="text-2xl text-blue-600 font-bold">TripHub</div>
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
