@@ -33,7 +33,9 @@ GPT 기반 AI 챗봇을 통해 조건에 맞는 여행지를 추천받을 수 �
 ## ✨ 주요 기능
 
 ### 🧭 공통
-
+| <img width="300" alt="메인-게시글" src="https://github.com/user-attachments/assets/e6f2e8e2-c845-471d-b530-3b97ad98a40f" /> | <img width="300" alt="메인-여행지" src="https://github.com/user-attachments/assets/efcfe97a-48f2-4f56-9bfe-d942cf0d51fc" /> | <img width="300" alt="메인-검색" src="https://github.com/user-attachments/assets/cd518b00-8e9f-421e-a850-22a18a57d473" /> | <img width="300" alt="여행 추천 챗봇" src="https://github.com/user-attachments/assets/6d6e6f25-1ff3-4d9e-9c88-425c45d8fdd4" /> | <img width="300" alt="로그인" src="https://github.com/user-attachments/assets/95f60ec0-70e1-44d4-a5e0-b664e0547277" /> | <img width="300" alt="회원가입" src="https://github.com/user-attachments/assets/81b9747b-88d1-4de4-bbe4-3ec409dbd96b" /> |
+| :-------------------------: | :-------------------------: | :-------------------------: | :-------------------------: | :-------------------------: | :-------------------------: |
+| 메인 - 게시글 | 메인 - 여행지 | 메인 - 검색 | 여행 추천 챗봇 | 로그인 | 회원가입 |
 - 여행지 및 게시글 **검색 / 필터 / 정렬** 기능  
   (비용, 지역, 별점, 카테고리 등 기준)
 - **피드 형태**의 목록 제공 (여행지 / 게시글 모두)
@@ -42,7 +44,9 @@ GPT 기반 AI 챗봇을 통해 조건에 맞는 여행지를 추천받을 수 �
 - **GPT 기반 챗봇**을 통한 조건 기반 여행지 추천
 
 ### 📍 여행지
-
+| <img width="300" alt="여행지 - 목록" src="https://github.com/user-attachments/assets/23f5a6a5-7fc4-41e3-90e8-bb5922cd31e4" /> | <img width="300" alt="여행지 - 상세" src="https://github.com/user-attachments/assets/3ebf175c-6128-4bfe-9484-924f9baf297c" /> | <img width="300" alt="여행지 - 리뷰" src="https://github.com/user-attachments/assets/8ea7b7be-2683-41fc-8427-124b7cfbceb1" /> | <img width="300" alt="등록된 여행지 목록" src="https://github.com/user-attachments/assets/fdfe20ca-5e9a-4067-8d5a-8ea91f33a67f" /> | <img width="300" alt="등록된 여행지 수정" src="https://github.com/user-attachments/assets/2cbec9cd-103e-4024-b65f-9bd3da2bec34" /> |
+| :-------------------------: | :-------------------------: | :-------------------------: | :-------------------------: | :-------------------------: |
+| 여행지 - 목록 | 여행지 - 상세 | 여행지 - 리뷰 | 여행지 - 등록된 목록 | 여행지 - 수정 |
 - 이름, 지역, 카테고리, 방문 시간, 체류 시간, 메모, 비용 입력
 - 여행지 **이미지 업로드** (최대 6장), 썸네일 이미지 지정
 - **리뷰(댓글 + 별점)** 작성 및 열람
@@ -51,7 +55,9 @@ GPT 기반 AI 챗봇을 통해 조건에 맞는 여행지를 추천받을 수 �
 - 임시 저장 기능 지원
 
 ### 📝 게시글 (여행 일정)
-
+| <img width="300" alt="게시글 - 목록" src="https://github.com/user-attachments/assets/5311ac01-216e-4441-a6d4-78bc125a1fd4" /> | <img width="300" alt="게시글 - 부가기능" src="https://github.com/user-attachments/assets/cb0146ed-c8a2-4971-87d6-738cabd0a429" /> | <img width="300" alt="게시글 - 여행 일정" src="https://github.com/user-attachments/assets/6391e030-a707-49fc-b5a0-ec571472b097" /> | <img width="300" alt="게시글 - 여행 후기" src="https://github.com/user-attachments/assets/5295a748-3e61-44f8-a171-c8ddd61e5627" /> | <img width="300" alt="게시글 - 리뷰" src="https://github.com/user-attachments/assets/fefa4767-d83f-4784-b189-0c2be4271a14" /> | <img width="300" alt="게시글 - 등록" src="https://github.com/user-attachments/assets/3f73f44c-1b23-46f9-9050-f219c2fdc019" /> |
+| :-------------------------: | :-------------------------: | :-------------------------: | :-------------------------: | :-------------------------: | :-------------------------: |
+| 게시글 - 목록 | 게시글 - 부가기능 | 게시글 - 상세 (여행일정) | 게시글 - 상세 (여행후기) | 게시글 - 리뷰 | 게시글 - 등록 |
 - 제목 / 본문 입력, 여행지 목록 구성 및 순서 지정
 - **일정 탭 / 본문 탭 UI 분리**
 - 활동 요약 정보 표시  
@@ -61,7 +67,9 @@ GPT 기반 AI 챗봇을 통해 조건에 맞는 여행지를 추천받을 수 �
 - 게시글 링크 복사로 **외부 공유 가능**
 
 ### 🙋 마이페이지
-
+| <img width="300" alt="마이페이지 - 게시글" src="https://github.com/user-attachments/assets/955ce96f-19ee-4c02-889a-3d1019d31ff0" /> | <img width="300" alt="마이페이지 - 여행지" src="https://github.com/user-attachments/assets/bd256e28-1eef-44e1-a84c-fc07e4aecf3d" /> |
+| :-------------------------: | :-------------------------: |
+| 마이페이지 - 게시글 | 마이페이지 - 여행지 |
 - 내가 작성한 여행지 / 게시글 목록 조회
 - 각 항목에 대해 **수정 / 삭제** 기능 제공
 - 내가 누른 좋아요 / 즐겨찾기 항목 관리
